@@ -1,0 +1,40 @@
+{
+  "name": "kitt-cues",
+  "version": "1.0.0",
+  "description": "Бильярд с кошками - уникальная браузерная игра с анимированными котиками",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -p 8000",
+    "dev": "npx live-server --port=8000",
+    "build": "echo 'No build step needed for this vanilla JS project'",
+    "lint": "echo 'No linting configured yet'"
+  },
+  "keywords": [
+    "game",
+    "billiards",
+    "cats",
+    "javascript",
+    "html5",
+    "canvas-free",
+    "browser-game",
+    "physics",
+    "animations"
+  ],
+  "author": "Kitt-Cues Team",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/Kitt-Cues.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/Kitt-Cues/issues"
+  },
+  "homepage": "https://github.com/your-username/Kitt-Cues#readme"
+}

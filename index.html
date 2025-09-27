@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бильярд с кошками</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="relative w-[90vw] h-[50vw] max-w-[1000px] max-h-[550px]" id="game-area">
+        <!-- Верхняя панель с управлением -->
+        <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-10">
+            <div id="score-display" class="bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-lg text-lg font-bold">Счет: 0</div>
+            <div class="flex gap-2">
+                <button id="sound-toggle" class="bg-blue-600 text-white px-3 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition text-sm">🔊</button>
+                <button id="help-button" class="bg-green-600 text-white px-3 py-2 rounded-lg shadow-lg hover:bg-green-700 transition text-sm">❓</button>
+            </div>
+        </div>
+        <!-- Рамка стола -->
+        <div class="absolute inset-0 bg-[#8B4513] rounded-3xl shadow-2xl p-8">
+            <!-- Игровая поверхность -->
+            <div id="billiard-table" class="relative w-full h-full bg-[#006400] rounded-xl border-4 border-[#5a2d0c]">
+                <!-- Лузы -->
+                <div class="absolute top-[-12px] left-[-12px] w-12 h-12 bg-black rounded-full" data-pocket="0"></div>
+                <div class="absolute top-[-12px] right-[-12px] w-12 h-12 bg-black rounded-full" data-pocket="1"></div>
+                <div class="absolute bottom-[-12px] left-[-12px] w-12 h-12 bg-black rounded-full" data-pocket="2"></div>
+                <div class="absolute bottom-[-12px] right-[-12px] w-12 h-12 bg-black rounded-full" data-pocket="3"></div>
+                <div class="absolute top-[-12px] left-1/2 -translate-x-1/2 w-12 h-12 bg-black rounded-full" data-pocket="4"></div>
+                <div class="absolute bottom-[-12px] left-1/2 -translate-x-1/2 w-12 h-12 bg-black rounded-full" data-pocket="5"></div>
+
+                <!-- Бильярдные шары -->
+                <div class="billiard-ball bg-white" style="top: 50%; left: 25%; transform: translate(-50%, -50%);" id="cue-ball"></div>
+
+                <!-- Треугольник шаров -->
+                <div id="ball-pyramid" class="absolute" style="top: 50%; left: 70%; transform: translateY(-50%);">
+                    <div class="relative w-24 h-24">
+                        <!-- Ряд 1 -->
+                        <div class="billiard-ball bg-yellow-400" style="top: 34px; left: 0;"></div>
+                        <!-- Ряд 2 -->
+                        <div class="billiard-ball bg-blue-600" style="top: 22px; left: 20px;"></div>
+                        <div class="billiard-ball bg-red-600" style="top: 46px; left: 20px;"></div>
+                        <!-- Ряд 3 -->
+                        <div class="billiard-ball bg-purple-600" style="top: 10px; left: 40px;"></div>
+                        <div class="billiard-ball bg-black" style="top: 34px; left: 40px;"></div>
+                        <div class="billiard-ball bg-orange-500" style="top: 58px; left: 40px;"></div>
+                         <!-- Ряд 4 -->
+                        <div class="billiard-ball bg-green-800" style="top: -2px; left: 60px;"></div>
+                        <div class="billiard-ball bg-red-900" style="top: 22px; left: 60px;"></div>
+                        <div class="billiard-ball bg-yellow-900" style="top: 46px; left: 60px;"></div>
+                        <div class="billiard-ball bg-blue-900" style="top: 70px; left: 60px;"></div>
+                    </div>
+                </div>
+
+                 <!-- Кий -->
+                 <div id="cue" class="absolute h-2 bg-gradient-to-r from-yellow-200 to-yellow-600 rounded-full shadow-lg" style="width: 40%; top: 50%; left: -15%;"></div>
+            </div>
+        </div>
+
+        <!-- Кошки -->
+        <div class="cat-container absolute w-24 h-20" style="bottom: 80%; left: 15%;">
+            <div class="cat-head absolute w-14 h-12 bg-orange-500 rounded-full top-0 left-5">
+                <!-- Ears -->
+                <div class="absolute w-4 h-6 bg-orange-500 top-[-8px] left-1 rotate-[-25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <div class="absolute w-4 h-6 bg-orange-500 top-[-8px] right-1 rotate-[25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <!-- Eyes -->
+                <div class="absolute w-3 h-3 bg-white rounded-full top-4 left-3 cat-eye"><div class="absolute w-1.5 h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div></div>
+                <div class="absolute w-3 h-3 bg-white rounded-full top-4 right-3 cat-eye"><div class="absolute w-1.5 h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div></div>
+                <!-- Nose -->
+                <div class="absolute w-3 h-2 bg-pink-300 rounded-full top-7 left-1/2 -translate-x-1/2"></div>
+                <!-- Whiskers -->
+                <div class="absolute w-6 h-px bg-black top-8 left-[-5px] rotate-[10deg]"></div>
+                <div class="absolute w-6 h-px bg-black top-9 left-[-5px] rotate-[0deg]"></div>
+                <div class="absolute w-6 h-px bg-black top-10 left-[-5px] rotate-[-10deg]"></div>
+                <div class="absolute w-6 h-px bg-black top-8 right-[-5px] rotate-[-10deg]"></div>
+                <div class="absolute w-6 h-px bg-black top-9 right-[-5px] rotate-[0deg]"></div>
+                <div class="absolute w-6 h-px bg-black top-10 right-[-5px] rotate-[-10deg]"></div>
+            </div>
+            <div class="absolute w-20 h-10 bg-orange-500 rounded-tl-full rounded-br-full top-10 left-0">
+                <!-- Paws -->
+                <div class="absolute w-6 h-6 bg-orange-400 rounded-full bottom-[-5px] left-2"></div>
+                <div class="absolute w-6 h-6 bg-orange-400 rounded-full bottom-[-5px] left-10"></div>
+            </div>
+            <div class="cat-tail absolute w-12 h-4 bg-orange-400 rounded-full -left-8 top-12"></div>
+        </div>
+        <div class="cat-container absolute w-20 h-24" style="top: -15%; left: 40%;">
+            <div class="cat-head absolute w-12 h-14 bg-gray-800 rounded-full top-5 left-4">
+                <!-- Ears -->
+                <div class="absolute w-4 h-6 bg-gray-800 top-[-8px] left-0 rotate-[-25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <div class="absolute w-4 h-6 bg-gray-800 top-[-8px] right-0 rotate-[25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <!-- Eyes -->
+                 <div class="absolute w-3 h-3 bg-yellow-300 rounded-full top-4 left-3 cat-eye"></div>
+                 <div class="absolute w-3 h-3 bg-yellow-300 rounded-full top-4 right-3 cat-eye"></div>
+                <!-- Nose -->
+                <div class="absolute w-3 h-2 bg-pink-400 rounded-full top-8 left-1/2 -translate-x-1/2"></div>
+                <!-- Whiskers -->
+                <div class="absolute w-5 h-px bg-gray-400 top-9 left-[-2px] rotate-[10deg]"></div>
+                <div class="absolute w-5 h-px bg-gray-400 top-10 left-[-2px] rotate-[0deg]"></div>
+                <div class="absolute w-5 h-px bg-gray-400 top-9 right-[-2px] rotate-[-10deg]"></div>
+                <div class="absolute w-5 h-px bg-gray-400 top-10 right-[-2px] rotate-[0deg]"></div>
+            </div>
+            <div class="cat-tail absolute w-4 h-14 bg-gray-700 rounded-full right-0 -top-8 rotate-45"></div>
+            <!-- Paws -->
+            <div class="absolute w-6 h-5 bg-gray-700 rounded-b-full bottom-0 left-5"></div>
+            <div class="absolute w-6 h-5 bg-gray-700 rounded-b-full bottom-0 right-5"></div>
+        </div>
+        <div class="cat-container absolute w-24 h-20" style="top: 80%; right: 15%;">
+            <div class="absolute w-20 h-10 bg-white rounded-tl-full rounded-br-full top-10 right-0 transform scale-x-[-1]">
+                <!-- Paws -->
+                <div class="absolute w-6 h-6 bg-gray-200 rounded-full bottom-[-5px] right-2"></div>
+                <div class="absolute w-6 h-6 bg-gray-200 rounded-full bottom-[-5px] right-10"></div>
+            </div>
+            <div class="cat-head absolute w-14 h-12 bg-white rounded-full top-0 right-5">
+                <!-- Ears -->
+                <div class="absolute w-4 h-6 bg-white top-[-8px] left-1 rotate-[-25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <div class="absolute w-4 h-6 bg-white top-[-8px] right-1 rotate-[25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <!-- Eyes -->
+                <div class="absolute w-3 h-3 bg-blue-300 rounded-full top-4 left-3 cat-eye"></div>
+                <div class="absolute w-3 h-3 bg-blue-300 rounded-full top-4 right-3 cat-eye"></div>
+                <!-- Nose -->
+                <div class="absolute w-3 h-2 bg-pink-200 rounded-full top-7 left-1/2 -translate-x-1/2"></div>
+                <!-- Whiskers -->
+                <div class="absolute w-6 h-px bg-gray-400 top-8 left-[-5px] rotate-[10deg]"></div>
+                <div class="absolute w-6 h-px bg-gray-400 top-9 left-[-5px] rotate-[0deg]"></div>
+                <div class="absolute w-6 h-px bg-gray-400 top-8 right-[-5px] rotate-[-10deg]"></div>
+                <div class="absolute w-6 h-px bg-gray-400 top-9 right-[-5px] rotate-[0deg]"></div>
+            </div>
+            <div class="cat-tail absolute w-12 h-4 bg-gray-200 rounded-full -right-8 top-12"></div>
+        </div>
+        <div class="cat-container absolute w-28 h-16" style="bottom: -15%; left: 60%;">
+            <div class="absolute w-16 h-12 bg-gray-500 rounded-t-full top-4 left-6"></div>
+            <div class="cat-head absolute w-12 h-10 bg-gray-500 rounded-full top-0 left-8">
+                <!-- Ears -->
+                <div class="absolute w-3 h-5 bg-gray-500 top-[-6px] left-1 rotate-[-25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <div class="absolute w-3 h-5 bg-gray-500 top-[-6px] right-1 rotate-[25deg]" style="border-radius: 50% 50% 0 0;"></div>
+                <!-- Eyes -->
+                <div class="absolute w-2 h-2 bg-black rounded-full top-3 left-3 cat-eye"></div>
+                <div class="absolute w-2 h-2 bg-black rounded-full top-3 right-3 cat-eye"></div>
+                <!-- Nose -->
+                <div class="absolute w-2 h-1.5 bg-pink-300 rounded-full top-5 left-1/2 -translate-x-1/2"></div>
+                <!-- Whiskers -->
+                <div class="absolute w-5 h-px bg-gray-800 top-6 left-1 rotate-[10deg]"></div>
+                <div class="absolute w-5 h-px bg-gray-800 top-7 left-1 rotate-[0deg]"></div>
+                <div class="absolute w-5 h-px bg-gray-800 top-6 right-1 rotate-[-10deg]"></div>
+                <div class="absolute w-5 h-px bg-gray-800 top-7 right-1 rotate-[0deg]"></div>
+            </div>
+            <div class="cat-paw hitting-paw absolute w-5 h-8 bg-gray-400 rounded-b-full top-10 left-2"></div>
+            <div class="cat-paw absolute w-5 h-8 bg-gray-400 rounded-b-full top-10 left-20" style="animation-delay: 0.5s;"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно помощи -->
+    <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">🎱 Как играть</h2>
+            <div class="text-gray-600 space-y-3">
+                <p><strong>Цель:</strong> Забить все цветные шары в лузы</p>
+                <p><strong>Управление:</strong></p>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>Наведите курсор для прицеливания</li>
+                    <li>Зажмите и потяните для силы удара</li>
+                    <li>Отпустите для выполнения удара</li>
+                </ul>
+                <p><strong>Кошки:</strong> Могут ударить шары лапками! 🐾</p>
+                <p><strong>Счет:</strong> +1 очко за каждый забитый шар</p>
+            </div>
+            <button id="close-help" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full">Понятно!</button>
+        </div>
+    </div>
+
+<script src="script.js" defer></script>
+</body>
+</html>

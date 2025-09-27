@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Comfortaa', cursive;
+            background-color: #3a2d27; /* Темно-коричневый фон, как в бильярдной */
+            overflow: hidden;
+            touch-action: none; /* Отключаем действия по умолчанию для касаний */
+        }
+
+        /* Анимация для хвоста кошки */
+        @keyframes tail-wag {
+            0%, 100% { transform: rotate(5deg); }
+            50% { transform: rotate(-15deg); }
+        }
+
+        /* Анимация для головы кошки (кивок) */
+        @keyframes head-nod {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Анимация для лапки */
+        @keyframes paw-tap {
+            0%, 100% { transform: translateY(0) rotate(5deg); }
+            50% { transform: translateY(-3px) rotate(-5deg); }
+        }
+        
+        /* Анимация для моргания */
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        /* Анимация для удара лапой */
+        @keyframes paw-swat {
+            0% { transform: scale(1) rotate(5deg); }
+            50% { transform: scale(1.4) rotate(-40deg); }
+            100% { transform: scale(1) rotate(5deg); }
+        }
+
+        .swat-animation {
+            animation: paw-swat 0.3s ease-out;
+        }
+
+        /* Применение анимаций к элементам кошек */
+        .cat-tail {
+            animation: tail-wag 2.5s infinite ease-in-out;
+            transform-origin: right bottom;
+        }
+        .cat-head {
+            animation: head-nod 4s infinite ease-in-out;
+        }
+        .cat-paw {
+            animation: paw-tap 1.5s infinite ease-in-out;
+        }
+        .cat-eye {
+            animation: blink 5s infinite;
+        }
+
+        /* Стили для кия */
+        #cue {
+            transition: transform 0.1s ease-out;
+            pointer-events: none; /* Кий не должен мешать кликам */
+        }
+
+        .billiard-ball {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            backdrop-filter: blur(5px);
+        }
+
+        /* Анимации для UI элементов */
+        .button-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .button-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Пульсирующая анимация для важных элементов */
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4);
+            }
+        }
+
+        .help-button-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        /* Улучшенные тени */
+        .enhanced-shadow {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Градиентные фоны для кнопок */
+        .gradient-yellow {
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+        }
+        
+        .gradient-blue {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .gradient-green {
+            background: linear-gradient(135deg, #10b981, #047857);
+        }
