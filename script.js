@@ -60,18 +60,19 @@ document.addEventListener('DOMContentLoaded', () => {
         oscillator.stop(audioContext.currentTime + 0.15);
     }
 
-    function playPawSound() {
-        if (!audioContext || !soundEnabled) return;
+    function playMeowSound() {
+        if (!audioContext) return;
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        oscillator.type = 'sawtooth';
-        oscillator.frequency.setValueAtTime(120, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
         oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.2);
+        oscillator.stop(audioContext.currentTime + 0.3);
     }
     // --- Инициализация ---
     function initCats() {
@@ -176,7 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ball.el.style.display = 'none';
                     if (ball.el.id !== 'cue-ball') {
                         score++;
-                        document.getElementById('score-display').textContent = `Счет: ${score}`;
+                        const scoreDisplay = document.getElementById('score-display');
+                        if (scoreDisplay) {
+                            scoreDisplay.textContent = `Счет: ${score}`;
+                        }
                         playHitSound(); // Sound for sinking
                     } else {
                         // Если биток утонул, вернуть на стартовую позицию после остановки
@@ -375,7 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
         score = 0;
-        document.getElementById('score-display').textContent = `Счет: ${score}`;
+        const scoreDisplay = document.getElementById('score-display');
+        if (scoreDisplay) {
+            scoreDisplay.textContent = `Счет: ${score}`;
+        }
         balls.forEach(ball => {
             ball.sunk = false;
             ball.el.style.display = 'block';
@@ -388,19 +395,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleSound() {
         soundEnabled = !soundEnabled;
         const soundButton = document.getElementById('sound-toggle');
-        soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-        soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
+        if (soundButton) {
+            soundButton.textContent = soundEnabled ? '🔊' : '🔇';
+            soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
+        }
         
         // Сохраняем настройку в localStorage
         localStorage.setItem('kitt-cues-sound', soundEnabled);
     }
 
     function showHelp() {
-        document.getElementById('help-modal').classList.remove('hidden');
+        const helpModal = document.getElementById('help-modal');
+        if (helpModal) {
+            helpModal.classList.remove('hidden');
+        }
     }
 
     function hideHelp() {
-        document.getElementById('help-modal').classList.add('hidden');
+        const helpModal = document.getElementById('help-modal');
+        if (helpModal) {
+            helpModal.classList.add('hidden');
+        }
     }
 
     function loadSettings() {
@@ -408,8 +423,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedSound !== null) {
             soundEnabled = savedSound === 'true';
             const soundButton = document.getElementById('sound-toggle');
-            soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-            soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
+            if (soundButton) {
+                soundButton.textContent = soundEnabled ? '🔊' : '🔇';
+                soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
+            }
         }
     }
 
@@ -431,24 +448,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Обработчики для новых кнопок
-    document.getElementById('sound-toggle').addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleSound();
-    });
+    const soundToggle = document.getElementById('sound-toggle');
+    const helpButton = document.getElementById('help-button');
+    const closeHelp = document.getElementById('close-help');
+    const helpModal = document.getElementById('help-modal');
+    
+    if (soundToggle) {
+        soundToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleSound();
+        });
+    }
 
-    document.getElementById('help-button').addEventListener('click', (e) => {
-        e.stopPropagation();
-        showHelp();
-    });
+    if (helpButton) {
+        helpButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showHelp();
+        });
+    }
 
-    document.getElementById('close-help').addEventListener('click', hideHelp);
+    if (closeHelp) {
+        closeHelp.addEventListener('click', hideHelp);
+    }
     
     // Закрытие модального окна по клику вне его
-    document.getElementById('help-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'help-modal') {
-            hideHelp();
-        }
-    });
+    if (helpModal) {
+        helpModal.addEventListener('click', (e) => {
+            if (e.target.id === 'help-modal') {
+                hideHelp();
+            }
+        });
+    }
 
     // Поддержка клавиатуры для модального окна
     document.addEventListener('keydown', (e) => {
