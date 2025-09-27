@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ball.y = cat.y + normalizedDy * separation;
                         
                     } else {
-                        // Медленный шар - кот играет лапкой (старое поведение)
+                        // Шар со скоростью ≤ средней - кот играет лапкой
                         playPawSound();
                         cat.cooldown = CAT_COOLDOWN;
                         
