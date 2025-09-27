@@ -244,20 +244,24 @@ document.addEventListener('DOMContentLoaded', () => {
                             catElement.classList.remove('cat-scared');
                         }, 500);
                         
-                        // Отскок шара от кота (упругое столкновение)
+                        // Рассчитываем направление от кота к шару
                         const angle = Math.atan2(dy, dx);
                         const normalizedDx = Math.cos(angle);
                         const normalizedDy = Math.sin(angle);
+                        
+                        // Отодвигаем шар от кота перед отскоком, чтобы избежать залипания
+                        const separation = ball.radius + cat.radius + 5;
+                        ball.x = cat.x + normalizedDx * separation;
+                        ball.y = cat.y + normalizedDy * separation;
+                        
+                        // Убеждаемся, что шар остается в границах стола
+                        ball.x = Math.max(ball.radius, Math.min(table.offsetWidth - ball.radius, ball.x));
+                        ball.y = Math.max(ball.radius, Math.min(table.offsetHeight - ball.radius, ball.y));
                         
                         // Отталкиваем шар от кота с сохранением части энергии
                         const bounceForce = ballSpeed * 0.8; // Немного теряем энергию
                         ball.vx = normalizedDx * bounceForce;
                         ball.vy = normalizedDy * bounceForce;
-                        
-                        // Отодвигаем шар от кота, чтобы избежать залипания
-                        const separation = ball.radius + cat.radius + 2;
-                        ball.x = cat.x + normalizedDx * separation;
-                        ball.y = cat.y + normalizedDy * separation;
                         
                     } else {
                         // Шар со скоростью ≤ средней - кот играет лапкой
