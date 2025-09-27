@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const HIT_POWER = 15;
     const PAW_HIT_POWER = 8;
     const CAT_COOLDOWN = 60; // 1 секунда (60 кадров)
+    const MEDIUM_SPEED = 5; // Средняя скорость для определения отскока от кота
 
     let balls = [];
     let cats = [];
@@ -61,18 +62,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playMeowSound() {
-        if (!audioContext) return;
+        if (!audioContext || !soundEnabled) return;
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        oscillator.type = 'square';
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        
+        // Создаем характерный звук мяукания с изменением частоты
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.1);
         oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.5);
+        
+        gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.4, audioContext.currentTime + 0.2);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
+        
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
         oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.3);
+        oscillator.stop(audioContext.currentTime + 0.6);
     }
     // --- Инициализация ---
     function initCats() {
@@ -221,18 +229,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < ball.radius + cat.radius) {
-                    playPawSound();
-                    cat.cooldown = CAT_COOLDOWN;
+                    // Вычисляем скорость шара
+                    const ballSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
                     
-                    const pawElement = cat.pawEl || cat.el;
-                    pawElement.classList.add('swat-animation');
-                    setTimeout(() => {
-                        pawElement.classList.remove('swat-animation');
-                    }, 300);
+                    if (ballSpeed > MEDIUM_SPEED) {
+                        // Быстрый шар - кот мяукает и отталкивает шар
+                        playMeowSound();
+                        cat.cooldown = CAT_COOLDOWN;
+                        
+                        // Анимация испуга кота
+                        const catElement = cat.el;
+                        catElement.classList.add('cat-scared');
+                        setTimeout(() => {
+                            catElement.classList.remove('cat-scared');
+                        }, 500);
+                        
+                        // Отскок шара от кота (упругое столкновение)
+                        const angle = Math.atan2(dy, dx);
+                        const normalizedDx = Math.cos(angle);
+                        const normalizedDy = Math.sin(angle);
+                        
+                        // Отталкиваем шар от кота с сохранением части энергии
+                        const bounceForce = ballSpeed * 0.8; // Немного теряем энергию
+                        ball.vx = normalizedDx * bounceForce;
+                        ball.vy = normalizedDy * bounceForce;
+                        
+                        // Отодвигаем шар от кота, чтобы избежать залипания
+                        const separation = ball.radius + cat.radius + 2;
+                        ball.x = cat.x + normalizedDx * separation;
+                        ball.y = cat.y + normalizedDy * separation;
+                        
+                    } else {
+                        // Медленный шар - кот играет лапкой (старое поведение)
+                        playPawSound();
+                        cat.cooldown = CAT_COOLDOWN;
+                        
+                        const pawElement = cat.pawEl || cat.el;
+                        pawElement.classList.add('swat-animation');
+                        setTimeout(() => {
+                            pawElement.classList.remove('swat-animation');
+                        }, 300);
 
-                    const angle = Math.atan2(dy, dx);
-                    ball.vx = Math.cos(angle) * PAW_HIT_POWER;
-                    ball.vy = Math.sin(angle) * PAW_HIT_POWER;
+                        const angle = Math.atan2(dy, dx);
+                        ball.vx = Math.cos(angle) * PAW_HIT_POWER;
+                        ball.vy = Math.sin(angle) * PAW_HIT_POWER;
+                    }
                 }
             });
         });
