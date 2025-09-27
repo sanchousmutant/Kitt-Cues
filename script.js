@@ -88,19 +88,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const catElements = document.querySelectorAll('.cat-container');
         const tableRect = table.getBoundingClientRect();
 
-        catElements.forEach(el => {
+        catElements.forEach((el, index) => {
             const catRect = el.getBoundingClientRect();
             const catCenterX = (catRect.left - tableRect.left) + catRect.width / 2;
             const catCenterY = (catRect.top - tableRect.top) + catRect.height / 2;
+            
+            // Ищем элемент лапки, если есть, иначе используем весь элемент кота
+            let pawElement = el.querySelector('.hitting-paw');
+            if (!pawElement) {
+                pawElement = el.querySelector('.cat-paw');
+            }
+            if (!pawElement) {
+                pawElement = el; // Если нет специальной лапки, используем весь контейнер
+            }
+            
             cats.push({
                 el: el,
-                pawEl: el.querySelector('.hitting-paw'),
+                pawEl: pawElement,
                 x: catCenterX,
                 y: catCenterY,
                 radius: Math.max(catRect.width, catRect.height) / 2 + 10,
-                cooldown: 0
+                cooldown: 0,
+                index: index // Добавляем индекс для отладки
             });
-        });
     }
 
     function initPockets() {
@@ -222,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Столкновения с кошками
-            cats.forEach(cat => {
+            cats.forEach((cat, catIndex) => {
                 if (cat.cooldown > 0) return;
                 const dx = ball.x - cat.x;
                 const dy = ball.y - cat.y;
@@ -231,6 +241,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (distance < ball.radius + cat.radius) {
                     // Вычисляем скорость шара
                     const ballSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                    
+                    // Рассчитываем направление от кота к шару (ВСЕГДА нужно для отделения)
+                    const angle = Math.atan2(dy, dx);
+                    const normalizedDx = Math.cos(angle);
+                    const normalizedDy = Math.sin(angle);
+                    
+                    // ВСЕГДА отодвигаем шар от кота перед любыми действиями
+                    const separation = ball.radius + cat.radius + 8;
+                    ball.x = cat.x + normalizedDx * separation;
+                    ball.y = cat.y + normalizedDy * separation;
+                    
+                    // Убеждаемся, что шар остается в границах стола
+                    ball.x = Math.max(ball.radius, Math.min(table.offsetWidth - ball.radius, ball.x));
+                    ball.y = Math.max(ball.radius, Math.min(table.offsetHeight - ball.radius, ball.y));
                     
                     if (ballSpeed > MEDIUM_SPEED) {
                         // Быстрый шар - кот мяукает и отталкивает шар
@@ -244,22 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             catElement.classList.remove('cat-scared');
                         }, 500);
                         
-                        // Рассчитываем направление от кота к шару
-                        const angle = Math.atan2(dy, dx);
-                        const normalizedDx = Math.cos(angle);
-                        const normalizedDy = Math.sin(angle);
-                        
-                        // Отодвигаем шар от кота перед отскоком, чтобы избежать залипания
-                        const separation = ball.radius + cat.radius + 5;
-                        ball.x = cat.x + normalizedDx * separation;
-                        ball.y = cat.y + normalizedDy * separation;
-                        
-                        // Убеждаемся, что шар остается в границах стола
-                        ball.x = Math.max(ball.radius, Math.min(table.offsetWidth - ball.radius, ball.x));
-                        ball.y = Math.max(ball.radius, Math.min(table.offsetHeight - ball.radius, ball.y));
-                        
                         // Отталкиваем шар от кота с сохранением части энергии
-                        const bounceForce = ballSpeed * 0.8; // Немного теряем энергию
+                        const bounceForce = ballSpeed * 0.8;
                         ball.vx = normalizedDx * bounceForce;
                         ball.vy = normalizedDy * bounceForce;
                         
@@ -274,20 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             pawElement.classList.remove('swat-animation');
                         }, 300);
 
-                        // Рассчитываем направление от кота к шару
-                        const angle = Math.atan2(dy, dx);
-                        const normalizedDx = Math.cos(angle);
-                        const normalizedDy = Math.sin(angle);
-                        
-                        // Отодвигаем шар от кота перед ударом, чтобы избежать залипания
-                        const separation = ball.radius + cat.radius + 5;
-                        ball.x = cat.x + normalizedDx * separation;
-                        ball.y = cat.y + normalizedDy * separation;
-                        
-                        // Убеждаемся, что шар остается в границах стола
-                        ball.x = Math.max(ball.radius, Math.min(table.offsetWidth - ball.radius, ball.x));
-                        ball.y = Math.max(ball.radius, Math.min(table.offsetHeight - ball.radius, ball.y));
-                        
                         // Даем шару новую скорость в направлении от кота
                         ball.vx = normalizedDx * PAW_HIT_POWER;
                         ball.vy = normalizedDy * PAW_HIT_POWER;
