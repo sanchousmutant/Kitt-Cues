@@ -270,9 +270,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             pawElement.classList.remove('swat-animation');
                         }, 300);
 
+                        // Рассчитываем направление от кота к шару
                         const angle = Math.atan2(dy, dx);
-                        ball.vx = Math.cos(angle) * PAW_HIT_POWER;
-                        ball.vy = Math.sin(angle) * PAW_HIT_POWER;
+                        const normalizedDx = Math.cos(angle);
+                        const normalizedDy = Math.sin(angle);
+                        
+                        // Отодвигаем шар от кота перед ударом, чтобы избежать залипания
+                        const separation = ball.radius + cat.radius + 5;
+                        ball.x = cat.x + normalizedDx * separation;
+                        ball.y = cat.y + normalizedDy * separation;
+                        
+                        // Убеждаемся, что шар остается в границах стола
+                        ball.x = Math.max(ball.radius, Math.min(table.offsetWidth - ball.radius, ball.x));
+                        ball.y = Math.max(ball.radius, Math.min(table.offsetHeight - ball.radius, ball.y));
+                        
+                        // Даем шару новую скорость в направлении от кота
+                        ball.vx = normalizedDx * PAW_HIT_POWER;
+                        ball.vy = normalizedDy * PAW_HIT_POWER;
                     }
                 }
             });
