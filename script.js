@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragStartY = 0;
     let audioContext;
     let soundEnabled = true;
+    let musicEnabled = true;
     let backgroundMusic = null;
     let isMusicPlaying = false;
 
@@ -33,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createBackgroundMusic() {
-        if (!audioContext || !soundEnabled) return;
+        if (!audioContext || !musicEnabled) return;
         
         // Создаем очень тихую и ненавязчивую мелодию
         const oscillator1 = audioContext.createOscillator();
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let noteIndex = 0;
         const playNote = () => {
-            if (!soundEnabled || !isMusicPlaying) return;
+            if (!musicEnabled || !isMusicPlaying) return;
             
             // Плавное изменение частоты
             oscillator1.frequency.setValueAtTime(notes[noteIndex], audioContext.currentTime);
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startBackgroundMusic() {
-        if (!soundEnabled || isMusicPlaying || !audioContext) return;
+        if (!musicEnabled || isMusicPlaying || !audioContext) return;
         
         isMusicPlaying = true;
         createBackgroundMusic();
@@ -516,18 +517,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const soundButton = document.getElementById('sound-toggle');
         if (soundButton) {
             soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-            soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
+            soundButton.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
+        }
+        
+        // Сохраняем настройку в localStorage
+        localStorage.setItem('kitt-cues-sound', soundEnabled);
+    }
+
+    function toggleMusic() {
+        musicEnabled = !musicEnabled;
+        const musicButton = document.getElementById('music-toggle');
+        if (musicButton) {
+            musicButton.textContent = musicEnabled ? '🎵' : '🔇';
+            musicButton.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
         }
         
         // Управляем фоновой музыкой
-        if (soundEnabled) {
+        if (musicEnabled) {
             startBackgroundMusic();
         } else {
             stopBackgroundMusic();
         }
         
         // Сохраняем настройку в localStorage
-        localStorage.setItem('kitt-cues-sound', soundEnabled);
+        localStorage.setItem('kitt-cues-music', musicEnabled);
     }
 
     function showHelp() {
@@ -545,14 +558,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadSettings() {
+        // Загружаем настройки звуковых эффектов
         const savedSound = localStorage.getItem('kitt-cues-sound');
         if (savedSound !== null) {
             soundEnabled = savedSound === 'true';
-            const soundButton = document.getElementById('sound-toggle');
-            if (soundButton) {
-                soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-                soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
-            }
+        }
+        const soundButton = document.getElementById('sound-toggle');
+        if (soundButton) {
+            soundButton.textContent = soundEnabled ? '🔊' : '🔇';
+            soundButton.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
+        }
+
+        // Загружаем настройки фоновой музыки
+        const savedMusic = localStorage.getItem('kitt-cues-music');
+        if (savedMusic !== null) {
+            musicEnabled = savedMusic === 'true';
+        }
+        const musicButton = document.getElementById('music-toggle');
+        if (musicButton) {
+            musicButton.textContent = musicEnabled ? '🎵' : '🔇';
+            musicButton.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
         }
     }
 
@@ -575,6 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработчики для новых кнопок
     const soundToggle = document.getElementById('sound-toggle');
+    const musicToggle = document.getElementById('music-toggle');
     const helpButton = document.getElementById('help-button');
     const closeHelp = document.getElementById('close-help');
     const helpModal = document.getElementById('help-modal');
@@ -583,6 +609,13 @@ document.addEventListener('DOMContentLoaded', () => {
         soundToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleSound();
+        });
+    }
+
+    if (musicToggle) {
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMusic();
         });
     }
 
