@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Дополнительный отступ для маленьких экранов (iPhone SE)
         const isSmallScreen = window.innerWidth <= 375;
-        const extraMargin = isSmallScreen ? 60 : 0;
+        const extraMargin = isSmallScreen ? 100 : 0;
         
         // Левые кнопки
         const soundToggle = document.querySelector('#sound-toggle');
@@ -177,9 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Проверяем, не выходит ли счет за левую границу стола
             const scoreLeftEdge = gameAreaRect.width - finalRightX - topRightScore.offsetWidth;
-            if (scoreLeftEdge < tableRect.left - gameAreaRect.left + 10) {
+            const minDistanceFromTable = isSmallScreen ? 50 : 20;
+            if (scoreLeftEdge < tableRect.left - gameAreaRect.left + minDistanceFromTable) {
                 // Если счет перекрывает стол слева, сдвигаем его еще правее
-                const safeRightX = gameAreaRect.width - (tableRect.left - gameAreaRect.left) - topRightScore.offsetWidth - 20;
+                const safeRightX = gameAreaRect.width - (tableRect.left - gameAreaRect.left) - topRightScore.offsetWidth - minDistanceFromTable;
                 topRightScore.style.right = `${Math.max(10, safeRightX)}px`;
             } else {
                 topRightScore.style.right = `${finalRightX}px`;
@@ -216,70 +217,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createBackgroundMusic() {
         if (!audioContext || !musicEnabled) return;
-        
-        // Создаем очень тихую и ненавязчивую мелодию
+
         const oscillator1 = audioContext.createOscillator();
         const oscillator2 = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         const filter = audioContext.createBiquadFilter();
-        
-        // Настройки для мягкого звучания
-        oscillator1.type = 'sine';
-        oscillator2.type = 'triangle';
-        
-        // Очень тихий уровень громкости (0.02 = 2%)
-        gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
-        
-        // Мягкий фильтр для более теплого звука
+
+        // Настройки для озорного и ритмичного звучания
+        oscillator1.type = 'square'; // Более резкий, "игровой" звук
+        oscillator2.type = 'sawtooth'; // Добавляет яркости
+
+        // Увеличиваем громкость до 45%
+        gainNode.gain.setValueAtTime(0.45, audioContext.currentTime);
+
+        // Фильтр для более яркого звука
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(800, audioContext.currentTime);
-        filter.Q.setValueAtTime(1, audioContext.currentTime);
-        
-        // Простая и успокаивающая мелодия
+        filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+        filter.Q.setValueAtTime(1.5, audioContext.currentTime);
+
+        // Веселая и озорная мелодия в стиле арпеджио
         const notes = [
+            // C major arpeggio
             261.63, // C4
-            293.66, // D4
             329.63, // E4
-            293.66, // D4
-            261.63, // C4
-            246.94, // B3
-            261.63, // C4
-            293.66  // D4
+            392.00, // G4
+            523.25, // C5
+            // G major arpeggio
+            392.00, // G4
+            493.88, // B4
+            587.33, // D5
+            783.99, // G5
         ];
-        
+
         let noteIndex = 0;
         const playNote = () => {
             if (!musicEnabled || !isMusicPlaying) return;
-            
-            // Плавное изменение частоты
-            oscillator1.frequency.setValueAtTime(notes[noteIndex], audioContext.currentTime);
-            oscillator2.frequency.setValueAtTime(notes[noteIndex] * 0.5, audioContext.currentTime + 0.1);
-            
+
+            const note = notes[noteIndex];
+            const duration = 0.15; // Короткая длительность ноты
+            const currentTime = audioContext.currentTime;
+
+            // Основная нота
+            oscillator1.frequency.setValueAtTime(note, currentTime);
+            // Гармония на квинту ниже
+            oscillator2.frequency.setValueAtTime(note * 0.75, currentTime);
+
+            // Короткая атака и затухание для "острого" звука
+            gainNode.gain.cancelScheduledValues(currentTime);
+            gainNode.gain.setValueAtTime(0.45, currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+
             noteIndex = (noteIndex + 1) % notes.length;
         };
-        
-        // Воспроизводим ноту каждые 2 секунды (очень медленно)
-        const musicInterval = setInterval(playNote, 2000);
-        
-        // Подключаем цепочку звука
+
+        // Воспроизводим ноту каждые 250 мс (быстрый темп)
+        const musicInterval = setInterval(playNote, 250);
+
         oscillator1.connect(filter);
         oscillator2.connect(filter);
         filter.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        
-        // Запускаем осцилляторы
+
         oscillator1.start();
         oscillator2.start();
-        
-        // Сохраняем ссылки для остановки
+
         backgroundMusic = {
             oscillator1,
             oscillator2,
             gainNode,
             interval: musicInterval
         };
-        
-        playNote(); // Играем первую ноту сразу
+
+        playNote();
     }
 
     function startBackgroundMusic() {
@@ -315,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
@@ -330,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
         oscillator.type = 'triangle';
         oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.15);
-        gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
@@ -345,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         oscillator.type = 'square';
         oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
@@ -615,8 +624,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!cueBallObj || !e) return;
         const tableRect = table.getBoundingClientRect();
         // Поддержка как мыши, так и сенсорного ввода
-        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        if (clientX === undefined || clientY === undefined) return;
         
         let mouseX = clientX - tableRect.left;
         let mouseY = clientY - tableRect.top;
@@ -656,8 +673,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableRect = table.getBoundingClientRect();
         
         // Поддержка как мыши, так и сенсорного ввода
-        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
         
         if (clientX !== undefined && clientY !== undefined) {
             dragStartX = clientX - tableRect.left;
@@ -679,8 +702,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableRect = table.getBoundingClientRect();
         
         // Поддержка как мыши, так и сенсорного ввода
-        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        let clientX, clientY;
+        if (e && e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else if (e) {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        } else {
+            // Если событие не передано (например, при touchend), используем последние известные координаты
+            clientX = dragStartX + tableRect.left;
+            clientY = dragStartY + tableRect.top;
+        }
         
         const dragEndX = clientX - tableRect.left;
         const dragEndY = clientY - tableRect.top;
@@ -928,12 +961,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Сенсорное управление
     gameArea.addEventListener('touchmove', e => { 
         e.preventDefault(); 
-        aimCue(e); 
+        if (e.touches && e.touches.length > 0) {
+            aimCue(e); 
+        }
     }, { passive: false });
     
     gameArea.addEventListener('touchstart', e => { 
         e.preventDefault(); 
-        startDrag(e); 
+        if (e.touches && e.touches.length > 0) {
+            startDrag(e); 
+        }
     }, { passive: false });
     
     gameArea.addEventListener('touchend', e => { 
@@ -944,14 +981,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Предотвращаем контекстное меню на сенсорных устройствах
     gameArea.addEventListener('contextmenu', e => e.preventDefault());
 
+    // --- Универсальный обработчик кликов и касаний для кнопок ---
+    function addButtonListener(element, action) {
+        if (element) {
+            const handler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                action();
+            };
+            element.addEventListener('click', handler);
+            element.addEventListener('touchstart', handler);
+        }
+    }
+
     // Обработчик для новой кнопки сброса
     const resetButton = document.getElementById('reset-button');
-    if (resetButton) {
-        resetButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            resetGame();
-        });
-    }
+    addButtonListener(resetButton, resetGame);
 
     // Обработчики для новых кнопок
     const soundToggle = document.getElementById('sound-toggle');
@@ -967,60 +1012,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpButtonLandscape = document.getElementById('help-button-landscape');
     const resetButtonLandscape = document.getElementById('reset-button-landscape');
     
-    if (soundToggle) {
-        soundToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleSound();
-        });
-    }
-
-    if (musicToggle) {
-        musicToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleMusic();
-        });
-    }
-
-    if (helpButton) {
-        helpButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showHelp();
-        });
-    }
-    
+    addButtonListener(soundToggle, toggleSound);
+    addButtonListener(musicToggle, toggleMusic);
+    addButtonListener(helpButton, showHelp);
     
     // Ландшафтные обработчики
-    if (soundToggleLandscape) {
-        soundToggleLandscape.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleSound();
-        });
-    }
+    addButtonListener(soundToggleLandscape, toggleSound);
+    addButtonListener(musicToggleLandscape, toggleMusic);
+    addButtonListener(helpButtonLandscape, showHelp);
+    addButtonListener(resetButtonLandscape, resetGame);
 
-    if (musicToggleLandscape) {
-        musicToggleLandscape.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleMusic();
-        });
-    }
-
-    if (helpButtonLandscape) {
-        helpButtonLandscape.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showHelp();
-        });
-    }
-    
-    if (resetButtonLandscape) {
-        resetButtonLandscape.addEventListener('click', (e) => {
-            e.stopPropagation();
-            resetGame();
-        });
-    }
-
-    if (closeHelp) {
-        closeHelp.addEventListener('click', hideHelp);
-    }
+    addButtonListener(closeHelp, hideHelp);
     
     // Закрытие модального окна по клику вне его
     if (helpModal) {
@@ -1059,16 +1061,29 @@ document.addEventListener('DOMContentLoaded', () => {
         positionUIElements();
     }, 100);
     
+    // Дополнительный вызов для корректного позиционирования UI при загрузке
+    setTimeout(() => {
+        positionUIElements();
+    }, 300);
+    
     // Добавляем обработчики событий
     window.addEventListener('orientationchange', handleOrientationChange);
     window.addEventListener('resize', handleResize);
     
+    // Обработчик для корректного позиционирования при изменении размера
+    window.addEventListener('resize', () => {
+        setTimeout(() => {
+            positionUIElements();
+        }, 50);
+    });
+    
     // Запускаем фоновую музыку после первого взаимодействия пользователя
     const startMusicOnFirstInteraction = () => {
-        if (soundEnabled) {
+        if (musicEnabled) { // Проверяем, включена ли музыка
             initAudio();
             startBackgroundMusic();
         }
+        // Удаляем обработчики, чтобы избежать повторного запуска
         document.removeEventListener('mousedown', startMusicOnFirstInteraction);
         document.removeEventListener('touchstart', startMusicOnFirstInteraction);
     };

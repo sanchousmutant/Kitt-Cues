@@ -483,24 +483,27 @@
         /* Специальные стили для iPhone SE (375px) */
         @media (max-width: 375px) {
             .billiard-ball {
-                width: 12px;
-                height: 12px;
+                width: 8px !important;
+                height: 8px !important;
             }
             
             .cat-container {
-                transform: scale(0.3);
+                transform: scale(0.5) !important;
             }
             
             /* Уменьшаем размер счета на маленьких экранах */
             #score-display {
-                font-size: 0.875rem !important;
-                padding: 0.25rem 0.5rem !important;
+                font-size: 0.625rem !important;
+                padding: 0.125rem 0.25rem !important;
+                max-width: 60px !important;
             }
             
             /* Уменьшаем размер кнопок */
             button {
-                padding: 0.25rem 0.5rem !important;
-                font-size: 0.75rem !important;
+                padding: 0.125rem 0.25rem !important;
+                font-size: 0.5rem !important;
+                min-width: 24px !important;
+                min-height: 24px !important;
             }
         }
 
