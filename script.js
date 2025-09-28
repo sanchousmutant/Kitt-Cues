@@ -22,12 +22,108 @@ document.addEventListener('DOMContentLoaded', () => {
     let dragStartY = 0;
     let audioContext;
     let soundEnabled = true;
+    let backgroundMusic = null;
+    let isMusicPlaying = false;
 
     // --- Звуковой движок ---
     function initAudio() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
+    }
+
+    function createBackgroundMusic() {
+        if (!audioContext || !soundEnabled) return;
+        
+        // Создаем очень тихую и ненавязчивую мелодию
+        const oscillator1 = audioContext.createOscillator();
+        const oscillator2 = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+        
+        // Настройки для мягкого звучания
+        oscillator1.type = 'sine';
+        oscillator2.type = 'triangle';
+        
+        // Очень тихий уровень громкости (0.02 = 2%)
+        gainNode.gain.setValueAtTime(0.02, audioContext.currentTime);
+        
+        // Мягкий фильтр для более теплого звука
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, audioContext.currentTime);
+        filter.Q.setValueAtTime(1, audioContext.currentTime);
+        
+        // Простая и успокаивающая мелодия
+        const notes = [
+            261.63, // C4
+            293.66, // D4
+            329.63, // E4
+            293.66, // D4
+            261.63, // C4
+            246.94, // B3
+            261.63, // C4
+            293.66  // D4
+        ];
+        
+        let noteIndex = 0;
+        const playNote = () => {
+            if (!soundEnabled || !isMusicPlaying) return;
+            
+            // Плавное изменение частоты
+            oscillator1.frequency.setValueAtTime(notes[noteIndex], audioContext.currentTime);
+            oscillator2.frequency.setValueAtTime(notes[noteIndex] * 0.5, audioContext.currentTime + 0.1);
+            
+            noteIndex = (noteIndex + 1) % notes.length;
+        };
+        
+        // Воспроизводим ноту каждые 2 секунды (очень медленно)
+        const musicInterval = setInterval(playNote, 2000);
+        
+        // Подключаем цепочку звука
+        oscillator1.connect(filter);
+        oscillator2.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Запускаем осцилляторы
+        oscillator1.start();
+        oscillator2.start();
+        
+        // Сохраняем ссылки для остановки
+        backgroundMusic = {
+            oscillator1,
+            oscillator2,
+            gainNode,
+            interval: musicInterval
+        };
+        
+        playNote(); // Играем первую ноту сразу
+    }
+
+    function startBackgroundMusic() {
+        if (!soundEnabled || isMusicPlaying || !audioContext) return;
+        
+        isMusicPlaying = true;
+        createBackgroundMusic();
+    }
+
+    function stopBackgroundMusic() {
+        if (!backgroundMusic) return;
+        
+        isMusicPlaying = false;
+        
+        // Плавно уменьшаем громкость
+        if (backgroundMusic.gainNode) {
+            backgroundMusic.gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+        }
+        
+        // Останавливаем осцилляторы через полсекунды
+        setTimeout(() => {
+            if (backgroundMusic.oscillator1) backgroundMusic.oscillator1.stop();
+            if (backgroundMusic.oscillator2) backgroundMusic.oscillator2.stop();
+            if (backgroundMusic.interval) clearInterval(backgroundMusic.interval);
+            backgroundMusic = null;
+        }, 500);
     }
 
     function playHitSound() {
@@ -423,6 +519,13 @@ document.addEventListener('DOMContentLoaded', () => {
             soundButton.title = soundEnabled ? 'Отключить звук' : 'Включить звук';
         }
         
+        // Управляем фоновой музыкой
+        if (soundEnabled) {
+            startBackgroundMusic();
+        } else {
+            stopBackgroundMusic();
+        }
+        
         // Сохраняем настройку в localStorage
         localStorage.setItem('kitt-cues-sound', soundEnabled);
     }
@@ -521,4 +624,17 @@ document.addEventListener('DOMContentLoaded', () => {
     initCats();
     initPockets();
     resetGame();
+    
+    // Запускаем фоновую музыку после первого взаимодействия пользователя
+    const startMusicOnFirstInteraction = () => {
+        if (soundEnabled) {
+            initAudio();
+            startBackgroundMusic();
+        }
+        document.removeEventListener('mousedown', startMusicOnFirstInteraction);
+        document.removeEventListener('touchstart', startMusicOnFirstInteraction);
+    };
+    
+    document.addEventListener('mousedown', startMusicOnFirstInteraction);
+    document.addEventListener('touchstart', startMusicOnFirstInteraction);
 });
