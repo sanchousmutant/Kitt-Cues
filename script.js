@@ -461,14 +461,14 @@ document.addEventListener('DOMContentLoaded', () => {
     gameArea.addEventListener('touchstart', startDrag);
     gameArea.addEventListener('touchend', e => { e.preventDefault(); endDrag(); });
 
-    const resetButton = document.createElement('button');
-    resetButton.textContent = 'Начать заново';
-    resetButton.className = 'absolute bottom-2 right-2 bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-yellow-700 transition z-10';
-    gameArea.appendChild(resetButton);
-    resetButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        resetGame();
-    });
+    // Обработчик для новой кнопки сброса
+    const resetButton = document.getElementById('reset-button');
+    if (resetButton) {
+        resetButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetGame();
+        });
+    }
 
     // Обработчики для новых кнопок
     const soundToggle = document.getElementById('sound-toggle');
