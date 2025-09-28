@@ -84,12 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const catRect = el.getBoundingClientRect();
             const catCenterX = (catRect.left - tableRect.left) + catRect.width / 2;
             const catCenterY = (catRect.top - tableRect.top) + catRect.height / 2;
+            
+            // Увеличиваем радиус для маленького кота для лучшего взаимодействия
+            let radius = Math.max(catRect.width, catRect.height) / 2 + 10;
+            if (el.classList.contains('cat-small')) {
+                radius = Math.max(catRect.width, catRect.height) / 2 + 25; // Значительно больший радиус для маленького кота
+            }
+            
             cats.push({
                 el: el,
                 pawEl: el.querySelector('.hitting-paw'),
                 x: catCenterX,
                 y: catCenterY,
-                radius: Math.max(catRect.width, catRect.height) / 2 + 10,
+                radius: radius,
                 cooldown: 0
             });
         });
@@ -225,11 +232,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     playMeowSound(); // Используем уже определенную функцию вместо playPawSound
                     cat.cooldown = CAT_COOLDOWN;
                     
-                    const pawElement = cat.pawEl || cat.el;
-                    pawElement.classList.add('swat-animation');
-                    setTimeout(() => {
-                        pawElement.classList.remove('swat-animation');
-                    }, 300);
+                    // Для маленького кота анимируем весь элемент, для остальных - только лапку
+                    if (cat.el.classList.contains('cat-small')) {
+                        cat.el.classList.add('swat-animation');
+                        setTimeout(() => {
+                            cat.el.classList.remove('swat-animation');
+                        }, 500); // Увеличиваем время для новой анимации
+                    } else {
+                        const pawElement = cat.pawEl || cat.el;
+                        pawElement.classList.add('swat-animation');
+                        setTimeout(() => {
+                            pawElement.classList.remove('swat-animation');
+                        }, 300);
+                    }
 
                     const angle = Math.atan2(dy, dx);
                     ball.vx = Math.cos(angle) * PAW_HIT_POWER;
