@@ -25,6 +25,187 @@ document.addEventListener('DOMContentLoaded', () => {
     let musicEnabled = true;
     let backgroundMusic = null;
     let isMusicPlaying = false;
+    let isMobile = window.innerWidth <= 640;
+    let isPortrait = window.innerHeight > window.innerWidth;
+
+    // --- Определение ориентации и управление уведомлением ---
+    function checkOrientation() {
+        isMobile = window.innerWidth <= 640;
+        isPortrait = window.innerHeight > window.innerWidth;
+        const rotationNotice = document.getElementById('rotation-notice');
+        
+        if (isMobile && isPortrait) {
+            // Показываем уведомление о повороте
+            if (rotationNotice) {
+                rotationNotice.style.display = 'flex';
+            }
+        } else {
+            // Скрываем уведомление
+            if (rotationNotice) {
+                rotationNotice.style.display = 'none';
+            }
+        }
+    }
+
+    // Обработчик изменения ориентации
+    function handleOrientationChange() {
+        // Небольшая задержка для корректного определения размеров
+        setTimeout(checkOrientation, 100);
+    }
+
+    // Обработчик изменения размера окна
+    function handleResize() {
+        checkOrientation();
+        
+        // Динамическое масштабирование элементов
+        const gameArea = document.getElementById('game-area');
+        const table = document.getElementById('billiard-table');
+        const tableContainer = document.getElementById('billiard-table-container');
+        
+        if (gameArea && table && tableContainer) {
+            const gameAreaStyle = window.getComputedStyle(gameArea);
+            const paddingLeft = parseFloat(gameAreaStyle.paddingLeft);
+            const paddingRight = parseFloat(gameAreaStyle.paddingRight);
+            const paddingTop = parseFloat(gameAreaStyle.paddingTop);
+            const paddingBottom = parseFloat(gameAreaStyle.paddingBottom);
+            
+            const gameAreaRect = gameArea.getBoundingClientRect();
+            const availableWidth = gameAreaRect.width - paddingLeft - paddingRight;
+            const availableHeight = gameAreaRect.height - paddingTop - paddingBottom;
+            
+            // Рассчитываем оптимальный размер стола
+            const aspectRatio = 1.5; // Соотношение сторон бильярдного стола (1.5:1)
+            let tableWidth, tableHeight;
+            
+            if (availableWidth / availableHeight > aspectRatio) {
+                // Высота ограничивает
+                tableHeight = availableHeight;
+                tableWidth = tableHeight * aspectRatio;
+            } else {
+                // Ширина ограничивает
+                tableWidth = availableWidth;
+                tableHeight = tableWidth / aspectRatio;
+            }
+            
+            // Устанавливаем размеры контейнера немного больше стола для создания бортов
+            const borderWidth = 20; // Ширина бортов
+            const containerWidth = tableWidth + borderWidth * 2;
+            const containerHeight = tableHeight + borderWidth * 2;
+            
+            // Позиционируем контейнер стола по центру игровой области
+            tableContainer.style.width = `${containerWidth}px`;
+            tableContainer.style.height = `${containerHeight}px`;
+            tableContainer.style.left = `${paddingLeft + (availableWidth - containerWidth) / 2}px`;
+            tableContainer.style.top = `${paddingTop + (availableHeight - containerHeight) / 2}px`;
+            
+            // Позиционируем стол внутри контейнера с отступом для бортов
+            table.style.width = `${tableWidth}px`;
+            table.style.height = `${tableHeight}px`;
+            table.style.left = `${borderWidth}px`;
+            table.style.top = `${borderWidth}px`;
+        }
+        
+        // Переинициализируем элементы при изменении размера
+        if (typeof initCats === 'function') initCats();
+        if (typeof initPockets === 'function') initPockets();
+        if (typeof initBalls === 'function') initBalls();
+        
+        // Позиционируем UI элементы за пределами стола после обновления размеров
+        setTimeout(() => {
+            positionUIElements();
+        }, 50);
+    }
+
+    // --- Позиционирование UI элементов ---
+    function positionUIElements() {
+        const gameArea = document.getElementById('game-area');
+        const tableContainer = document.getElementById('billiard-table-container');
+        
+        if (!gameArea || !tableContainer) return;
+        
+        const gameAreaRect = gameArea.getBoundingClientRect();
+        const tableRect = tableContainer.getBoundingClientRect();
+        
+        // Вычисляем масштабный коэффициент на основе размера стола
+        const baseTableWidth = 600; // Базовый размер стола для расчета масштаба
+        const scaleFactor = Math.min(tableRect.width / baseTableWidth, 1.5); // Ограничиваем масштаб
+        const margin = Math.max(20, 40 * scaleFactor); // Адаптивный отступ
+        
+        // Дополнительный отступ для маленьких экранов (iPhone SE)
+        const isSmallScreen = window.innerWidth <= 375;
+        const extraMargin = isSmallScreen ? 60 : 0;
+        
+        // Левые кнопки
+        const soundToggle = document.querySelector('#sound-toggle');
+        if (soundToggle && soundToggle.parentElement) {
+            const leftButtons = soundToggle.parentElement;
+            const leftX = tableRect.left - gameAreaRect.left - leftButtons.offsetWidth - margin;
+            leftButtons.style.left = `${Math.max(10, leftX)}px`;
+            leftButtons.style.right = 'auto';
+        }
+        
+        // Правая кнопка
+        const resetButton = document.querySelector('#reset-button');
+        if (resetButton && resetButton.parentElement) {
+            const rightButton = resetButton.parentElement;
+            const rightX = gameAreaRect.width - (tableRect.right - gameAreaRect.left) - rightButton.offsetWidth - margin;
+            rightButton.style.right = `${Math.max(10, rightX)}px`;
+            rightButton.style.left = 'auto';
+        }
+        
+        // Счет в правом верхнем углу
+        const scoreDisplay = document.querySelector('#score-display');
+        if (scoreDisplay && scoreDisplay.parentElement) {
+            const topRightScore = scoreDisplay.parentElement;
+            const topY = tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin;
+            const rightX = gameAreaRect.width - (tableRect.right - gameAreaRect.left) - topRightScore.offsetWidth - margin;
+            
+            // Проверяем, не перекрывает ли счет стол
+            const minTopY = Math.max(10, topY);
+            const minRightX = Math.max(10, rightX);
+            
+            // Если счет может перекрыть стол, перемещаем его выше
+            if (minTopY < tableRect.top - gameAreaRect.top + 10) {
+                topRightScore.style.top = `${tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin}px`;
+            } else {
+                topRightScore.style.top = `${minTopY}px`;
+            }
+            
+            // Сдвигаем счет правее, чтобы он не перекрывал стол
+            const extraRightMargin = Math.max(0, (tableRect.right - gameAreaRect.left) - (gameAreaRect.width - minRightX - topRightScore.offsetWidth));
+            const finalRightX = minRightX + extraRightMargin + extraMargin;
+            
+            // Проверяем, не выходит ли счет за левую границу стола
+            const scoreLeftEdge = gameAreaRect.width - finalRightX - topRightScore.offsetWidth;
+            if (scoreLeftEdge < tableRect.left - gameAreaRect.left + 10) {
+                // Если счет перекрывает стол слева, сдвигаем его еще правее
+                const safeRightX = gameAreaRect.width - (tableRect.left - gameAreaRect.left) - topRightScore.offsetWidth - 20;
+                topRightScore.style.right = `${Math.max(10, safeRightX)}px`;
+            } else {
+                topRightScore.style.right = `${finalRightX}px`;
+            }
+            
+            topRightScore.style.bottom = 'auto';
+            topRightScore.style.left = 'auto';
+        }
+        
+        // Мобильные элементы в ландшафтной ориентации
+        const soundToggleLandscape = document.querySelector('#sound-toggle-landscape');
+        if (soundToggleLandscape && soundToggleLandscape.parentElement) {
+            const mobileButtons = soundToggleLandscape.parentElement;
+            const topY = tableRect.top - gameAreaRect.top - mobileButtons.offsetHeight - margin;
+            mobileButtons.style.top = `${Math.max(10, topY)}px`;
+            mobileButtons.style.bottom = 'auto';
+        }
+        
+        const scoreDisplayLandscape = document.querySelector('#score-display-landscape');
+        if (scoreDisplayLandscape && scoreDisplayLandscape.parentElement) {
+            const mobileScore = scoreDisplayLandscape.parentElement;
+            const topY = tableRect.top - gameAreaRect.top - mobileScore.offsetHeight - margin;
+            mobileScore.style.top = `${Math.max(10, topY)}px`;
+            mobileScore.style.bottom = 'auto';
+        }
+    }
 
     // --- Звуковой движок ---
     function initAudio() {
@@ -281,9 +462,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (ball.el.id !== 'cue-ball') {
                         score++;
                         const scoreDisplay = document.getElementById('score-display');
+                        const scoreDisplayLandscape = document.getElementById('score-display-landscape');
+                        
                         if (scoreDisplay) {
                             scoreDisplay.textContent = `Счет: ${score}`;
                         }
+                        
+                        if (scoreDisplayLandscape) {
+                            scoreDisplayLandscape.textContent = `Счет: ${score}`;
+                        }
+                        
                         playHitSound(); // Sound for sinking
                     } else {
                         // Если биток утонул, вернуть на стартовую позицию после остановки
@@ -426,8 +614,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const cueBallObj = balls.find(b => b.el.id === 'cue-ball');
         if (!cueBallObj || !e) return;
         const tableRect = table.getBoundingClientRect();
-        const mouseX = (e.clientX || (e.touches && e.touches[0].clientX)) - tableRect.left;
-        const mouseY = (e.clientY || (e.touches && e.touches[0].clientY)) - tableRect.top;
+        // Поддержка как мыши, так и сенсорного ввода
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        
+        let mouseX = clientX - tableRect.left;
+        let mouseY = clientY - tableRect.top;
+
+        // Ограничиваем позицию курсора границами зеленого поля
+        const padding = 20; // Отступ от края зеленого поля
+        mouseX = Math.max(padding, Math.min(table.offsetWidth - padding, mouseX));
+        mouseY = Math.max(padding, Math.min(table.offsetHeight - padding, mouseY));
 
         // Угол от курсора мыши к битку
         const dx = cueBallObj.x - mouseX;
@@ -449,19 +646,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startDrag(e) {
         if (animationFrameId) return;
+        
+        // Проверяем, не кликнули ли по кнопке
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return;
+        }
+        
         isDragging = true;
         const tableRect = table.getBoundingClientRect();
-        dragStartX = (e.clientX || (e.touches && e.touches[0].clientX)) - tableRect.left;
-        dragStartY = (e.clientY || (e.touches && e.touches[0].clientY)) - tableRect.top;
-        aimCue(e);
+        
+        // Поддержка как мыши, так и сенсорного ввода
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        
+        if (clientX !== undefined && clientY !== undefined) {
+            dragStartX = clientX - tableRect.left;
+            dragStartY = clientY - tableRect.top;
+            aimCue(e);
+        }
     }
 
     function endDrag(e) {
         if (!isDragging || animationFrameId) return;
+        
+        // Проверяем, не кликнули ли по кнопке
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            isDragging = false;
+            return;
+        }
+        
         isDragging = false;
         const tableRect = table.getBoundingClientRect();
-        const dragEndX = (e.clientX || (e.touches && e.touches[0].clientX)) - tableRect.left;
-        const dragEndY = (e.clientY || (e.touches && e.touches[0].clientY)) - tableRect.top;
+        
+        // Поддержка как мыши, так и сенсорного ввода
+        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+        
+        const dragEndX = clientX - tableRect.left;
+        const dragEndY = clientY - tableRect.top;
         const dragDistance = Math.sqrt((dragEndX - dragStartX)**2 + (dragEndY - dragStartY)**2);
         let power = Math.min(dragDistance / 10, 25); // Max power 25
         if (dragDistance < 10) power = HIT_POWER; // Min power for clicks/taps
@@ -500,24 +722,119 @@ document.addEventListener('DOMContentLoaded', () => {
         animationFrameId = null;
         score = 0;
         const scoreDisplay = document.getElementById('score-display');
+        const scoreDisplayLandscape = document.getElementById('score-display-landscape');
+        
         if (scoreDisplay) {
             scoreDisplay.textContent = `Счет: ${score}`;
         }
-        balls.forEach(ball => {
-            ball.sunk = false;
-            ball.el.style.display = 'block';
-        });
+        
+        if (scoreDisplayLandscape) {
+            scoreDisplayLandscape.textContent = `Счет: ${score}`;
+        }
+        
         initPockets();
         initBalls();
+        
+        // Сброс всех шаров
+        balls.forEach(ball => {
+            ball.sunk = false;
+            ball.vx = 0;
+            ball.vy = 0;
+            ball.el.style.display = 'block';
+        });
+        
+        // Позиционируем белый шар слева по центру
+        const cueBall = balls.find(b => b.el.id === 'cue-ball');
+        if (cueBall) {
+            cueBall.x = table.offsetWidth * 0.25; // 25% от ширины стола слева
+            cueBall.y = table.offsetHeight * 0.5;  // 50% от высоты стола (центр)
+        }
+        
+        // Позиционируем разноцветные шары справа в виде треугольника
+        const coloredBalls = balls.filter(b => b.el.id !== 'cue-ball');
+        const ballRadius = coloredBalls[0]?.radius || 12;
+        const tableWidth = table.offsetWidth;
+        const tableHeight = table.offsetHeight;
+        
+        // Убеждаемся, что треугольник помещается в пределах стола
+        const triangleX = Math.min(tableWidth * 0.6, tableWidth - ballRadius * 8); // Максимум 60% или с отступом
+        const triangleY = tableHeight * 0.5; // 50% от высоты стола (центр)
+        const ballSpacing = Math.min(ballRadius * 2.2, (tableWidth - triangleX) / 4); // Адаптивное расстояние
+        
+        // Создаем треугольник из 10 шаров (4 ряда: 1, 2, 3, 4)
+        let ballIndex = 0;
+        
+        // Функция для безопасного позиционирования шара
+        const setBallPosition = (ball, x, y) => {
+            // Ограничиваем позицию в пределах стола с учетом радиуса шара
+            ball.x = Math.max(ballRadius, Math.min(tableWidth - ballRadius, x));
+            ball.y = Math.max(ballRadius, Math.min(tableHeight - ballRadius, y));
+        };
+        
+        // Ряд 1 (1 шар)
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX, triangleY);
+            ballIndex++;
+        }
+        
+        // Ряд 2 (2 шара)
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing, triangleY - ballSpacing * 0.5);
+            ballIndex++;
+        }
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing, triangleY + ballSpacing * 0.5);
+            ballIndex++;
+        }
+        
+        // Ряд 3 (3 шара)
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 2, triangleY - ballSpacing);
+            ballIndex++;
+        }
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 2, triangleY);
+            ballIndex++;
+        }
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 2, triangleY + ballSpacing);
+            ballIndex++;
+        }
+        
+        // Ряд 4 (4 шара)
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 3, triangleY - ballSpacing * 1.5);
+            ballIndex++;
+        }
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 3, triangleY - ballSpacing * 0.5);
+            ballIndex++;
+        }
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 3, triangleY + ballSpacing * 0.5);
+            ballIndex++;
+        }
+        if (ballIndex < coloredBalls.length) {
+            setBallPosition(coloredBalls[ballIndex], triangleX + ballSpacing * 3, triangleY + ballSpacing * 1.5);
+            ballIndex++;
+        }
+        render();
         aimCue({ clientX: table.getBoundingClientRect().left, clientY: table.getBoundingClientRect().top + table.offsetHeight / 2 });
     }
 
     function toggleSound() {
         soundEnabled = !soundEnabled;
         const soundButton = document.getElementById('sound-toggle');
+        const soundButtonLandscape = document.getElementById('sound-toggle-landscape');
+        
         if (soundButton) {
             soundButton.textContent = soundEnabled ? '🔊' : '🔇';
             soundButton.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
+        }
+        
+        if (soundButtonLandscape) {
+            soundButtonLandscape.textContent = soundEnabled ? '🔊' : '🔇';
+            soundButtonLandscape.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
         }
         
         // Сохраняем настройку в localStorage
@@ -527,9 +844,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleMusic() {
         musicEnabled = !musicEnabled;
         const musicButton = document.getElementById('music-toggle');
+        const musicButtonLandscape = document.getElementById('music-toggle-landscape');
+        
         if (musicButton) {
             musicButton.textContent = musicEnabled ? '🎵' : '🔇';
             musicButton.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
+        }
+        
+        if (musicButtonLandscape) {
+            musicButtonLandscape.textContent = musicEnabled ? '🎵' : '🔇';
+            musicButtonLandscape.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
         }
         
         // Управляем фоновой музыкой
@@ -564,9 +888,16 @@ document.addEventListener('DOMContentLoaded', () => {
             soundEnabled = savedSound === 'true';
         }
         const soundButton = document.getElementById('sound-toggle');
+        const soundButtonLandscape = document.getElementById('sound-toggle-landscape');
+        
         if (soundButton) {
             soundButton.textContent = soundEnabled ? '🔊' : '🔇';
             soundButton.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
+        }
+        
+        if (soundButtonLandscape) {
+            soundButtonLandscape.textContent = soundEnabled ? '🔊' : '🔇';
+            soundButtonLandscape.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
         }
 
         // Загружаем настройки фоновой музыки
@@ -575,19 +906,43 @@ document.addEventListener('DOMContentLoaded', () => {
             musicEnabled = savedMusic === 'true';
         }
         const musicButton = document.getElementById('music-toggle');
+        const musicButtonLandscape = document.getElementById('music-toggle-landscape');
+        
         if (musicButton) {
             musicButton.textContent = musicEnabled ? '🎵' : '🔇';
             musicButton.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
         }
+        
+        if (musicButtonLandscape) {
+            musicButtonLandscape.textContent = musicEnabled ? '🎵' : '🔇';
+            musicButtonLandscape.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
+        }
     }
 
     // --- Слушатели событий ---
+    // Мышь
     gameArea.addEventListener('mousemove', aimCue);
     gameArea.addEventListener('mousedown', startDrag);
     gameArea.addEventListener('mouseup', endDrag);
-    gameArea.addEventListener('touchmove', e => { e.preventDefault(); aimCue(e); });
-    gameArea.addEventListener('touchstart', startDrag);
-    gameArea.addEventListener('touchend', e => { e.preventDefault(); endDrag(); });
+    
+    // Сенсорное управление
+    gameArea.addEventListener('touchmove', e => { 
+        e.preventDefault(); 
+        aimCue(e); 
+    }, { passive: false });
+    
+    gameArea.addEventListener('touchstart', e => { 
+        e.preventDefault(); 
+        startDrag(e); 
+    }, { passive: false });
+    
+    gameArea.addEventListener('touchend', e => { 
+        e.preventDefault(); 
+        endDrag(e); 
+    }, { passive: false });
+    
+    // Предотвращаем контекстное меню на сенсорных устройствах
+    gameArea.addEventListener('contextmenu', e => e.preventDefault());
 
     // Обработчик для новой кнопки сброса
     const resetButton = document.getElementById('reset-button');
@@ -604,6 +959,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpButton = document.getElementById('help-button');
     const closeHelp = document.getElementById('close-help');
     const helpModal = document.getElementById('help-modal');
+    
+    
+    // Ландшафтные мобильные кнопки
+    const soundToggleLandscape = document.getElementById('sound-toggle-landscape');
+    const musicToggleLandscape = document.getElementById('music-toggle-landscape');
+    const helpButtonLandscape = document.getElementById('help-button-landscape');
+    const resetButtonLandscape = document.getElementById('reset-button-landscape');
     
     if (soundToggle) {
         soundToggle.addEventListener('click', (e) => {
@@ -623,6 +985,36 @@ document.addEventListener('DOMContentLoaded', () => {
         helpButton.addEventListener('click', (e) => {
             e.stopPropagation();
             showHelp();
+        });
+    }
+    
+    
+    // Ландшафтные обработчики
+    if (soundToggleLandscape) {
+        soundToggleLandscape.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleSound();
+        });
+    }
+
+    if (musicToggleLandscape) {
+        musicToggleLandscape.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMusic();
+        });
+    }
+
+    if (helpButtonLandscape) {
+        helpButtonLandscape.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showHelp();
+        });
+    }
+    
+    if (resetButtonLandscape) {
+        resetButtonLandscape.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetGame();
         });
     }
 
@@ -658,6 +1050,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initPockets();
     resetGame();
     
+    // Проверяем ориентацию при загрузке
+    checkOrientation();
+    
+    // Применяем динамическое масштабирование
+    setTimeout(() => {
+        handleResize();
+        positionUIElements();
+    }, 100);
+    
+    // Добавляем обработчики событий
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleResize);
+    
     // Запускаем фоновую музыку после первого взаимодействия пользователя
     const startMusicOnFirstInteraction = () => {
         if (soundEnabled) {
@@ -669,5 +1074,5 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     document.addEventListener('mousedown', startMusicOnFirstInteraction);
-    document.addEventListener('touchstart', startMusicOnFirstInteraction);
+    document.addEventListener('touchstart', startMusicOnFirstInteraction, { passive: true });
 });

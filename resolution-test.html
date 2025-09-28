@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест разрешений - Kitt-Cues</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-frame {
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 10px;
+        }
+        .device-label {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .resolution-info {
+            background: #f3f4f6;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: #666;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6 text-center">📐 Тест разрешений экрана Kitt-Cues</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <h2 class="text-xl font-semibold mb-4">🎯 Проверка полного размещения в экране</h2>
+            <p class="text-gray-600 mb-4">
+                Все элементы должны полностью помещаться в экран без прокрутки на любом разрешении.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">✅ Что проверять:</h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• Нет горизонтальной прокрутки</li>
+                        <li>• Нет вертикальной прокрутки</li>
+                        <li>• Все элементы видны полностью</li>
+                        <li>• Кнопки управления доступны</li>
+                        <li>• Игровое поле масштабируется корректно</li>
+                        <li>• Кошки и шары видны полностью</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">🔧 Технические особенности:</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• Динамическое масштабирование стола</li>
+                        <li>• Адаптивные размеры элементов</li>
+                        <li>• Flexbox для центрирования</li>
+                        <li>• Overflow: hidden на body</li>
+                        <li>• Максимальные размеры 100vw/100vh</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-grid">
+            <!-- Очень маленькие экраны -->
+            <div class="test-frame">
+                <div class="device-label">📱 iPhone SE (375x667)</div>
+                <div class="resolution-info">Портретная ориентация</div>
+                <iframe src="index.html" width="375" height="667" class="w-full"></iframe>
+            </div>
+            
+            <div class="test-frame">
+                <div class="device-label">📱 iPhone SE (667x375)</div>
+                <div class="resolution-info">Ландшафтная ориентация</div>
+                <iframe src="index.html" width="667" height="375" class="w-full"></iframe>
+            </div>
+            
+            <!-- Стандартные мобильные -->
+            <div class="test-frame">
+                <div class="device-label">📱 iPhone 12 (390x844)</div>
+                <div class="resolution-info">Портретная ориентация</div>
+                <iframe src="index.html" width="390" height="844" class="w-full"></iframe>
+            </div>
+            
+            <div class="test-frame">
+                <div class="device-label">📱 iPhone 12 (844x390)</div>
+                <div class="resolution-info">Ландшафтная ориентация</div>
+                <iframe src="index.html" width="844" height="390" class="w-full"></iframe>
+            </div>
+            
+            <!-- Планшеты -->
+            <div class="test-frame">
+                <div class="device-label">📱 iPad (768x1024)</div>
+                <div class="resolution-info">Портретная ориентация</div>
+                <iframe src="index.html" width="768" height="1024" class="w-full"></iframe>
+            </div>
+            
+            <div class="test-frame">
+                <div class="device-label">📱 iPad (1024x768)</div>
+                <div class="resolution-info">Ландшафтная ориентация</div>
+                <iframe src="index.html" width="1024" height="768" class="w-full"></iframe>
+            </div>
+            
+            <!-- Десктопы -->
+            <div class="test-frame">
+                <div class="device-label">💻 Ноутбук (1366x768)</div>
+                <div class="resolution-info">Стандартное разрешение</div>
+                <iframe src="index.html" width="1366" height="768" class="w-full"></iframe>
+            </div>
+            
+            <div class="test-frame">
+                <div class="device-label">💻 Full HD (1920x1080)</div>
+                <div class="resolution-info">Высокое разрешение</div>
+                <iframe src="index.html" width="1920" height="1080" class="w-full"></iframe>
+            </div>
+            
+            <!-- Ультраширокие экраны -->
+            <div class="test-frame">
+                <div class="device-label">🖥️ Ультраширокий (2560x1440)</div>
+                <div class="resolution-info">4K разрешение</div>
+                <iframe src="index.html" width="2560" height="1440" class="w-full"></iframe>
+            </div>
+            
+            <!-- Очень маленькие экраны -->
+            <div class="test-frame">
+                <div class="device-label">📱 Старый телефон (320x568)</div>
+                <div class="resolution-info">Минимальное разрешение</div>
+                <iframe src="index.html" width="320" height="568" class="w-full"></iframe>
+            </div>
+        </div>
+        
+        <div class="mt-6 bg-yellow-50 p-4 rounded-lg">
+            <h3 class="font-semibold text-yellow-800 mb-2">⚠️ Важные проверки:</h3>
+            <ul class="text-sm text-yellow-700 space-y-1">
+                <li>• <strong>Нет прокрутки:</strong> ни горизонтальной, ни вертикальной</li>
+                <li>• <strong>Полная видимость:</strong> все элементы помещаются в экран</li>
+                <li>• <strong>Адаптивность:</strong> размеры элементов изменяются пропорционально</li>
+                <li>• <strong>Функциональность:</strong> все кнопки доступны и работают</li>
+                <li>• <strong>Центрирование:</strong> игра остается по центру экрана</li>
+            </ul>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <a href="index.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition inline-block">
+                🎮 Открыть игру в полном размере
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
+

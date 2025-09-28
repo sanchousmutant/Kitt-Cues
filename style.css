@@ -3,8 +3,64 @@
         body {
             font-family: 'Comfortaa', cursive;
             background-color: #3a2d27; /* Темно-коричневый фон, как в бильярдной */
-            overflow: hidden;
+            overflow: hidden; /* Полностью убираем прокрутку */
             touch-action: none; /* Отключаем действия по умолчанию для касаний */
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Гарантируем, что все помещается в экран */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Адаптивные размеры шаров */
+        .billiard-ball {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Увеличенные размеры для больших экранов */
+        @media (min-width: 640px) {
+            .billiard-ball {
+                width: 18px;
+                height: 18px;
+                box-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.4);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .billiard-ball {
+                width: 20px;
+                height: 20px;
+                box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .billiard-ball {
+                width: 22px;
+                height: 22px;
+                box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .billiard-ball {
+                width: 24px;
+                height: 24px;
+                box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            }
         }
 
         /* Анимация для хвоста кошки */
@@ -222,15 +278,6 @@
             pointer-events: none; /* Кий не должен мешать кликам */
         }
 
-        .billiard-ball {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-            transition: transform 0.1s ease-out;
-        }
-
         /* Модальное окно */
         .modal-overlay {
             backdrop-filter: blur(5px);
@@ -276,4 +323,195 @@
         
         .gradient-green {
             background: linear-gradient(135deg, #10b981, #047857);
+        }
+
+        /* Адаптивные улучшения для мобильных устройств */
+        @media (max-width: 640px) {
+            /* Уменьшаем анимации на мобильных для производительности */
+            .cat-container * {
+                animation-duration: 0.8s !important;
+            }
+            
+            /* Уменьшаем размер кошек на мобильных */
+            .cat-container {
+                transform: scale(0.5);
+            }
+            
+            /* Улучшаем читаемость текста */
+            .text-sm {
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+            }
+            
+            /* Оптимизируем тени для мобильных */
+            .shadow-lg {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+        }
+
+        /* Улучшения для планшетов */
+        @media (min-width: 640px) and (max-width: 1024px) {
+            /* Средние размеры элементов */
+            .cat-container {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Улучшения для больших экранов */
+        @media (min-width: 1024px) {
+            /* Полные размеры и эффекты */
+            .cat-container {
+                transform: scale(1);
+            }
+            
+            /* Улучшенные тени */
+            .enhanced-shadow {
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1);
+            }
+        }
+
+        /* Поддержка ландшафтной ориентации на мобильных */
+        @media (max-width: 640px) and (orientation: landscape) {
+            body {
+                padding: 0.25rem;
+            }
+            
+            #game-area {
+                height: 100% !important;
+                width: 100% !important;
+                max-height: none !important;
+            }
+            
+            /* Скрываем панель управления сверху в ландшафте */
+            .flex.justify-center.items-center.gap-1.mb-1.sm\\:hidden {
+                display: none !important;
+            }
+            
+            /* Скрываем счет сверху в ландшафте */
+            .mb-1.sm\\:hidden:has(#score-display-mobile) {
+                display: none !important;
+            }
+        }
+
+        /* Дополнительные стили для мобильных в портретной ориентации */
+        @media (max-width: 640px) and (orientation: portrait) {
+            #rotation-notice {
+                display: flex !important;
+            }
+            
+            /* Скрываем ландшафтные элементы управления */
+            .landscape-mobile-controls {
+                display: none !important;
+            }
+            
+            /* Оптимизация для портретной ориентации */
+            body {
+                overflow: hidden;
+            }
+            
+            #game-area {
+                height: 100% !important;
+                width: 100% !important;
+            }
+        }
+
+        /* Стили для ландшафтных элементов управления */
+        @media (max-width: 640px) and (orientation: landscape) {
+            .landscape-mobile-controls {
+                display: block !important;
+            }
+        }
+
+        /* Стили для уведомления о повороте телефона */
+        #rotation-notice {
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes rotate-phone {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-90deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .animate-pulse-custom {
+            animation: pulse 2s infinite;
+        }
+
+        .animate-rotate-phone {
+            animation: rotate-phone 3s infinite ease-in-out;
+        }
+
+        /* Скрытие уведомления при ландшафтной ориентации */
+        @media (max-width: 640px) and (orientation: landscape) {
+            #rotation-notice {
+                display: none !important;
+            }
+        }
+
+        /* Универсальные правила для всех размеров экрана */
+        #game-area {
+            max-width: 100vw;
+            max-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Адаптивные размеры для очень маленьких экранов */
+        @media (max-width: 360px) {
+            .billiard-ball {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .cat-container {
+                transform: scale(0.4);
+            }
+        }
+
+        /* Специальные стили для iPhone SE (375px) */
+        @media (max-width: 375px) {
+            .billiard-ball {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .cat-container {
+                transform: scale(0.3);
+            }
+            
+            /* Уменьшаем размер счета на маленьких экранах */
+            #score-display {
+                font-size: 0.875rem !important;
+                padding: 0.25rem 0.5rem !important;
+            }
+            
+            /* Уменьшаем размер кнопок */
+            button {
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* Адаптивные размеры для очень больших экранов */
+        @media (min-width: 1920px) {
+            .billiard-ball {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .cat-container {
+                transform: scale(1.2);
+            }
         }
