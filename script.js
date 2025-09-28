@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const HIT_POWER = 15;
     const PAW_HIT_POWER = 8;
     const CAT_COOLDOWN = 60; // 1 секунда (60 кадров)
-    const MEDIUM_SPEED = 5; // Средняя скорость для определения отскока от кота
 
     let balls = [];
     let cats = [];
@@ -62,25 +61,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playMeowSound() {
-        if (!audioContext || !soundEnabled) return;
+        if (!audioContext) return;
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        
-        // Создаем характерный звук мяукания с изменением частоты
-        oscillator.type = 'triangle';
-        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.1);
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.5);
-        
-        gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.4, audioContext.currentTime + 0.2);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
-        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
         oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.6);
+        oscillator.stop(audioContext.currentTime + 0.3);
     }
     // --- Инициализация ---
     function initCats() {
@@ -88,29 +80,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const catElements = document.querySelectorAll('.cat-container');
         const tableRect = table.getBoundingClientRect();
 
-        catElements.forEach((el, index) => {
+        catElements.forEach(el => {
             const catRect = el.getBoundingClientRect();
             const catCenterX = (catRect.left - tableRect.left) + catRect.width / 2;
             const catCenterY = (catRect.top - tableRect.top) + catRect.height / 2;
-            
-            // Ищем элемент лапки, если есть, иначе используем весь элемент кота
-            let pawElement = el.querySelector('.hitting-paw');
-            if (!pawElement) {
-                pawElement = el.querySelector('.cat-paw');
-            }
-            if (!pawElement) {
-                pawElement = el; // Если нет специальной лапки, используем весь контейнер
-            }
-            
             cats.push({
                 el: el,
-                pawEl: pawElement,
+                pawEl: el.querySelector('.hitting-paw'),
                 x: catCenterX,
                 y: catCenterY,
                 radius: Math.max(catRect.width, catRect.height) / 2 + 10,
-                cooldown: 0,
-                index: index // Добавляем индекс для отладки
+                cooldown: 0
             });
+        });
     }
 
     function initPockets() {
@@ -181,18 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.x += ball.vx;
             ball.y += ball.vy;
 
-            // Проверка на попадание в лузы (перед стенами)
-            let sunkThisFrame = false;
+            // Проверка на попадание в лузы (перед другими столкновениями)
             pockets.forEach(pocket => {
                 const dx = ball.x - pocket.x;
                 const dy = ball.y - pocket.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < pocket.radius) {
-                    sunkThisFrame = true;
+                if (distance < pocket.radius && !ball.sunk) {
                     ball.sunk = true;
                     ball.vx = 0;
                     ball.vy = 0;
                     ball.el.style.display = 'none';
+                    
                     if (ball.el.id !== 'cue-ball') {
                         score++;
                         const scoreDisplay = document.getElementById('score-display');
@@ -212,87 +193,57 @@ document.addEventListener('DOMContentLoaded', () => {
                             render();
                         }, 1000);
                     }
+                    return; // Выходим из обработки этого шара если он утонул
                 }
             });
 
-            // Столкновения со стенами (только если не утонул)
-            if (!sunkThisFrame) {
-                if ((ball.x - ball.radius < 0 && ball.vx < 0) || (ball.x + ball.radius > table.offsetWidth && ball.vx > 0)) {
-                    ball.vx *= -1;
-                    playWallHitSound();
-                    if (ball.x - ball.radius < 0) ball.x = ball.radius;
-                    if (ball.x + ball.radius > table.offsetWidth) ball.x = table.offsetWidth - ball.radius;
-                }
-                if ((ball.y - ball.radius < 0 && ball.vy < 0) || (ball.y + ball.radius > table.offsetHeight && ball.vy > 0)) {
-                    ball.vy *= -1;
-                    playWallHitSound();
-                    if (ball.y - ball.radius < 0) ball.y = ball.radius;
-                    if (ball.y + ball.radius > table.offsetHeight) ball.y = table.offsetHeight - ball.radius;
-                }
+            // Если шар утонул, не обрабатываем дальнейшие столкновения
+            if (ball.sunk) return;
+
+            // Столкновения со стенами
+            if ((ball.x - ball.radius < 0 && ball.vx < 0) || (ball.x + ball.radius > table.offsetWidth && ball.vx > 0)) {
+                ball.vx *= -1;
+                playWallHitSound();
+                if (ball.x - ball.radius < 0) ball.x = ball.radius;
+                if (ball.x + ball.radius > table.offsetWidth) ball.x = table.offsetWidth - ball.radius;
+            }
+            if ((ball.y - ball.radius < 0 && ball.vy < 0) || (ball.y + ball.radius > table.offsetHeight && ball.vy > 0)) {
+                ball.vy *= -1;
+                playWallHitSound();
+                if (ball.y - ball.radius < 0) ball.y = ball.radius;
+                if (ball.y + ball.radius > table.offsetHeight) ball.y = table.offsetHeight - ball.radius;
             }
 
             // Столкновения с кошками
-            cats.forEach((cat, catIndex) => {
-                if (cat.cooldown > 0) return;
+            cats.forEach(cat => {
+                if (cat.cooldown > 0 || ball.sunk) return;
                 const dx = ball.x - cat.x;
                 const dy = ball.y - cat.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < ball.radius + cat.radius) {
-                    // Вычисляем скорость шара
-                    const ballSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                    playMeowSound(); // Используем уже определенную функцию вместо playPawSound
+                    cat.cooldown = CAT_COOLDOWN;
                     
-                    // Рассчитываем направление от кота к шару (ВСЕГДА нужно для отделения)
-                    const angle = Math.atan2(dy, dx);
-                    const normalizedDx = Math.cos(angle);
-                    const normalizedDy = Math.sin(angle);
-                    
-                    // ВСЕГДА отодвигаем шар от кота перед любыми действиями
-                    const separation = ball.radius + cat.radius + 8;
-                    ball.x = cat.x + normalizedDx * separation;
-                    ball.y = cat.y + normalizedDy * separation;
-                    
-                    // Убеждаемся, что шар остается в границах стола
-                    ball.x = Math.max(ball.radius, Math.min(table.offsetWidth - ball.radius, ball.x));
-                    ball.y = Math.max(ball.radius, Math.min(table.offsetHeight - ball.radius, ball.y));
-                    
-                    if (ballSpeed > MEDIUM_SPEED) {
-                        // Быстрый шар - кот мяукает и отталкивает шар
-                        playMeowSound();
-                        cat.cooldown = CAT_COOLDOWN;
-                        
-                        // Анимация испуга кота
-                        const catElement = cat.el;
-                        catElement.classList.add('cat-scared');
-                        setTimeout(() => {
-                            catElement.classList.remove('cat-scared');
-                        }, 500);
-                        
-                        // Отталкиваем шар от кота с сохранением части энергии
-                        const bounceForce = ballSpeed * 0.8;
-                        ball.vx = normalizedDx * bounceForce;
-                        ball.vy = normalizedDy * bounceForce;
-                        
-                    } else {
-                        // Шар со скоростью ≤ средней - кот играет лапкой
-                        playPawSound();
-                        cat.cooldown = CAT_COOLDOWN;
-                        
-                        const pawElement = cat.pawEl || cat.el;
-                        pawElement.classList.add('swat-animation');
-                        setTimeout(() => {
-                            pawElement.classList.remove('swat-animation');
-                        }, 300);
+                    const pawElement = cat.pawEl || cat.el;
+                    pawElement.classList.add('swat-animation');
+                    setTimeout(() => {
+                        pawElement.classList.remove('swat-animation');
+                    }, 300);
 
-                        // Даем шару новую скорость в направлении от кота
-                        ball.vx = normalizedDx * PAW_HIT_POWER;
-                        ball.vy = normalizedDy * PAW_HIT_POWER;
-                    }
+                    const angle = Math.atan2(dy, dx);
+                    ball.vx = Math.cos(angle) * PAW_HIT_POWER;
+                    ball.vy = Math.sin(angle) * PAW_HIT_POWER;
+
+                    // Anti-sticking: move ball out of cat's radius
+                    const overlap = (ball.radius + cat.radius) - distance + 1;
+                    ball.x += Math.cos(angle) * overlap;
+                    ball.y += Math.sin(angle) * overlap;
                 }
             });
         });
 
-        // Столкновения шаров (только с несунkenными)
+        // Столкновения шаров (только с не утонувшими)
         for (let i = 0; i < balls.length; i++) {
             if (balls[i].sunk) continue;
             for (let j = i + 1; j < balls.length; j++) {
@@ -322,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ball2.vx = vx2 * cos - vy2 * sin;
                     ball2.vy = vy2 * cos + vx2 * sin;
 
-                    const overlap = (ball1.radius + ball2.radius) - distance + 0.1;
+                    const overlap = (ball1.radius + ball2.radius) - distance + 1;
                     const moveX = (overlap / 2) * cos;
                     const moveY = (overlap / 2) * sin;
                     ball1.x -= moveX;
@@ -338,16 +289,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function render() {
         balls.forEach(ball => {
-            ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
-            ball.el.style.left = '0px';
-            ball.el.style.top = '0px';
+            if (!ball.sunk) {
+                ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
+                ball.el.style.left = '0px';
+                ball.el.style.top = '0px';
+            }
         });
     }
 
     function gameLoop() {
         updatePhysics();
         render();
-        const allStopped = balls.every(b => b.vx === 0 && b.vy === 0);
+        const allStopped = balls.every(b => b.sunk || (b.vx === 0 && b.vy === 0));
         if (allStopped) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
