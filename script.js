@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const CAT_COOLDOWN = 60; // 1 секунда (60 кадров)
 
     if (window.innerWidth <= 640) { // isMobile check
-        FRICTION = 0.65; // ещё меньше инерции
-        MIN_VELOCITY = 0.1; // немного раньше считаем шар остановившимся
+        FRICTION = 0.7; // ещё меньше инерции
+        MIN_VELOCITY = 0.09; // немного раньше считаем шар остановившимся
         HIT_POWER = 7;
     }
 
