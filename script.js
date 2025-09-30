@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.getElementById('game-area');
     const table = document.getElementById('billiard-table');
     const cue = document.getElementById('cue');
+    const aimLine = document.getElementById('aim-line');
+    const powerIndicator = document.getElementById('power-indicator');
+    const powerFill = document.getElementById('power-fill');
     const ballElements = document.querySelectorAll('.billiard-ball');
     const pyramidContainer = document.getElementById('ball-pyramid');
     
@@ -103,6 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
             table.style.height = `${tableHeight}px`;
             table.style.left = `${borderWidth}px`;
             table.style.top = `${borderWidth}px`;
+            
+            // Динамическое масштабирование элементов пропорционально размеру стола
+            applyDynamicScaling(tableWidth, tableHeight);
         }
         
         // Переинициализируем элементы при изменении размера
@@ -114,6 +120,236 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             positionUIElements();
         }, 50);
+    }
+
+    // Функция для динамического масштабирования элементов
+    function applyDynamicScaling(tableWidth, tableHeight) {
+        // Базовые размеры стола для расчёта масштаба
+        const baseTableWidth = 600;
+        const baseTableHeight = 400;
+        
+        // Рассчитываем коэффициент масштабирования
+        const scaleFactorX = tableWidth / baseTableWidth;
+        const scaleFactorY = tableHeight / baseTableHeight;
+        const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+        
+        // Применяем масштабирование к котам
+        const cats = document.querySelectorAll('.cat-container');
+        cats.forEach(cat => {
+            let baseScale = 1.0;
+            
+            // Учитываем медиа-запросы для базового масштаба
+            if (window.innerWidth <= 280) {
+                baseScale = 0.1;
+            } else if (window.innerWidth <= 320) {
+                baseScale = 0.15;
+            } else if (window.innerWidth <= 375) {
+                baseScale = 0.2;
+            } else if (window.innerWidth <= 640) {
+                baseScale = 0.3;
+            } else if (window.innerWidth <= 1024) {
+                baseScale = 1.1;
+            }
+            
+            // Применяем дополнительное масштабирование на основе размера стола
+            const finalScale = baseScale * scaleFactor;
+            cat.style.transform = `scale(${Math.max(0.05, finalScale)})`;
+        });
+        
+        // Применяем масштабирование к шарам
+        const balls = document.querySelectorAll('.billiard-ball');
+        balls.forEach(ball => {
+            let baseSize = 16;
+            
+            // Учитываем медиа-запросы для базового размера
+            if (window.innerWidth <= 280) {
+                baseSize = 4;
+            } else if (window.innerWidth <= 320) {
+                baseSize = 5;
+            } else if (window.innerWidth <= 375) {
+                baseSize = 6;
+            } else if (window.innerWidth <= 640) {
+                baseSize = 10;
+            }
+            
+            const finalSize = Math.max(3, baseSize * scaleFactor);
+            ball.style.width = `${finalSize}px`;
+            ball.style.height = `${finalSize}px`;
+        });
+        
+        // Применяем масштабирование к лузам
+        const pockets = document.querySelectorAll('[data-pocket]');
+        pockets.forEach(pocket => {
+            let baseSize = 32; // Увеличили ещё больше (было 24px)
+            
+            // Учитываем медиа-запросы для базового размера, делаем лузы ещё крупнее
+            if (window.innerWidth <= 280) {
+                baseSize = 12; // Увеличили с 8px до 12px
+            } else if (window.innerWidth <= 320) {
+                baseSize = 14; // Увеличили с 10px до 14px
+            } else if (window.innerWidth <= 375) {
+                baseSize = 16; // Увеличили с 12px до 16px
+            } else if (window.innerWidth <= 640) {
+                baseSize = 20; // Увеличили с 16px до 20px
+            }
+            
+            // Применяем менее агрессивное масштабирование для луз
+            const pocketScaleFactor = Math.max(0.8, scaleFactor); // Увеличили минимум с 70% до 80%
+            const finalSize = Math.max(8, baseSize * pocketScaleFactor); // Увеличили минимум с 6px до 8px
+            pocket.style.width = `${finalSize}px`;
+            pocket.style.height = `${finalSize}px`;
+        });
+        
+        // Применяем масштабирование к кию
+        const cue = document.getElementById('cue');
+        if (cue) {
+            let baseHeight = 8;
+            let baseWidth = 40;
+            
+            // Учитываем медиа-запросы для базовых размеров кия
+            if (window.innerWidth <= 280) {
+                baseHeight = 1;
+                baseWidth = 10;
+            } else if (window.innerWidth <= 320) {
+                baseHeight = 1;
+                baseWidth = 15;
+            } else if (window.innerWidth <= 375) {
+                baseHeight = 1;
+                baseWidth = 20;
+            } else if (window.innerWidth <= 640) {
+                baseHeight = 1;
+                baseWidth = 25;
+            }
+            
+            const finalHeight = Math.max(1, baseHeight * scaleFactor);
+            const finalWidth = Math.max(5, baseWidth);
+            
+            cue.style.height = `${finalHeight}px`;
+            cue.style.width = `${finalWidth}%`;
+        }
+        
+        // Применяем масштабирование к кнопкам интерфейса
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            let baseFontSize = 16;
+            let basePaddingX = 16;
+            let basePaddingY = 8;
+            let baseMinWidth = 40;
+            let baseMinHeight = 40;
+            
+            // Учитываем медиа-запросы для базовых размеров кнопок
+            if (window.innerWidth <= 320) {
+                baseFontSize = 8;
+                basePaddingX = 4;
+                basePaddingY = 2;
+                baseMinWidth = 12;
+                baseMinHeight = 12;
+            } else if (window.innerWidth <= 375) {
+                baseFontSize = 10;
+                basePaddingX = 6;
+                basePaddingY = 3;
+                baseMinWidth = 16;
+                baseMinHeight = 16;
+            } else if (window.innerWidth <= 640) {
+                baseFontSize = 12;
+                basePaddingX = 8;
+                basePaddingY = 4;
+                baseMinWidth = 20;
+                baseMinHeight = 20;
+            }
+            
+            const finalFontSize = Math.max(6, baseFontSize * scaleFactor);
+            const finalPaddingX = Math.max(2, basePaddingX * scaleFactor);
+            const finalPaddingY = Math.max(1, basePaddingY * scaleFactor);
+            const finalMinWidth = Math.max(10, baseMinWidth * scaleFactor);
+            const finalMinHeight = Math.max(10, baseMinHeight * scaleFactor);
+            
+            // Применяем только если кнопка не является ландшафтной мобильной
+            if (!button.closest('.landscape-mobile-controls')) {
+                button.style.fontSize = `${finalFontSize}px`;
+                button.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
+                button.style.minWidth = `${finalMinWidth}px`;
+                button.style.minHeight = `${finalMinHeight}px`;
+            }
+        });
+        
+        // Применяем масштабирование к ландшафтным мобильным кнопкам отдельно
+        const landscapeButtons = document.querySelectorAll('.landscape-mobile-controls button');
+        landscapeButtons.forEach(button => {
+            let baseFontSize = 10;
+            let basePaddingX = 4;
+            let basePaddingY = 2;
+            let baseMinWidth = 16;
+            let baseMinHeight = 16;
+            
+            // Дополнительные корректировки для очень маленьких экранов
+            if (window.innerWidth <= 320) {
+                baseFontSize = 6;
+                basePaddingX = 2;
+                basePaddingY = 1;
+                baseMinWidth = 10;
+                baseMinHeight = 10;
+            }
+            
+            const finalFontSize = Math.max(4, baseFontSize * scaleFactor);
+            const finalPaddingX = Math.max(1, basePaddingX * scaleFactor);
+            const finalPaddingY = Math.max(1, basePaddingY * scaleFactor);
+            const finalMinWidth = Math.max(8, baseMinWidth * scaleFactor);
+            const finalMinHeight = Math.max(8, baseMinHeight * scaleFactor);
+            
+            button.style.fontSize = `${finalFontSize}px`;
+            button.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
+            button.style.minWidth = `${finalMinWidth}px`;
+            button.style.minHeight = `${finalMinHeight}px`;
+        });
+        
+        // Применяем масштабирование к счету
+        const scoreElements = [
+            { selector: '#score-display', element: document.querySelector('#score-display') },
+            { selector: '#score-display-landscape', element: document.querySelector('#score-display-landscape') }
+        ];
+        
+        scoreElements.forEach(({ selector, element }) => {
+            if (element) {
+                let baseFontSize = 18;
+                let basePaddingX = 32;
+                let basePaddingY = 16;
+                
+                // Учитываем медиа-запросы для базовых размеров счета
+                if (window.innerWidth <= 320) {
+                    baseFontSize = 8;
+                    basePaddingX = 8;
+                    basePaddingY = 4;
+                } else if (window.innerWidth <= 375) {
+                    baseFontSize = 10;
+                    basePaddingX = 12;
+                    basePaddingY = 6;
+                } else if (window.innerWidth <= 640) {
+                    baseFontSize = 14;
+                    basePaddingX = 16;
+                    basePaddingY = 8;
+                } else if (selector.includes('landscape')) {
+                    // Для ландшафтного счета базовые размеры меньше
+                    baseFontSize = 12;
+                    basePaddingX = 12;
+                    basePaddingY = 4;
+                }
+                
+                const finalFontSize = Math.max(8, baseFontSize * scaleFactor);
+                const finalPaddingX = Math.max(4, basePaddingX * scaleFactor);
+                const finalPaddingY = Math.max(2, basePaddingY * scaleFactor);
+                
+                element.style.fontSize = `${finalFontSize}px`;
+                element.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
+                
+                // Также масштабируем минимальную ширину если она задана
+                if (selector === '#score-display') {
+                    const baseMinWidth = 80;
+                    const finalMinWidth = Math.max(40, baseMinWidth * scaleFactor);
+                    element.style.minWidth = `${finalMinWidth}px`;
+                }
+            }
+        });
     }
 
     // --- Позиционирование UI элементов ---
@@ -129,13 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Вычисляем масштабный коэффициент на основе размера стола
         const baseTableWidth = 600; // Базовый размер стола для расчета масштаба
         const scaleFactor = Math.min(tableRect.width / baseTableWidth, 1.5); // Ограничиваем масштаб
-        const margin = Math.max(20, 40 * scaleFactor); // Адаптивный отступ
-        
-        // Дополнительный отступ для маленьких экранов (iPhone SE)
-        const isSmallScreen = window.innerWidth <= 375;
-        const extraMargin = isSmallScreen ? 100 : 0;
-        
-        // Левые кнопки
+        const margin = Math.max(10, 20 * scaleFactor); // Адаптивный отступ
+
+        // Левые кнопки за пределами стола (только для больших экранов)
         const soundToggle = document.querySelector('#sound-toggle');
         if (soundToggle && soundToggle.parentElement) {
             const leftButtons = soundToggle.parentElement;
@@ -143,51 +375,33 @@ document.addEventListener('DOMContentLoaded', () => {
             leftButtons.style.left = `${Math.max(10, leftX)}px`;
             leftButtons.style.right = 'auto';
         }
-        
-        // Правая кнопка
+
+        // Calculate a common left offset for the right-side elements
+        const tableRightEdge = (gameAreaRect.width - tableContainer.offsetWidth) / 2 + tableContainer.offsetWidth;
+        const commonLeftOffset = tableRightEdge + margin;
+
+        // Правые кнопки
         const resetButton = document.querySelector('#reset-button');
         if (resetButton && resetButton.parentElement) {
             const rightButton = resetButton.parentElement;
-            const rightX = gameAreaRect.width - (tableRect.right - gameAreaRect.left) - rightButton.offsetWidth - margin;
-            rightButton.style.right = `${Math.max(10, rightX)}px`;
-            rightButton.style.left = 'auto';
-        }
-        
-        // Счет в правом верхнем углу
-        const scoreDisplay = document.querySelector('#score-display');
-        if (scoreDisplay && scoreDisplay.parentElement) {
-            const topRightScore = scoreDisplay.parentElement;
-            const topY = tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin;
-            const rightX = gameAreaRect.width - (tableRect.right - gameAreaRect.left) - topRightScore.offsetWidth - margin;
-            
-            // Проверяем, не перекрывает ли счет стол
-            const minTopY = Math.max(10, topY);
-            const minRightX = Math.max(10, rightX);
-            
-            // Если счет может перекрыть стол, перемещаем его выше
-            if (minTopY < tableRect.top - gameAreaRect.top + 10) {
-                topRightScore.style.top = `${tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin}px`;
-            } else {
-                topRightScore.style.top = `${minTopY}px`;
+            rightButton.style.left = `${commonLeftOffset}px`;
+            rightButton.style.right = 'auto';
+
+            // Счет в правом верхнем углу
+            const scoreDisplay = document.querySelector('#score-display');
+            if (scoreDisplay && scoreDisplay.parentElement) {
+                const topRightScore = scoreDisplay.parentElement;
+                const topY = tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin;
+
+                // Position top
+                topRightScore.style.top = `${Math.max(10, topY)}px`; // Ensure it's not too close to the top edge
+
+                // Position left to align with reset button
+                topRightScore.style.left = `${commonLeftOffset}px`;
+                topRightScore.style.right = 'auto';
+                
+                topRightScore.style.bottom = 'auto';
             }
-            
-            // Сдвигаем счет правее, чтобы он не перекрывал стол
-            const extraRightMargin = Math.max(0, (tableRect.right - gameAreaRect.left) - (gameAreaRect.width - minRightX - topRightScore.offsetWidth));
-            const finalRightX = minRightX + extraRightMargin + extraMargin;
-            
-            // Проверяем, не выходит ли счет за левую границу стола
-            const scoreLeftEdge = gameAreaRect.width - finalRightX - topRightScore.offsetWidth;
-            const minDistanceFromTable = isSmallScreen ? 50 : 20;
-            if (scoreLeftEdge < tableRect.left - gameAreaRect.left + minDistanceFromTable) {
-                // Если счет перекрывает стол слева, сдвигаем его еще правее
-                const safeRightX = gameAreaRect.width - (tableRect.left - gameAreaRect.left) - topRightScore.offsetWidth - minDistanceFromTable;
-                topRightScore.style.right = `${Math.max(10, safeRightX)}px`;
-            } else {
-                topRightScore.style.right = `${finalRightX}px`;
-            }
-            
-            topRightScore.style.bottom = 'auto';
-            topRightScore.style.left = 'auto';
         }
         
         // Мобильные элементы в ландшафтной ориентации
@@ -348,7 +562,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playMeowSound() {
-        if (!audioContext) return;
+        // Добавляем диагностику для отладки
+        console.log('playMeowSound called - soundEnabled:', soundEnabled, 'audioContext:', !!audioContext);
+        
+        if (!audioContext || !soundEnabled) return;
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         oscillator.type = 'square';
@@ -372,13 +589,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const catCenterX = (catRect.left - tableRect.left) + catRect.width / 2;
             const catCenterY = (catRect.top - tableRect.top) + catRect.height / 2;
             
-            // Увеличиваем радиус для маленького кота для лучшего взаимодействия
-            let radius = Math.max(catRect.width, catRect.height) / 2 + 10;
-            if (el.classList.contains('cat-small')) {
-                radius = Math.max(catRect.width, catRect.height) / 2 + 25; // Значительно больший радиус для маленького кота
-            }
-            
-            cats.push({
+                            // Увеличиваем радиус для маленького кота для лучшего взаимодействия
+                            let radius = Math.max(catRect.width, catRect.height) / 2;
+                            if (el.classList.contains('cat-small')) {
+                                radius = Math.max(catRect.width, catRect.height) / 2; // Значительно больший радиус для маленького кота
+                            }            cats.push({
                 el: el,
                 pawEl: el.querySelector('.hitting-paw'),
                 x: catCenterX,
@@ -397,10 +612,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const pocketRect = el.getBoundingClientRect();
             const pocketX = (pocketRect.left - tableRect.left) + pocketRect.width / 2;
             const pocketY = (pocketRect.top - tableRect.top) + pocketRect.height / 2;
+            
+            // Динамически рассчитываем радиус лузы на основе её текущего размера
+            const pocketSize = Math.max(el.offsetWidth, el.offsetHeight);
+            const pocketRadius = Math.max(15, pocketSize * 1.4); // Увеличили с 12px до 15px минимум, с 1.2 до 1.4 коэффициент
+            
             pockets.push({
                 x: pocketX,
                 y: pocketY,
-                radius: 18 // Slightly larger than ball for easier sinking
+                radius: pocketRadius
             });
         });
     }
@@ -659,6 +879,50 @@ document.addEventListener('DOMContentLoaded', () => {
         cue.style.left = `${cueX}px`;
         cue.style.top = `${cueY}px`;
         cue.style.transform = `rotate(${degrees}deg)`;
+
+        // Показываем линию прицеливания
+        updateAimLine(cueBallObj.x, cueBallObj.y, angle);
+    }
+
+    function updateAimLine(startX, startY, angle) {
+        if (!aimLine) return;
+        
+        const lineLength = 150; // Длина линии прицеливания
+        const endX = startX + Math.cos(angle) * lineLength;
+        const endY = startY + Math.sin(angle) * lineLength;
+        
+        // Позиционируем линию от битка в направлении удара
+        aimLine.style.left = `${startX}px`;
+        aimLine.style.top = `${startY - 1}px`;
+        aimLine.style.width = `${lineLength}px`;
+        aimLine.style.transform = `rotate(${angle * (180 / Math.PI)}deg)`;
+        aimLine.style.transformOrigin = 'left center';
+        
+        // Показываем линию только при перетаскивании
+        if (isDragging) {
+            aimLine.classList.add('visible');
+        }
+    }
+
+    function updatePowerIndicator(power) {
+        if (!powerIndicator || !powerFill) return;
+        
+        const maxPower = 25;
+        const powerPercent = Math.min((power / maxPower) * 100, 100);
+        
+        powerFill.style.width = `${powerPercent}%`;
+        
+        // Показываем индикатор только при перетаскивании
+        if (isDragging && power > 0) {
+            powerIndicator.classList.add('visible');
+            
+            // Позиционируем индикатор рядом с битком
+            const cueBallObj = balls.find(b => b.el.id === 'cue-ball');
+            if (cueBallObj) {
+                powerIndicator.style.left = `${cueBallObj.x - 50}px`;
+                powerIndicator.style.top = `${cueBallObj.y - 30}px`;
+            }
+        }
     }
 
     function startDrag(e) {
@@ -686,6 +950,10 @@ document.addEventListener('DOMContentLoaded', () => {
             dragStartX = clientX - tableRect.left;
             dragStartY = clientY - tableRect.top;
             aimCue(e);
+            
+            // Показываем визуальные помощники
+            if (aimLine) aimLine.classList.add('visible');
+            if (powerIndicator) powerIndicator.classList.add('visible');
         }
     }
 
@@ -695,6 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Проверяем, не кликнули ли по кнопке
         if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
             isDragging = false;
+            hideVisualHelpers();
             return;
         }
         
@@ -706,11 +975,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e && e.touches && e.touches.length > 0) {
             clientX = e.touches[0].clientX;
             clientY = e.touches[0].clientY;
+        } else if (e && e.changedTouches && e.changedTouches.length > 0) {
+            // Для touchend используем changedTouches
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
         } else if (e) {
             clientX = e.clientX;
             clientY = e.clientY;
         } else {
-            // Если событие не передано (например, при touchend), используем последние известные координаты
+            // Если событие не передано, используем последние известные координаты
             clientX = dragStartX + tableRect.left;
             clientY = dragStartY + tableRect.top;
         }
@@ -720,7 +993,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const dragDistance = Math.sqrt((dragEndX - dragStartX)**2 + (dragEndY - dragStartY)**2);
         let power = Math.min(dragDistance / 10, 25); // Max power 25
         if (dragDistance < 10) power = HIT_POWER; // Min power for clicks/taps
+        
+        // Скрываем визуальные помощники
+        hideVisualHelpers();
+        
         hitBall(power);
+    }
+
+    function hideVisualHelpers() {
+        if (aimLine) aimLine.classList.remove('visible');
+        if (powerIndicator) powerIndicator.classList.remove('visible');
     }
 
     function hitBall(power = HIT_POWER) {
@@ -731,6 +1013,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!cueBallObj) return;
 
         playHitSound();
+
+        // Вибрация на сенсорных устройствах (если поддерживается)
+        if (navigator.vibrate && isMobile) {
+            const vibrationIntensity = Math.min(power * 2, 30); // Интенсивность вибрации зависит от силы
+            navigator.vibrate(vibrationIntensity);
+        }
 
         // Придаем скорость битку с учетом силы
         cueBallObj.vx = Math.cos(cueAngle) * power;
@@ -857,12 +1145,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleSound() {
         soundEnabled = !soundEnabled;
+        console.log('Sound toggled - soundEnabled is now:', soundEnabled); // Диагностика
+        
         const soundButton = document.getElementById('sound-toggle');
         const soundButtonLandscape = document.getElementById('sound-toggle-landscape');
         
         if (soundButton) {
             soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-            soundButton.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
+            soundButton.title = soundEnabled ? 'Отключить звуковые эффекты (мяуканье, удары)' : 'Включить звуковые эффекты (мяуканье, удары)';
         }
         
         if (soundButtonLandscape) {
@@ -904,6 +1194,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const helpModal = document.getElementById('help-modal');
         if (helpModal) {
             helpModal.classList.remove('hidden');
+            // Предотвращаем скроллинг фона на мобильных
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'auto';
+            
+            // Фокусируемся на скроллируемом контенте для лучшей доступности
+            const scrollableContent = helpModal.querySelector('.overflow-y-auto');
+            if (scrollableContent) {
+                scrollableContent.scrollTop = 0; // Сбрасываем позицию скролла
+            }
         }
     }
 
@@ -911,6 +1210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const helpModal = document.getElementById('help-modal');
         if (helpModal) {
             helpModal.classList.add('hidden');
+            // Восстанавливаем скроллинг фона
+            document.body.style.overflow = '';
+            document.body.style.touchAction = 'none';
         }
     }
 
@@ -925,7 +1227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (soundButton) {
             soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-            soundButton.title = soundEnabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
+            soundButton.title = soundEnabled ? 'Отключить звуковые эффекты (мяуканье, удары)' : 'Включить звуковые эффекты (мяуканье, удары)';
         }
         
         if (soundButtonLandscape) {
@@ -954,19 +1256,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Слушатели событий ---
     // Мышь
-    gameArea.addEventListener('mousemove', aimCue);
+    gameArea.addEventListener('mousemove', e => {
+        aimCue(e);
+        
+        // Обновляем показатель силы при перетаскивании мышью
+        if (isDragging) {
+            const tableRect = table.getBoundingClientRect();
+            const currentX = e.clientX - tableRect.left;
+            const currentY = e.clientY - tableRect.top;
+            const distance = Math.sqrt((currentX - dragStartX)**2 + (currentY - dragStartY)**2);
+            const power = Math.min(distance / 10, 25);
+            updatePowerIndicator(power);
+        }
+    });
     gameArea.addEventListener('mousedown', startDrag);
-    gameArea.addEventListener('mouseup', endDrag);
+    window.addEventListener('mouseup', endDrag);
     
     // Сенсорное управление
     gameArea.addEventListener('touchmove', e => { 
+        if (!document.getElementById('help-modal').classList.contains('hidden')) return;
         e.preventDefault(); 
         if (e.touches && e.touches.length > 0) {
-            aimCue(e); 
+            aimCue(e);
+            
+            // Обновляем показатель силы при перетаскивании
+            if (isDragging) {
+                const tableRect = table.getBoundingClientRect();
+                const currentX = e.touches[0].clientX - tableRect.left;
+                const currentY = e.touches[0].clientY - tableRect.top;
+                const distance = Math.sqrt((currentX - dragStartX)**2 + (currentY - dragStartY)**2);
+                const power = Math.min(distance / 10, 25);
+                updatePowerIndicator(power);
+            }
         }
     }, { passive: false });
     
     gameArea.addEventListener('touchstart', e => { 
+        if (!document.getElementById('help-modal').classList.contains('hidden')) return;
         e.preventDefault(); 
         if (e.touches && e.touches.length > 0) {
             startDrag(e); 
@@ -1031,9 +1357,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideHelp();
             }
         });
+        
+        // Предотвращаем закрытие при клике на содержимое
+        const modalContent = helpModal.querySelector('.bg-white');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+            
+            // Обработка сенсорных событий для предотвращения конфликтов
+            modalContent.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+            });
+            
+            modalContent.addEventListener('touchmove', (e) => {
+                // Разрешаем скроллинг только внутри скроллируемой области
+                const scrollableElement = e.target.closest('.overflow-y-auto');
+                if (!scrollableElement) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
     }
 
-    // Поддержка клавиатуры для модального окна
+    // Поддержка клавиатуры для модального окна и управления
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             hideHelp();
@@ -1041,8 +1388,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'h' || e.key === 'H') {
             showHelp();
         }
+        if (e.key === 's' || e.key === 'S') {
+            toggleSound(); // Звуковые эффекты (мяуканье, удары)
+        }
         if (e.key === 'm' || e.key === 'M') {
-            toggleSound();
+            toggleMusic(); // Фоновая музыка
         }
     });
 
@@ -1051,6 +1401,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initCats();
     initPockets();
     resetGame();
+    
+    // Добавляем класс для динамического масштабирования
+    if (gameArea) {
+        gameArea.classList.add('dynamic-scaling');
+    }
     
     // Проверяем ориентацию при загрузке
     checkOrientation();

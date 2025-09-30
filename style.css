@@ -5,6 +5,7 @@
             background-color: #3a2d27; /* Темно-коричневый фон, как в бильярдной */
             overflow: hidden; /* Полностью убираем прокрутку */
             touch-action: none; /* Отключаем действия по умолчанию для касаний */
+            user-select: none; /* Запрещаем выделение текста */
             margin: 0;
             padding: 0;
             width: 100vw;
@@ -278,9 +279,200 @@
             pointer-events: none; /* Кий не должен мешать кликам */
         }
 
+        /* Динамическое масштабирование элементов */
+        .dynamic-scaling .cat-container {
+            transition: transform 0.3s ease-out;
+        }
+        
+        .dynamic-scaling .billiard-ball {
+            transition: width 0.3s ease-out, height 0.3s ease-out;
+        }
+        
+        .dynamic-scaling [data-pocket] {
+            transition: width 0.3s ease-out, height 0.3s ease-out;
+        }
+        
+        .dynamic-scaling #cue {
+            transition: transform 0.1s ease-out, height 0.3s ease-out, width 0.3s ease-out;
+        }
+        
+        .dynamic-scaling button {
+            transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out, min-height 0.3s ease-out;
+        }
+        
+        .dynamic-scaling .landscape-mobile-controls button {
+            transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out, min-height 0.3s ease-out;
+        }
+        
+        .dynamic-scaling #score-display,
+        .dynamic-scaling #score-display-landscape {
+            transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out;
+        }
+
+        /* Индикатор силы удара */
+        #power-indicator {
+            position: absolute;
+            width: 100px;
+            height: 6px;
+            background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+            border-radius: 3px;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #power-indicator.visible {
+            opacity: 0.9;
+        }
+
+        #power-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s ease-out;
+        }
+
+        /* Линия прицеливания */
+        #aim-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 5;
+            border-radius: 1px;
+            pointer-events: none;
+        }
+
+        #aim-line.visible {
+            opacity: 0.7;
+        }
+
+        /* Улучшенные стили для сенсорного управления */
+        @media (max-width: 640px) {
+            #power-indicator {
+                width: 80px;
+                height: 8px;
+            }
+            
+            #aim-line {
+                height: 3px;
+            }
+            
+            /* Увеличиваем область касания для битка */
+            #cue-ball {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
+            }
+        }
+
         /* Модальное окно */
         .modal-overlay {
             backdrop-filter: blur(5px);
+        }
+
+        /* Улучшения для модального окна помощи */
+        #help-modal {
+            touch-action: auto; /* Более совместимый вариант */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            overflow: hidden; /* Предотвращаем скролл фона */
+        }
+
+        #help-modal .bg-white {
+            max-height: 90vh;
+            overflow: hidden; /* Скрываем переполнение контейнера */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Стили для скроллируемого контента */
+        #help-modal .overflow-y-auto {
+            -webkit-overflow-scrolling: touch; /* Плавный скроллинг на iOS */
+            scrollbar-width: thin; /* Тонкий скроллбар на Firefox */
+            scrollbar-color: #cbd5e1 #f1f5f9;
+            touch-action: pan-y; /* Разрешаем только вертикальный скролл */
+            overscroll-behavior: contain; /* Предотвращаем скролл родительских элементов */
+            flex: 1; /* Занимаем доступное пространство */
+            min-height: 0; /* Позволяем flex-элементу уменьшаться */
+        }
+
+        /* Дополнительные стили для iOS */
+        @supports (-webkit-overflow-scrolling: touch) {
+            #help-modal .overflow-y-auto {
+                -webkit-overflow-scrolling: touch;
+                transform: translateZ(0); /* Форсируем аппаратное ускорение */
+            }
+        }
+
+        /* Стили скроллбара для Webkit браузеров */
+        #help-modal .overflow-y-auto::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #help-modal .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        #help-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        #help-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Дополнительные отступы для контента */
+        #help-modal .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+
+        #help-modal .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+
+        /* Стили для цветных блоков информации */
+        #help-modal .bg-blue-50 {
+            background-color: #eff6ff;
+        }
+
+        #help-modal .border-blue-400 {
+            border-color: #60a5fa;
+        }
+
+        #help-modal .bg-green-50 {
+            background-color: #f0fdf4;
+        }
+
+        #help-modal .border-green-400 {
+            border-color: #4ade80;
+        }
+
+        #help-modal .bg-yellow-50 {
+            background-color: #fefce8;
+        }
+
+        #help-modal .border-yellow-400 {
+            border-color: #facc15;
+        }
+
+        #help-modal .bg-purple-50 {
+            background-color: #faf5ff;
+        }
+
+        #help-modal .border-purple-400 {
+            border-color: #c084fc;
+        }
+
+        #help-modal .text-blue-600 {
+            color: #2563eb;
         }
 
         /* Анимации для UI элементов */
@@ -332,9 +524,23 @@
                 animation-duration: 0.8s !important;
             }
             
-            /* Уменьшаем размер кошек на мобильных */
+            /* Значительно уменьшаем размер кошек на мобильных */
             .cat-container {
-                transform: scale(0.5);
+                transform: scale(0.3);
+            }
+            
+            /* Отключаем некоторые анимации для лучшей производительности */
+            .cat-tail, .cat-paw {
+                animation: none !important;
+            }
+            
+            /* Оставляем только основные анимации */
+            .cat-head {
+                animation: gentle-breathing 4s infinite ease-in-out !important;
+            }
+            
+            .cat-eye {
+                animation: blink 5s infinite !important;
             }
             
             /* Улучшаем читаемость текста */
@@ -346,6 +552,37 @@
             /* Оптимизируем тени для мобильных */
             .shadow-lg {
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            
+            /* Дополнительные оптимизации для мобильных */
+            .billiard-ball {
+                width: 10px !important;
+                height: 10px !important;
+            }
+            
+            /* Уменьшаем размер кия на мобильных */
+            #cue {
+                height: 1px !important;
+                width: 25% !important;
+            }
+            
+            /* Увеличиваем размер луз для мобильных */
+            [data-pocket] {
+                width: 16px !important;
+                height: 16px !important;
+            }
+            
+            /* Очень маленькие кнопки для ландшафтного режима */
+            .landscape-mobile-controls button {
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.5rem !important;
+                min-width: 16px !important;
+                min-height: 16px !important;
+            }
+            
+            .landscape-mobile-controls #score-display-landscape {
+                font-size: 0.5rem !important;
+                padding: 0.25rem 0.5rem !important;
             }
         }
 
@@ -380,6 +617,29 @@
                 height: 100% !important;
                 width: 100% !important;
                 max-height: none !important;
+            }
+            
+            /* Ещё больше уменьшаем коты в ландшафтном режиме */
+            .cat-container {
+                transform: scale(0.25) !important;
+            }
+            
+            /* Уменьшаем размер шаров в ландшафтном режиме */
+            .billiard-ball {
+                width: 8px !important;
+                height: 8px !important;
+            }
+            
+            /* Уменьшаем размер кия в ландшафтном режиме */
+            #cue {
+                height: 1px !important;
+                width: 20% !important;
+            }
+            
+            /* Увеличиваем лузы в ландшафтном режиме */
+            [data-pocket] {
+                width: 14px !important;
+                height: 14px !important;
             }
             
             /* Скрываем панель управления сверху в ландшафте */
@@ -471,24 +731,24 @@
         /* Адаптивные размеры для очень маленьких экранов */
         @media (max-width: 360px) {
             .billiard-ball {
-                width: 14px;
-                height: 14px;
+                width: 8px;
+                height: 8px;
             }
             
             .cat-container {
-                transform: scale(0.4);
+                transform: scale(0.2);
             }
         }
 
         /* Специальные стили для iPhone SE (375px) */
         @media (max-width: 375px) {
             .billiard-ball {
-                width: 8px !important;
-                height: 8px !important;
+                width: 6px !important;
+                height: 6px !important;
             }
             
             .cat-container {
-                transform: scale(0.5) !important;
+                transform: scale(0.2) !important;
             }
             
             /* Уменьшаем размер счета на маленьких экранах */
@@ -502,8 +762,34 @@
             button {
                 padding: 0.125rem 0.25rem !important;
                 font-size: 0.5rem !important;
-                min-width: 24px !important;
-                min-height: 24px !important;
+                min-width: 16px !important;
+                min-height: 16px !important;
+            }
+            
+            /* Уменьшаем размер ландшафтных кнопок управления */
+            .landscape-mobile-controls button {
+                padding: 0.1rem 0.15rem !important;
+                font-size: 0.35rem !important;
+                min-width: 14px !important;
+                min-height: 14px !important;
+            }
+            
+            /* Уменьшаем счет для ландшафтного режима */
+            #score-display-landscape {
+                font-size: 0.4rem !important;
+                padding: 0.1rem 0.15rem !important;
+            }
+            
+            /* Увеличиваем размер луз для маленьких экранов */
+            [data-pocket] {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            
+            /* Уменьшаем размер кия на мобильных */
+            #cue {
+                height: 1px !important;
+                width: 20% !important;
             }
         }
 
@@ -516,5 +802,67 @@
             
             .cat-container {
                 transform: scale(1.2);
+            }
+        }
+
+        /* Дополнительные улучшения для очень маленьких смартфонов */
+        @media (max-width: 320px) {
+            .cat-container {
+                transform: scale(0.15) !important;
+            }
+            
+            .billiard-ball {
+                width: 5px !important;
+                height: 5px !important;
+            }
+            
+            button {
+                padding: 0.05rem 0.1rem !important;
+                font-size: 0.35rem !important;
+                min-width: 12px !important;
+                min-height: 12px !important;
+            }
+            
+            .landscape-mobile-controls button {
+                padding: 0.05rem 0.1rem !important;
+                font-size: 0.3rem !important;
+                min-width: 10px !important;
+                min-height: 10px !important;
+            }
+            
+            /* Увеличиваем лузы для очень маленьких экранов */
+            [data-pocket] {
+                width: 12px !important;
+                height: 12px !important;
+            }
+            
+            /* Ещё более короткий кий */
+            #cue {
+                height: 1px !important;
+                width: 15% !important;
+            }
+        }
+
+        /* Улучшения для очень узких экранов */
+        @media (max-width: 280px) {
+            .cat-container {
+                transform: scale(0.1) !important;
+            }
+            
+            .billiard-ball {
+                width: 4px !important;
+                height: 4px !important;
+            }
+            
+            /* Увеличиваем лузы для самых маленьких экранов */
+            [data-pocket] {
+                width: 10px !important;
+                height: 10px !important;
+            }
+            
+            /* Минимальный размер кия */
+            #cue {
+                height: 1px !important;
+                width: 10% !important;
             }
         }
