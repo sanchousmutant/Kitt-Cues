@@ -46,6 +46,33 @@ document.addEventListener('DOMContentLoaded', () => {
         return current + diff * alpha;
     }
 
+    // --- Полноэкранный режим ---
+    function isFullscreenActive() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+    }
+
+    function enterFullscreen() {
+        const el = document.documentElement;
+        if (el.requestFullscreen) return el.requestFullscreen().catch(() => {});
+        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    }
+
+    function exitFullscreen() {
+        if (document.exitFullscreen) return document.exitFullscreen().catch(() => {});
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    }
+
+    function maybeAttemptFullscreen() {
+        // Пытаемся открыть на весь экран в ландшафте на мобильных
+        if (isMobile && !isPortrait && !isFullscreenActive()) {
+            enterFullscreen();
+        }
+        // В портрете выходим из полного экрана
+        if (isMobile && isPortrait && isFullscreenActive()) {
+            exitFullscreen();
+        }
+    }
+
     // --- Определение ориентации и управление уведомлением ---
     function checkOrientation() {
         isMobile = window.innerWidth <= 640;
@@ -148,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
             resetGame();
             didInitialReset = true;
         }
+        // Попытка перейти в полноэкранный режим при смене ориентации/размеров
+        maybeAttemptFullscreen();
     };
     const debouncedRecomputeLayout = debounce(recomputeLayout, 100);
 
@@ -1583,6 +1612,8 @@ document.addEventListener('DOMContentLoaded', () => {
             initAudio();
             startBackgroundMusic();
         }
+        // Разрешаем попытку входа в fullscreen после первого взаимодействия
+        maybeAttemptFullscreen();
         // Удаляем обработчики, чтобы избежать повторного запуска
         document.removeEventListener('mousedown', startMusicOnFirstInteraction);
         document.removeEventListener('touchstart', startMusicOnFirstInteraction);
