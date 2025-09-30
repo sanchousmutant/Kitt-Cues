@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.innerWidth <= 640) { // isMobile check
         FRICTION = 0.7; // ещё меньше инерции
-        MIN_VELOCITY = 0.1; // немного раньше считаем шар остановившимся
+        MIN_VELOCITY = 0.07; // немного раньше считаем шар остановившимся
         HIT_POWER = 7;
     }
 
