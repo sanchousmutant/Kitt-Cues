@@ -8,11 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const ballElements = document.querySelectorAll('.billiard-ball');
     const pyramidContainer = document.getElementById('ball-pyramid');
     
-    const FRICTION = 0.985;
-    const MIN_VELOCITY = 0.05;
-    const HIT_POWER = 15;
-    const PAW_HIT_POWER = 8;
+    let FRICTION = 0.985;
+    let MIN_VELOCITY = 0.05;
+    let HIT_POWER = 15;
+    const PAW_HIT_POWER = 4;
     const CAT_COOLDOWN = 60; // 1 секунда (60 кадров)
+
+    if (window.innerWidth <= 640) { // isMobile check
+        FRICTION = 0.8; // в 2 раза меньше инерции по сравнению с текущим мобильным значением
+        MIN_VELOCITY = 0.12; // ещё раньше считаем шар остановившимся
+        HIT_POWER = 7;
+    }
 
     let balls = [];
     let cats = [];
@@ -30,6 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let isMusicPlaying = false;
     let isMobile = window.innerWidth <= 640;
     let isPortrait = window.innerHeight > window.innerWidth;
+    let musicVolume = 0.45; // 0..1
+    let didInitialReset = false;
+
+    // Вспомогательные функции для плавного вращения кия
+    function smoothAngle(current, target, alpha) {
+        // Интерполяция по кратчайшей дуге
+        const diff = Math.atan2(Math.sin(target - current), Math.cos(target - current));
+        return current + diff * alpha;
+    }
 
     // --- Определение ориентации и управление уведомлением ---
     function checkOrientation() {
@@ -50,13 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Обработчик изменения ориентации
-    function handleOrientationChange() {
-        // Небольшая задержка для корректного определения размеров
-        setTimeout(checkOrientation, 100);
+    // Дебаунс утилита
+    function debounce(fn, delay) {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => fn(...args), delay);
+        };
     }
 
-    // Обработчик изменения размера окна
+    // Обновление размеров/элементов UI
     function handleResize() {
         checkOrientation();
         
@@ -121,6 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
             positionUIElements();
         }, 50);
     }
+
+    const recomputeLayout = () => {
+        handleResize();
+        positionUIElements();
+        // Сбрасываем игру один раз после первичной компоновки при первом открытии
+        if (!didInitialReset) {
+            resetGame();
+            didInitialReset = true;
+        }
+    };
+    const debouncedRecomputeLayout = debounce(recomputeLayout, 100);
 
     // Функция для динамического масштабирования элементов
     function applyDynamicScaling(tableWidth, tableHeight) {
@@ -441,8 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
         oscillator1.type = 'square'; // Более резкий, "игровой" звук
         oscillator2.type = 'sawtooth'; // Добавляет яркости
 
-        // Увеличиваем громкость до 45%
-        gainNode.gain.setValueAtTime(0.45, audioContext.currentTime);
+        // Устанавливаем текущую громкость
+        gainNode.gain.setValueAtTime(musicVolume, audioContext.currentTime);
 
         // Фильтр для более яркого звука
         filter.type = 'lowpass';
@@ -478,8 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Короткая атака и затухание для "острого" звука
             gainNode.gain.cancelScheduledValues(currentTime);
-            gainNode.gain.setValueAtTime(0.45, currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+            gainNode.gain.setValueAtTime(musicVolume, currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0005, musicVolume * 0.007), currentTime + duration);
 
             noteIndex = (noteIndex + 1) % notes.length;
         };
@@ -593,6 +622,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             let radius = Math.max(catRect.width, catRect.height) / 2;
                             if (el.classList.contains('cat-small')) {
                                 radius = Math.max(catRect.width, catRect.height) / 2; // Значительно больший радиус для маленького кота
+                            }
+                            if (isMobile) {
+                                radius *= 0.1; // Strongly reduce sensitivity radius on mobile
                             }            cats.push({
                 el: el,
                 pawEl: el.querySelector('.hitting-paw'),
@@ -613,9 +645,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const pocketX = (pocketRect.left - tableRect.left) + pocketRect.width / 2;
             const pocketY = (pocketRect.top - tableRect.top) + pocketRect.height / 2;
             
-            // Динамически рассчитываем радиус лузы на основе её текущего размера
-            const pocketSize = Math.max(el.offsetWidth, el.offsetHeight);
-            const pocketRadius = Math.max(15, pocketSize * 1.4); // Увеличили с 12px до 15px минимум, с 1.2 до 1.4 коэффициент
+            // Радиус засчёта берём близким к видимому (чёрному) кругу
+            const visualRadius = Math.max(el.offsetWidth, el.offsetHeight) / 2;
+            let pocketRadius = Math.max(6, visualRadius * 0.95);
+            if (isMobile) {
+                pocketRadius = Math.max(4, visualRadius * 0.5);
+            }
             
             pockets.push({
                 x: pocketX,
@@ -644,14 +679,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 radius: el.offsetWidth / 2,
                 sunk: false
             });
-            // Move ball to table directly for visibility
+            // Переносим шар на стол и задаем базовые координаты (0,0); позиционирование через transform
             table.appendChild(el);
             el.style.position = 'absolute';
-            el.style.left = '0';
-            el.style.top = '0';
+            el.style.left = '0px';
+            el.style.top = '0px';
             el.style.removeProperty('top');
             el.style.removeProperty('left');
-            el.style.removeProperty('transform');
+            // transform выставляется в render()
         });
         // Empty pyramid container
         pyramidContainer.innerHTML = '';
@@ -682,7 +717,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dx = ball.x - pocket.x;
                 const dy = ball.y - pocket.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < pocket.radius && !ball.sunk) {
+                // Засчитываем, только если весь шар внутри радиуса лузы
+                if ((distance + ball.radius) < pocket.radius && !ball.sunk) {
                     ball.sunk = true;
                     ball.vx = 0;
                     ball.vy = 0;
@@ -702,7 +738,44 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         
                         playHitSound(); // Sound for sinking
+                        // Показать растроенный эмодзи над каждым котом
+                        cats.forEach(cat => {
+                            try {
+                                const emoji = document.createElement('div');
+                                emoji.className = 'cat-emoji';
+                                emoji.textContent = '😿';
+                                // Позиционируем по центру головы кота
+                                const head = cat.el.querySelector('.cat-head') || cat.el;
+                                const headRect = head.getBoundingClientRect();
+                                const tableRect = table.getBoundingClientRect();
+                                const centerX = (headRect.left - tableRect.left) + headRect.width / 2;
+                                const topY = (headRect.top - tableRect.top) - 6;
+                                emoji.style.left = `${centerX}px`;
+                                emoji.style.top = `${topY}px`;
+                                table.appendChild(emoji);
+                                setTimeout(() => {
+                                    emoji.remove();
+                                }, 1300);
+                            } catch (e) { /* ignore */ }
+                        });
                     } else {
+                        // Радостные коты при забитии битка
+                        cats.forEach(cat => {
+                            try {
+                                const emoji = document.createElement('div');
+                                emoji.className = 'cat-emoji';
+                                emoji.textContent = '😺';
+                                const head = cat.el.querySelector('.cat-head') || cat.el;
+                                const headRect = head.getBoundingClientRect();
+                                const tableRect = table.getBoundingClientRect();
+                                const centerX = (headRect.left - tableRect.left) + headRect.width / 2;
+                                const topY = (headRect.top - tableRect.top) - 6;
+                                emoji.style.left = `${centerX}px`;
+                                emoji.style.top = `${topY}px`;
+                                table.appendChild(emoji);
+                                setTimeout(() => emoji.remove(), 1300);
+                            } catch (e) { /* ignore */ }
+                        });
                         // Если биток утонул, вернуть на стартовую позицию после остановки
                         setTimeout(() => {
                             ball.x = table.offsetWidth * 0.25;
@@ -743,8 +816,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < ball.radius + cat.radius) {
+                    // On mobile, require a higher speed to trigger cat reaction and use weaker hit
+                    if (isMobile) {
+                        const speed = Math.hypot(ball.vx, ball.vy);
+                        if (speed < 3) return; // ignore slow balls on mobile
+                    }
                     playMeowSound(); // Используем уже определенную функцию вместо playPawSound
-                    cat.cooldown = CAT_COOLDOWN;
+                    cat.cooldown = isMobile ? CAT_COOLDOWN * 2 : CAT_COOLDOWN;
                     
                     // Для маленького кота анимируем весь элемент, для остальных - только лапку
                     if (cat.el.classList.contains('cat-small')) {
@@ -761,8 +839,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const angle = Math.atan2(dy, dx);
-                    ball.vx = Math.cos(angle) * PAW_HIT_POWER;
-                    ball.vy = Math.sin(angle) * PAW_HIT_POWER;
+                    // На мобильных в 2 раза меньше базовой
+                    const effectivePawPower = isMobile ? Math.max(1, PAW_HIT_POWER * 0.5) : PAW_HIT_POWER;
+                    ball.vx = Math.cos(angle) * effectivePawPower;
+                    ball.vy = Math.sin(angle) * effectivePawPower;
 
                     // Anti-sticking: move ball out of cat's radius
                     const overlap = (ball.radius + cat.radius) - distance + 1;
@@ -819,9 +899,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function render() {
         balls.forEach(ball => {
             if (!ball.sunk) {
-                ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
                 ball.el.style.left = '0px';
                 ball.el.style.top = '0px';
+                ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
             }
         });
     }
@@ -833,6 +913,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (allStopped) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
+            // Показываем кий после полной остановки шаров и позиционируем возле битка
+            const cueBallObj = balls.find(b => b.el.id === 'cue-ball');
+            if (cueBallObj && cue) {
+                const tipOffset = cueBallObj.radius + 4;
+                const tipX = cueBallObj.x + Math.cos(cueAngle) * tipOffset;
+                const tipY = cueBallObj.y + Math.sin(cueAngle) * tipOffset;
+                const degrees = cueAngle * (180 / Math.PI);
+                cue.style.visibility = 'visible';
+                cue.style.transformOrigin = `left center`;
+                cue.style.left = `0px`;
+                cue.style.top = `0px`;
+                cue.style.transform = `translate(${tipX}px, ${tipY - cue.offsetHeight / 2}px) rotate(${degrees}deg)`;
+            }
         } else {
             animationFrameId = requestAnimationFrame(gameLoop);
         }
@@ -863,25 +956,28 @@ document.addEventListener('DOMContentLoaded', () => {
         mouseX = Math.max(padding, Math.min(table.offsetWidth - padding, mouseX));
         mouseY = Math.max(padding, Math.min(table.offsetHeight - padding, mouseY));
 
-        // Угол от курсора мыши к битку
-        const dx = cueBallObj.x - mouseX;
-        const dy = cueBallObj.y - mouseY;
-        const angle = Math.atan2(dy, dx);
-        cueAngle = angle; // Это будет направление удара
+        // Углы: forward — от шара к курсору (направление удара)
+        const targetAngle = Math.atan2(mouseY - cueBallObj.y, mouseX - cueBallObj.x);
+        // Уменьшаем чувствительность вращения (плавно следуем за целевым углом)
+        const followFactor = isMobile ? 0.08 : 0.15; // мобильным ещё более плавно
+        cueAngle = smoothAngle(cueAngle, targetAngle, followFactor);
 
-        const degrees = angle * (180 / Math.PI);
+        const degrees = cueAngle * (180 / Math.PI);
 
-        // Позиционируем кий так, чтобы его кончик (правый край) был у курсора
-        const cueX = mouseX - cue.offsetWidth;
-        const cueY = mouseY - cue.offsetHeight / 2;
-        
-        cue.style.transformOrigin = `right center`;
-        cue.style.left = `${cueX}px`;
-        cue.style.top = `${cueY}px`;
-        cue.style.transform = `rotate(${degrees}deg)`;
+        // Позиционируем кий: его тыльный конец позади шара, кончик смотрит в сторону удара
+        const buttOffset = cue.offsetWidth || (table.offsetWidth * 0.4); // длина кия в px (проценты заданы в стилях)
+        const clearance = cueBallObj.radius + 6; // зазор от шара до кончика кия
+        const tipX = cueBallObj.x + Math.cos(cueAngle) * clearance;
+        const tipY = cueBallObj.y + Math.sin(cueAngle) * clearance;
 
-        // Показываем линию прицеливания
-        updateAimLine(cueBallObj.x, cueBallObj.y, angle);
+        // Кончик кия совпадает с точкой tipX/Y, поэтому origin — left center
+        cue.style.transformOrigin = `left center`;
+        cue.style.left = `0px`;
+        cue.style.top = `0px`;
+        cue.style.transform = `translate(${tipX}px, ${tipY - cue.offsetHeight / 2}px) rotate(${degrees}deg)`;
+
+        // Линия прицеливания — из центра шара в сторону, противоположную кию
+        updateAimLine(cueBallObj.x, cueBallObj.y, cueAngle + Math.PI);
     }
 
     function updateAimLine(startX, startY, angle) {
@@ -892,10 +988,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const endY = startY + Math.sin(angle) * lineLength;
         
         // Позиционируем линию от битка в направлении удара
-        aimLine.style.left = `${startX}px`;
-        aimLine.style.top = `${startY - 1}px`;
+        aimLine.style.left = `0px`;
+        aimLine.style.top = `0px`;
         aimLine.style.width = `${lineLength}px`;
-        aimLine.style.transform = `rotate(${angle * (180 / Math.PI)}deg)`;
+        aimLine.style.transform = `translate(${startX}px, ${startY - 1}px) rotate(${angle * (180 / Math.PI)}deg)`;
         aimLine.style.transformOrigin = 'left center';
         
         // Показываем линию только при перетаскивании
@@ -991,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dragEndX = clientX - tableRect.left;
         const dragEndY = clientY - tableRect.top;
         const dragDistance = Math.sqrt((dragEndX - dragStartX)**2 + (dragEndY - dragStartY)**2);
-        let power = Math.min(dragDistance / 10, 25); // Max power 25
+        let power = Math.min(dragDistance / 6, 25); // Возврат прежней чувствительности
         if (dragDistance < 10) power = HIT_POWER; // Min power for clicks/taps
         
         // Скрываем визуальные помощники
@@ -1021,13 +1117,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Придаем скорость битку с учетом силы
-        cueBallObj.vx = Math.cos(cueAngle) * power;
-        cueBallObj.vy = Math.sin(cueAngle) * power;
+        // Удар направляем противоположно положению курсора (противоположно cueAngle)
+        cueBallObj.vx = -Math.cos(cueAngle) * power;
+        cueBallObj.vy = -Math.sin(cueAngle) * power;
         
         // Анимация удара (откат пропорционален силе)
         const degrees = cueAngle * (180 / Math.PI);
         const baseTransform = `rotate(${degrees}deg)`;
         const recoil = Math.min(power * 0.8, 30);
+        // Сдвигаем кий назад, от кончика к рукояти (в сторону, противоположную удару)
         const hitTransform = `rotate(${degrees}deg) translateX(-${recoil}px)`;
 
         cue.style.transform = hitTransform;
@@ -1036,6 +1134,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
 
         gameLoop();
+        // Скрываем кий на время движения шаров
+        if (cue) {
+            cue.style.visibility = 'hidden';
+        }
     }
 
     function resetGame() {
@@ -1140,7 +1242,20 @@ document.addEventListener('DOMContentLoaded', () => {
             ballIndex++;
         }
         render();
-        aimCue({ clientX: table.getBoundingClientRect().left, clientY: table.getBoundingClientRect().top + table.offsetHeight / 2 });
+        // Показать и спозиционировать кий слева от битка по умолчанию
+        const cueBallObj = balls.find(b => b.el.id === 'cue-ball');
+        if (cueBallObj && cue) {
+            cue.style.visibility = 'visible';
+            cueAngle = 0; // вправо по оси X
+            const tipOffset = cueBallObj.radius + 10;
+            const tipX = cueBallObj.x + Math.cos(cueAngle) * tipOffset;
+            const tipY = cueBallObj.y + Math.sin(cueAngle) * tipOffset;
+            const degrees = cueAngle * (180 / Math.PI);
+            cue.style.transformOrigin = `left center`;
+            cue.style.left = `0px`;
+            cue.style.top = `0px`;
+            cue.style.transform = `translate(${tipX}px, ${tipY - cue.offsetHeight / 2}px) rotate(${degrees}deg)`;
+        }
     }
 
     function toggleSound() {
@@ -1188,6 +1303,24 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Сохраняем настройку в localStorage
         localStorage.setItem('kitt-cues-music', musicEnabled);
+    }
+
+    // Управление громкостью музыки
+    function setMusicVolumeFromPercent(percent) {
+        const clamped = Math.max(0, Math.min(100, Number(percent)));
+        musicVolume = clamped / 100;
+        // Обновляем громкость на лету
+        if (backgroundMusic && backgroundMusic.gainNode) {
+            backgroundMusic.gainNode.gain.setTargetAtTime(musicVolume, audioContext.currentTime, 0.05);
+        }
+        // Сохраняем
+        localStorage.setItem('kitt-cues-music-volume', String(clamped));
+        // Синхронизируем оба слайдера
+        const vol = String(clamped);
+        const volEl = document.getElementById('music-volume');
+        const volElLs = document.getElementById('music-volume-landscape');
+        if (volEl && volEl.value !== vol) volEl.value = vol;
+        if (volElLs && volElLs.value !== vol) volElLs.value = vol;
     }
 
     function showHelp() {
@@ -1252,6 +1385,16 @@ document.addEventListener('DOMContentLoaded', () => {
             musicButtonLandscape.textContent = musicEnabled ? '🎵' : '🔇';
             musicButtonLandscape.title = musicEnabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
         }
+
+        // Громкость музыки
+        const savedVolume = localStorage.getItem('kitt-cues-music-volume');
+        if (savedVolume !== null && !Number.isNaN(Number(savedVolume))) {
+            musicVolume = Math.max(0, Math.min(100, Number(savedVolume))) / 100;
+        }
+        const volumeControl = document.getElementById('music-volume');
+        const volumeControlLandscape = document.getElementById('music-volume-landscape');
+        if (volumeControl) volumeControl.value = String(Math.round(musicVolume * 100));
+        if (volumeControlLandscape) volumeControlLandscape.value = String(Math.round(musicVolume * 100));
     }
 
     // --- Слушатели событий ---
@@ -1265,7 +1408,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentX = e.clientX - tableRect.left;
             const currentY = e.clientY - tableRect.top;
             const distance = Math.sqrt((currentX - dragStartX)**2 + (currentY - dragStartY)**2);
-            const power = Math.min(distance / 10, 25);
+            const power = Math.min(distance / 6, 25);
             updatePowerIndicator(power);
         }
     });
@@ -1285,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentX = e.touches[0].clientX - tableRect.left;
                 const currentY = e.touches[0].clientY - tableRect.top;
                 const distance = Math.sqrt((currentX - dragStartX)**2 + (currentY - dragStartY)**2);
-                const power = Math.min(distance / 10, 25);
+                const power = Math.min(distance / 6, 25);
                 updatePowerIndicator(power);
             }
         }
@@ -1330,6 +1473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpButton = document.getElementById('help-button');
     const closeHelp = document.getElementById('close-help');
     const helpModal = document.getElementById('help-modal');
+    const musicVolumeEl = document.getElementById('music-volume');
     
     
     // Ландшафтные мобильные кнопки
@@ -1337,16 +1481,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicToggleLandscape = document.getElementById('music-toggle-landscape');
     const helpButtonLandscape = document.getElementById('help-button-landscape');
     const resetButtonLandscape = document.getElementById('reset-button-landscape');
+    const musicVolumeLandscapeEl = document.getElementById('music-volume-landscape');
     
     addButtonListener(soundToggle, toggleSound);
     addButtonListener(musicToggle, toggleMusic);
     addButtonListener(helpButton, showHelp);
+    if (musicVolumeEl) {
+        musicVolumeEl.addEventListener('input', (e) => setMusicVolumeFromPercent(e.target.value));
+        musicVolumeEl.addEventListener('change', (e) => setMusicVolumeFromPercent(e.target.value));
+    }
     
     // Ландшафтные обработчики
     addButtonListener(soundToggleLandscape, toggleSound);
     addButtonListener(musicToggleLandscape, toggleMusic);
     addButtonListener(helpButtonLandscape, showHelp);
     addButtonListener(resetButtonLandscape, resetGame);
+    if (musicVolumeLandscapeEl) {
+        musicVolumeLandscapeEl.addEventListener('input', (e) => setMusicVolumeFromPercent(e.target.value));
+        musicVolumeLandscapeEl.addEventListener('change', (e) => setMusicVolumeFromPercent(e.target.value));
+    }
 
     addButtonListener(closeHelp, hideHelp);
     
@@ -1400,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     initCats();
     initPockets();
-    resetGame();
+    // resetGame вызовется из recomputeLayout один раз после первичной компоновки
     
     // Добавляем класс для динамического масштабирования
     if (gameArea) {
@@ -1412,8 +1565,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Применяем динамическое масштабирование
     setTimeout(() => {
-        handleResize();
-        positionUIElements();
+        debouncedRecomputeLayout();
     }, 100);
     
     // Дополнительный вызов для корректного позиционирования UI при загрузке
@@ -1421,16 +1573,9 @@ document.addEventListener('DOMContentLoaded', () => {
         positionUIElements();
     }, 300);
     
-    // Добавляем обработчики событий
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleResize);
-    
-    // Обработчик для корректного позиционирования при изменении размера
-    window.addEventListener('resize', () => {
-        setTimeout(() => {
-            positionUIElements();
-        }, 50);
-    });
+    // Добавляем обработчики событий (дебаунс)
+    window.addEventListener('orientationchange', debouncedRecomputeLayout);
+    window.addEventListener('resize', debouncedRecomputeLayout);
     
     // Запускаем фоновую музыку после первого взаимодействия пользователя
     const startMusicOnFirstInteraction = () => {
