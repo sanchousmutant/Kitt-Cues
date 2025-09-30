@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const CAT_COOLDOWN = 60; // 1 секунда (60 кадров)
 
     if (window.innerWidth <= 640) { // isMobile check
-        FRICTION = 0.87; // ~1.5x больше инерции (между 0.8 и 0.9)
+        FRICTION = 0.8; // ~1.5x больше инерции (между 0.8 и 0.9)
         MIN_VELOCITY = 0.08; // порог ближе к середине между 0.12 и 0.06
         HIT_POWER = 7;
     }
