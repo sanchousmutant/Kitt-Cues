@@ -195,51 +195,176 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- PWA Install Prompt ---
     let deferredPrompt;
     let installButton;
+    let isInstallable = false;
 
     function showInstallButton() {
+        console.log('Показываем кнопку установки PWA');
         if (!installButton) {
             installButton = document.createElement('button');
             installButton.innerHTML = '📱 Установить приложение';
-            installButton.className = 'bg-green-600 text-white px-4 py-2 rounded shadow text-sm sm:text-base md:text-lg fixed top-4 right-4 z-50';
+            installButton.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow text-sm sm:text-base md:text-lg fixed top-4 right-4 z-50 transition-all duration-300';
+            installButton.id = 'pwa-install-button';
             installButton.style.display = 'none';
             installButton.addEventListener('click', installApp);
             document.body.appendChild(installButton);
         }
         installButton.style.display = 'block';
+        isInstallable = true;
+        
+        // Добавляем анимацию появления
+        setTimeout(() => {
+            installButton.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                installButton.style.transform = 'scale(1)';
+            }, 200);
+        }, 100);
     }
 
     function hideInstallButton() {
+        console.log('Скрываем кнопку установки PWA');
         if (installButton) {
             installButton.style.display = 'none';
         }
+        isInstallable = false;
     }
 
     function installApp() {
+        console.log('Попытка установки PWA');
         if (deferredPrompt) {
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then((choiceResult) => {
+                console.log('Результат выбора пользователя:', choiceResult.outcome);
                 if (choiceResult.outcome === 'accepted') {
                     console.log('Пользователь установил приложение');
+                    // Добавляем вибрацию на мобильных при успешной установке
+                    vibrate([100, 50, 100, 50, 100]);
                 } else {
                     console.log('Пользователь отклонил установку');
                 }
                 deferredPrompt = null;
                 hideInstallButton();
+            }).catch(error => {
+                console.log('Ошибка при установке PWA:', error);
             });
+        } else {
+            console.log('deferredPrompt недоступен');
+            // Показываем инструкции по ручной установке
+            showManualInstallInstructions();
         }
     }
 
-    // Регистрация Service Worker
+    function showManualInstallInstructions() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                <h3 class="text-lg font-bold mb-4">📱 Установка приложения</h3>
+                <div class="text-sm text-gray-700 mb-4">
+                    ${deviceInfo.isIOS ? `
+                        <p class="mb-2">На iOS Safari:</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Нажмите кнопку "Поделиться" в Safari</li>
+                            <li>Выберите "На экран Домой"</li>
+                            <li>Нажмите "Добавить"</li>
+                        </ol>
+                    ` : `
+                        <p class="mb-2">В Chrome:</p>
+                        <ol class="list-decimal list-inside space-y-1">
+                            <li>Нажмите на меню (три точки)</li>
+                            <li>Выберите "Добавить на главный экран"</li>
+                            <li>Нажмите "Добавить"</li>
+                        </ol>
+                    `}
+                </div>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded w-full" onclick="this.parentElement.parentElement.remove()">
+                    Понятно
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Автоматически скрываем через 10 секунд
+        setTimeout(() => {
+            if (modal.parentElement) {
+                modal.remove();
+            }
+        }, 10000);
+    }
+
+    // Проверка возможности установки при различных условиях
+    function checkInstallability() {
+        // Проверяем, установлено ли уже приложение
+        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('PWA уже установлено и запущено');
+            return;
+        }
+
+        // Для iOS показываем кнопку всегда (так как beforeinstallprompt не поддерживается)
+        if (deviceInfo.isIOS && deviceInfo.isSafari) {
+            setTimeout(() => {
+                console.log('iOS Safari - показываем кнопку установки');
+                showInstallButton();
+            }, 3000); // Показываем через 3 секунды после загрузки
+        }
+
+        // Для других браузеров, если не сработал beforeinstallprompt
+        setTimeout(() => {
+            if (!isInstallable && !window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('Показываем кнопку установки по таймауту');
+                showInstallButton();
+            }
+        }, 5000); // Показываем через 5 секунд, если событие не сработало
+    }
+
+    // Улучшенная регистрация Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js')
+            navigator.serviceWorker.register('./service-worker.js')
                 .then((registration) => {
-                    console.log('SW зарегистрирован:', registration);
+                    console.log('✅ Service Worker зарегистрирован успешно:', registration.scope);
+                    
+                    // Проверяем обновления
+                    registration.addEventListener('updatefound', () => {
+                        console.log('🔄 Найдено обновление Service Worker');
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🆕 Новая версия приложения доступна');
+                                showUpdateNotification();
+                            }
+                        });
+                    });
                 })
                 .catch((registrationError) => {
-                    console.log('SW регистрация не удалась:', registrationError);
+                    console.log('❌ Service Worker регистрация не удалась:', registrationError);
                 });
         });
+    } else {
+        console.log('⚠️ Service Worker не поддерживается в этом браузере');
+    }
+
+    function showUpdateNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        notification.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <span>🆕 Доступна новая версия</span>
+                <button onclick="window.location.reload()" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-medium">
+                    Обновить
+                </button>
+                <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                    ✕
+                </button>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        // Автоматически скрываем через 10 секунд
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 10000);
     }
 
     // --- Определение ориентации и управление уведомлением ---
@@ -1914,17 +2039,45 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', debouncedRecomputeLayout);
     }
 
-    // PWA Install Prompt Events
+    // PWA Install Prompt Events с улучшенной обработкой
     window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('beforeinstallprompt событие получено');
         e.preventDefault();
         deferredPrompt = e;
         showInstallButton();
     });
 
     window.addEventListener('appinstalled', () => {
-        console.log('PWA установлено');
+        console.log('PWA успешно установлено');
         hideInstallButton();
         deferredPrompt = null;
+        
+        // Показываем уведомление об успешной установке
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+        notification.innerHTML = '✅ Приложение установлено!';
+        document.body.appendChild(notification);
+        
+        // Добавляем вибрацию успеха
+        vibrate([100, 50, 100]);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translate(-50%, -100%)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    });
+
+    // Обработчик для определения режима отображения
+    window.addEventListener('DOMContentLoaded', () => {
+        // Проверяем, запущено ли как PWA
+        if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Запущено как PWA в standalone режиме');
+            document.body.classList.add('pwa-mode');
+        } else {
+            console.log('Запущено в браузере');
+            // Инициируем проверку возможности установки
+            checkInstallability();
+        }
     });
     
     // Запускаем фоновую музыку после первого взаимодействия пользователя
