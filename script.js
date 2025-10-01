@@ -39,6 +39,74 @@ document.addEventListener('DOMContentLoaded', () => {
     let musicVolume = 0.45; // 0..1
     let didInitialReset = false;
 
+    // Детекция устройства и браузера
+    const deviceInfo = {
+        isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+        isAndroid: /Android/.test(navigator.userAgent),
+        isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+        isChrome: /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent),
+        isFirefox: /Firefox/.test(navigator.userAgent),
+        isEdge: /Edg/.test(navigator.userAgent),
+        isSamsung: /Samsung/.test(navigator.userAgent),
+        isTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+        supportsVibration: 'vibrate' in navigator,
+        supportsOrientation: 'orientation' in window || 'onorientationchange' in window
+    };
+
+    // Применяем оптимизации на основе устройства
+    function applyDeviceOptimizations() {
+        const body = document.body;
+        
+        // iOS оптимизации
+        if (deviceInfo.isIOS) {
+            body.classList.add('ios-device');
+            // Отключаем bounce эффект в Safari
+            body.style.overflow = 'hidden';
+            body.style.position = 'fixed';
+            body.style.width = '100%';
+            body.style.height = '100%';
+            
+            // Предотвращаем зум в Safari
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+            }
+        }
+        
+        // Android оптимизации  
+        if (deviceInfo.isAndroid) {
+            body.classList.add('android-device');
+            // Улучшенная производительность анимаций
+            body.style.transform = 'translateZ(0)';
+        }
+        
+        // Samsung Internet оптимизации
+        if (deviceInfo.isSamsung) {
+            body.classList.add('samsung-browser');
+        }
+    }
+
+    // Функция для вибрации с кроссбраузерной поддержкой
+    function vibrate(pattern) {
+        if (!isMobile || !deviceInfo.supportsVibration) return;
+        
+        try {
+            // Поддержка различных браузеров и устройств
+            if (navigator.vibrate) {
+                navigator.vibrate(pattern);
+            } else if (navigator.webkitVibrate) {
+                navigator.webkitVibrate(pattern);
+            } else if (navigator.mozVibrate) {
+                navigator.mozVibrate(pattern);
+            } else if (navigator.msVibrate) {
+                navigator.msVibrate(pattern);
+            }
+        } catch (error) {
+            // Игнорируем ошибки вибрации - не критично для игры
+            console.log('Vibration not supported:', error);
+        }
+    }
+
     // Вспомогательные функции для плавного вращения кия
     function smoothAngle(current, target, alpha) {
         // Интерполяция по кратчайшей дуге
@@ -48,28 +116,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Полноэкранный режим ---
     function isFullscreenActive() {
-        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+        return !!(document.fullscreenElement || 
+                 document.webkitFullscreenElement || 
+                 document.mozFullScreenElement || 
+                 document.msFullscreenElement);
     }
 
     function enterFullscreen() {
         const el = document.documentElement;
-        if (el.requestFullscreen) return el.requestFullscreen().catch(() => {});
-        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+        try {
+            if (el.requestFullscreen) {
+                return el.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+            } else if (el.webkitRequestFullscreen) {
+                return el.webkitRequestFullscreen();
+            } else if (el.mozRequestFullScreen) {
+                return el.mozRequestFullScreen();
+            } else if (el.msRequestFullscreen) {
+                return el.msRequestFullscreen();
+            }
+        } catch (error) {
+            console.log('Fullscreen not supported:', error);
+        }
     }
 
     function exitFullscreen() {
-        if (document.exitFullscreen) return document.exitFullscreen().catch(() => {});
-        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        try {
+            if (document.exitFullscreen) {
+                return document.exitFullscreen().catch(err => console.log('Exit fullscreen error:', err));
+            } else if (document.webkitExitFullscreen) {
+                return document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                return document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                return document.msExitFullscreen();
+            }
+        } catch (error) {
+            console.log('Exit fullscreen not supported:', error);
+        }
     }
 
     function maybeAttemptFullscreen() {
+        // Обновляем переменные ориентации
+        const newIsPortrait = window.innerHeight > window.innerWidth;
+        const orientationChanged = newIsPortrait !== isPortrait;
+        isPortrait = newIsPortrait;
+        
+        // Обновляем переменную мобильного устройства
+        isMobile = window.innerWidth <= 640;
+        
         // Пытаемся открыть на весь экран в ландшафте на мобильных
         if (isMobile && !isPortrait && !isFullscreenActive()) {
-            enterFullscreen();
+            // Добавляем небольшую задержку для стабилизации ориентации
+            setTimeout(() => {
+                enterFullscreen();
+            }, 100);
         }
         // В портрете выходим из полного экрана
         if (isMobile && isPortrait && isFullscreenActive()) {
             exitFullscreen();
+        }
+        
+        // Показываем/скрываем уведомление о повороте
+        const rotationNotice = document.getElementById('rotation-notice');
+        if (rotationNotice) {
+            if (isMobile && isPortrait) {
+                rotationNotice.style.display = 'flex';
+            } else {
+                rotationNotice.style.display = 'none';
+            }
+        }
+        
+        // Если ориентация изменилась, добавляем легкую вибрацию
+        if (orientationChanged && isMobile) {
+            vibrate(50);
         }
     }
 
@@ -533,7 +652,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Звуковой движок ---
     function initAudio() {
         if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                // Поддержка всех вариантов AudioContext
+                const AudioContextClass = window.AudioContext || 
+                                         window.webkitAudioContext || 
+                                         window.mozAudioContext || 
+                                         window.msAudioContext;
+                
+                if (AudioContextClass) {
+                    audioContext = new AudioContextClass();
+                    
+                    // Для iOS Safari требуется пользовательское взаимодействие
+                    if (audioContext.state === 'suspended') {
+                        const resumeAudio = () => {
+                            audioContext.resume().then(() => {
+                                console.log('Audio context resumed');
+                                document.removeEventListener('touchstart', resumeAudio);
+                                document.removeEventListener('click', resumeAudio);
+                            });
+                        };
+                        document.addEventListener('touchstart', resumeAudio, { once: true });
+                        document.addEventListener('click', resumeAudio, { once: true });
+                    }
+                } else {
+                    console.warn('Web Audio API не поддерживается в этом браузере');
+                }
+            } catch (error) {
+                console.warn('Ошибка инициализации Web Audio API:', error);
+                audioContext = null;
+            }
         }
     }
 
@@ -641,32 +788,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playHitSound() {
         if (!audioContext || !soundEnabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.1);
+        try {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+            
+            // Добавляем вибрацию на мобильных
+            vibrate(50);
+        } catch (error) {
+            console.log('Error playing hit sound:', error);
+        }
     }
 
     function playWallHitSound() {
         if (!audioContext || !soundEnabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.type = 'triangle';
-        oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.15);
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.15);
+        try {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.15);
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.15);
+            
+            // Добавляем легкую вибрацию
+            vibrate(30);
+        } catch (error) {
+            console.log('Error playing wall hit sound:', error);
+        }
     }
 
     function playMeowSound() {
@@ -674,18 +835,28 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('playMeowSound called - soundEnabled:', soundEnabled, 'audioContext:', !!audioContext);
         
         if (!audioContext || !soundEnabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.type = 'square';
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.3);
+        try {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.type = 'square';
+            // Мяукающий звук с изменением тональности
+            oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(800, audioContext.currentTime + 0.1);
+            oscillator.frequency.linearRampToValueAtTime(400, audioContext.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+            
+            // Добавляем характерную вибрацию для мяукания
+            vibrate([100, 50, 100]);
+        } catch (error) {
+            console.log('Error playing meow sound:', error);
+        }
     }
+
     // --- Инициализация ---
     function initCats() {
         cats = [];
@@ -1494,18 +1665,23 @@ document.addEventListener('DOMContentLoaded', () => {
     gameArea.addEventListener('mousedown', startDrag);
     window.addEventListener('mouseup', endDrag);
     
-    // Сенсорное управление
+    // Сенсорное управление с улучшенной совместимостью
     gameArea.addEventListener('touchmove', e => { 
         if (!document.getElementById('help-modal').classList.contains('hidden')) return;
-        e.preventDefault(); 
+        
+        // Для iOS Safari и старых Android браузеров
+        if (e.preventDefault) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
+        
         if (e.touches && e.touches.length > 0) {
             aimCue(e);
             
             // Обновляем показатель силы при перетаскивании
             if (isDragging) {
                 const tableRect = table.getBoundingClientRect();
-                const currentX = e.touches[0].clientX - tableRect.left;
-                const currentY = e.touches[0].clientY - tableRect.top;
+                const touch = e.touches[0] || e.changedTouches[0];
+                const currentX = touch.clientX - tableRect.left;
+                const currentY = touch.clientY - tableRect.top;
                 const distance = Math.sqrt((currentX - dragStartX)**2 + (currentY - dragStartY)**2);
                 const power = Math.min(distance / 6, 25);
                 updatePowerIndicator(power);
@@ -1515,30 +1691,93 @@ document.addEventListener('DOMContentLoaded', () => {
     
     gameArea.addEventListener('touchstart', e => { 
         if (!document.getElementById('help-modal').classList.contains('hidden')) return;
-        e.preventDefault(); 
-        if (e.touches && e.touches.length > 0) {
+        
+        // Улучшенная обработка для различных браузеров
+        if (e.preventDefault) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
+        
+        const touch = e.touches[0] || e.changedTouches[0];
+        if (touch) {
             startDrag(e); 
+            // Добавляем легкую вибрацию при начале перетаскивания
+            vibrate(20);
         }
     }, { passive: false });
     
     gameArea.addEventListener('touchend', e => { 
-        e.preventDefault(); 
-        endDrag(e); 
+        // Обработка для различных браузеров
+        if (e.preventDefault) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
+        
+        endDrag(e);
+        // Добавляем вибрацию при завершении удара
+        if (isDragging) {
+            vibrate(40);
+        }
     }, { passive: false });
     
-    // Предотвращаем контекстное меню на сенсорных устройствах
-    gameArea.addEventListener('contextmenu', e => e.preventDefault());
+    // Предотвращаем контекстное меню и дополнительные жесты
+    gameArea.addEventListener('contextmenu', e => {
+        if (e.preventDefault) e.preventDefault();
+        return false;
+    });
+    
+    // Предотвращаем двойное касание для зума на iOS
+    gameArea.addEventListener('gesturestart', e => {
+        if (e.preventDefault) e.preventDefault();
+    });
+    
+    gameArea.addEventListener('gesturechange', e => {
+        if (e.preventDefault) e.preventDefault();
+    });
+    
+    gameArea.addEventListener('gestureend', e => {
+        if (e.preventDefault) e.preventDefault();
+    });
 
     // --- Универсальный обработчик кликов и касаний для кнопок ---
     function addButtonListener(element, action) {
         if (element) {
-            const handler = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                action();
-            };
-            element.addEventListener('click', handler);
-            element.addEventListener('touchstart', handler);
+            // Для мобильных устройств используем touchstart для быстрого отклика
+            if (deviceInfo.isTouch) {
+                element.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Добавляем легкую вибрацию для тактильной обратной связи
+                    vibrate(30);
+                    action();
+                }, { passive: false });
+                
+                // Предотвращаем двойное срабатывание на устройствах с поддержкой касаний и мыши
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            } else {
+                // Для десктопных устройств используем обычный click
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    action();
+                });
+            }
+            
+            // Добавляем визуальную обратную связь
+            element.addEventListener('touchstart', () => {
+                element.style.transform = 'scale(0.95)';
+            }, { passive: true });
+            
+            element.addEventListener('touchend', () => {
+                element.style.transform = 'scale(1)';
+            }, { passive: true });
+            
+            element.addEventListener('mousedown', () => {
+                element.style.transform = 'scale(0.95)';
+            });
+            
+            element.addEventListener('mouseup', () => {
+                element.style.transform = 'scale(1)';
+            });
         }
     }
 
@@ -1652,9 +1891,28 @@ document.addEventListener('DOMContentLoaded', () => {
         positionUIElements();
     }, 300);
     
-    // Добавляем обработчики событий (дебаунс)
-    window.addEventListener('orientationchange', debouncedRecomputeLayout);
-    window.addEventListener('resize', debouncedRecomputeLayout);
+    // Добавляем обработчики событий (дебаунс) с улучшенной кроссбраузерностью
+    const orientationChangeHandler = () => {
+        // Добавляем задержку для стабилизации после изменения ориентации
+        setTimeout(debouncedRecomputeLayout, 200);
+    };
+    
+    // Обработка изменения ориентации для различных браузеров
+    if (deviceInfo.supportsOrientation) {
+        window.addEventListener('orientationchange', orientationChangeHandler);
+        // iOS Safari иногда не срабатывает orientationchange
+        if (deviceInfo.isIOS) {
+            window.addEventListener('resize', orientationChangeHandler);
+        }
+    } else {
+        // Fallback для старых браузеров
+        window.addEventListener('resize', debouncedRecomputeLayout);
+    }
+    
+    // Дополнительный обработчик для Android
+    if (deviceInfo.isAndroid) {
+        window.addEventListener('resize', debouncedRecomputeLayout);
+    }
 
     // PWA Install Prompt Events
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -1681,6 +1939,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('mousedown', startMusicOnFirstInteraction);
         document.removeEventListener('touchstart', startMusicOnFirstInteraction);
     };
+    
+    // Применяем оптимизации устройства при загрузке
+    applyDeviceOptimizations();
     
     document.addEventListener('mousedown', startMusicOnFirstInteraction);
     document.addEventListener('touchstart', startMusicOnFirstInteraction, { passive: true });

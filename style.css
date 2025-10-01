@@ -1,15 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
 
         body {
-            font-family: 'Comfortaa', cursive;
+            font-family: 'Comfortaa', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background-color: #3a2d27; /* Темно-коричневый фон, как в бильярдной */
             overflow: hidden; /* Полностью убираем прокрутку */
             touch-action: none; /* Отключаем действия по умолчанию для касаний */
             user-select: none; /* Запрещаем выделение текста */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE/Edge */
             margin: 0;
             padding: 0;
             width: 100vw;
             height: 100vh;
+            /* Ускорение анимаций */
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-perspective: 1000px;
+            perspective: 1000px;
         }
 
         /* Гарантируем, что все помещается в экран */
@@ -19,6 +29,68 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            /* Предотвращаем зум на iOS */
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        /* iOS Safari оптимизации */
+        .ios-device {
+            -webkit-overflow-scrolling: touch;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Android оптимизации */
+        .android-device {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Samsung Internet оптимизации */
+        .samsung-browser {
+            will-change: transform;
+        }
+
+        /* Оптимизации для старых Android браузеров */
+        @media screen and (-webkit-min-device-pixel-ratio: 1) {
+            .billiard-ball {
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+            }
+        }
+
+        /* Firefox mobile оптимизации */
+        @-moz-document url-prefix() {
+            .billiard-ball {
+                -moz-transform: translateZ(0);
+                transform: translateZ(0);
+            }
+        }
+
+        /* Оптимизации для экранов с высокой плотностью пикселей */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .billiard-ball {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Улучшенные анимации для устройств с поддержкой аппаратного ускорения */
+        @media (prefers-reduced-motion: no-preference) {
+            .cat-container * {
+                will-change: transform;
+                -webkit-backface-visibility: hidden;
+                backface-visibility: hidden;
+            }
+        }
+
+        /* Снижение анимаций для пользователей, предпочитающих меньше движения */
+        @media (prefers-reduced-motion: reduce) {
+            .cat-container * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         /* Адаптивные размеры шаров */
@@ -29,6 +101,13 @@
             border-radius: 50%;
             box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
             transition: transform 0.1s ease-out;
+            -webkit-transition: -webkit-transform 0.1s ease-out;
+            -moz-transition: -moz-transform 0.1s ease-out;
+            -o-transition: -o-transform 0.1s ease-out;
+            /* Аппаратное ускорение */
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            will-change: transform;
         }
 
         /* Увеличенные размеры для больших экранов */
@@ -69,11 +148,27 @@
             0%, 100% { transform: rotate(5deg); }
             50% { transform: rotate(-15deg); }
         }
+        @-webkit-keyframes tail-wag {
+            0%, 100% { -webkit-transform: rotate(5deg); }
+            50% { -webkit-transform: rotate(-15deg); }
+        }
+        @-moz-keyframes tail-wag {
+            0%, 100% { -moz-transform: rotate(5deg); }
+            50% { -moz-transform: rotate(-15deg); }
+        }
 
         /* Анимация для головы кошки (кивок) */
         @keyframes head-nod {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
+        }
+        @-webkit-keyframes head-nod {
+            0%, 100% { -webkit-transform: translateY(0); }
+            50% { -webkit-transform: translateY(-5px); }
+        }
+        @-moz-keyframes head-nod {
+            0%, 100% { -moz-transform: translateY(0); }
+            50% { -moz-transform: translateY(-5px); }
         }
 
         /* Анимация для лапки */
@@ -81,11 +176,27 @@
             0%, 100% { transform: translateY(0) rotate(5deg); }
             50% { transform: translateY(-3px) rotate(-5deg); }
         }
+        @-webkit-keyframes paw-tap {
+            0%, 100% { -webkit-transform: translateY(0) rotate(5deg); }
+            50% { -webkit-transform: translateY(-3px) rotate(-5deg); }
+        }
+        @-moz-keyframes paw-tap {
+            0%, 100% { -moz-transform: translateY(0) rotate(5deg); }
+            50% { -moz-transform: translateY(-3px) rotate(-5deg); }
+        }
         
         /* Анимация для моргания */
         @keyframes blink {
             0%, 90%, 100% { transform: scaleY(1); }
             95% { transform: scaleY(0.1); }
+        }
+        @-webkit-keyframes blink {
+            0%, 90%, 100% { -webkit-transform: scaleY(1); }
+            95% { -webkit-transform: scaleY(0.1); }
+        }
+        @-moz-keyframes blink {
+            0%, 90%, 100% { -moz-transform: scaleY(1); }
+            95% { -moz-transform: scaleY(0.1); }
         }
 
         /* Анимация для удара лапой */
