@@ -73,6 +73,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- PWA Install Prompt ---
+    let deferredPrompt;
+    let installButton;
+
+    function showInstallButton() {
+        if (!installButton) {
+            installButton = document.createElement('button');
+            installButton.innerHTML = '📱 Установить приложение';
+            installButton.className = 'bg-green-600 text-white px-4 py-2 rounded shadow text-sm sm:text-base md:text-lg fixed top-4 right-4 z-50';
+            installButton.style.display = 'none';
+            installButton.addEventListener('click', installApp);
+            document.body.appendChild(installButton);
+        }
+        installButton.style.display = 'block';
+    }
+
+    function hideInstallButton() {
+        if (installButton) {
+            installButton.style.display = 'none';
+        }
+    }
+
+    function installApp() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('Пользователь установил приложение');
+                } else {
+                    console.log('Пользователь отклонил установку');
+                }
+                deferredPrompt = null;
+                hideInstallButton();
+            });
+        }
+    }
+
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then((registration) => {
+                    console.log('SW зарегистрирован:', registration);
+                })
+                .catch((registrationError) => {
+                    console.log('SW регистрация не удалась:', registrationError);
+                });
+        });
+    }
+
     // --- Определение ориентации и управление уведомлением ---
     function checkOrientation() {
         isMobile = window.innerWidth <= 640;
@@ -869,7 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const angle = Math.atan2(dy, dx);
                     // На мобильных в 2 раза меньше базовой
-                    const effectivePawPower = isMobile ? Math.max(1, PAW_HIT_POWER * 0.5) : PAW_HIT_POWER;
+                    const effectivePawPower = isMobile ? Math.max(1, PAW_HIT_POWER * 0.25) : PAW_HIT_POWER;
                     ball.vx = Math.cos(angle) * effectivePawPower;
                     ball.vy = Math.sin(angle) * effectivePawPower;
 
@@ -1605,6 +1655,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Добавляем обработчики событий (дебаунс)
     window.addEventListener('orientationchange', debouncedRecomputeLayout);
     window.addEventListener('resize', debouncedRecomputeLayout);
+
+    // PWA Install Prompt Events
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallButton();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA установлено');
+        hideInstallButton();
+        deferredPrompt = null;
+    });
     
     // Запускаем фоновую музыку после первого взаимодействия пользователя
     const startMusicOnFirstInteraction = () => {
