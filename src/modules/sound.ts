@@ -95,7 +95,7 @@ export class SoundManager {
       noteIndex = (noteIndex + 1) % notes.length;
     };
 
-    const musicInterval = setInterval(playNote, 250);
+    const musicInterval: number = window.setInterval(playNote, 250);
 
     oscillator1.connect(filter);
     oscillator2.connect(filter);
@@ -218,7 +218,7 @@ export class SoundManager {
       oscillator.start();
       oscillator.stop(this.audioContext.currentTime + 0.3);
       
-      vibrate(AUDIO_CONFIG.VIBRATION_DURATION.MEOW);
+      vibrate([...AUDIO_CONFIG.VIBRATION_DURATION.MEOW]);
     } catch (error) {
       console.log('Error playing meow sound:', error);
     }

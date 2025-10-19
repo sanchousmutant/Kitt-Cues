@@ -1,5 +1,5 @@
 import { BallObject, CatObject, PocketObject, PhysicsSettings } from '../types';
-import { PHYSICS_CONFIG, CAT_CONFIG, GAME_CONFIG } from '../constants';
+import { PHYSICS_CONFIG, CAT_CONFIG } from '../constants';
 import { playHitSound, playWallHitSound, playMeowSound } from './sound';
 import { vibrate } from '../utils/device';
 

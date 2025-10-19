@@ -1,5 +1,5 @@
-import { BallObject, CatObject, PocketObject, GameState } from './types';
-import { DOM_SELECTORS, PHYSICS_CONFIG, GAME_CONFIG, CAT_CONFIG, POCKET_CONFIG } from './constants';
+import { BallObject, GameState } from './types';
+import { DOM_SELECTORS, GAME_CONFIG, POCKET_CONFIG } from './constants';
 import { PhysicsEngine } from './modules/physics';
 import { soundManager } from './modules/sound';
 import { UIManager } from './modules/ui';
@@ -88,7 +88,7 @@ class Game {
     
     // Сенсорное управление
     gameArea.addEventListener('touchmove', (e) => {
-      if (!this.uiManager.helpModal?.classList.contains('hidden')) return;
+      if (this.uiManager.helpModal && !this.uiManager.helpModal.classList.contains('hidden')) return;
       
       e.preventDefault();
       e.stopPropagation();
@@ -100,7 +100,7 @@ class Game {
     }, { passive: false });
     
     gameArea.addEventListener('touchstart', (e) => {
-      if (!this.uiManager.helpModal?.classList.contains('hidden')) return;
+      if (this.uiManager.helpModal && !this.uiManager.helpModal.classList.contains('hidden')) return;
       
       e.preventDefault();
       e.stopPropagation();
@@ -254,7 +254,7 @@ class Game {
       const pocketX = (pocketRect.left - tableRect.left) + pocketRect.width / 2;
       const pocketY = (pocketRect.top - tableRect.top) + pocketRect.height / 2;
       
-      const visualRadius = Math.max(el.offsetWidth, el.offsetHeight) / 2;
+      const visualRadius = Math.max((el as HTMLElement).offsetWidth, (el as HTMLElement).offsetHeight) / 2;
       let pocketRadius = Math.max(
         POCKET_CONFIG.MIN_RADIUS, 
         visualRadius * POCKET_CONFIG.VISUAL_RADIUS_MULTIPLIER
@@ -298,7 +298,7 @@ class Game {
         y: posY,
         vx: 0,
         vy: 0,
-        radius: el.offsetWidth / 2,
+        radius: (el as HTMLElement).offsetWidth / 2,
         sunk: false
       };
       
@@ -613,10 +613,7 @@ class Game {
     const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
     if (cueBallObj && this.uiManager.cue) {
       const tipOffset = cueBallObj.radius + 4;
-      const tipX = cueBallObj.x + Math.cos(this.gameState.cueAngle) * tipOffset;
-      const tipY = cueBallObj.y + Math.sin(this.gameState.cueAngle) * tipOffset;
-      const degrees = this.gameState.cueAngle * (180 / Math.PI);
-      
+      // Используем переменные для позиционирования кия
       this.uiManager.cue.style.visibility = 'visible';
       this.updateCuePosition(cueBallObj);
     }
@@ -719,7 +716,7 @@ class Game {
   }
 
   // Метод для обработки первого взаимодействия пользователя
-  private onFirstInteraction(): void {
+  private handleFirstInteraction(): void {
     soundManager.initAudio();
     if (soundManager.isMusicEnabled) {
       soundManager.startBackgroundMusic();
@@ -734,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Запускаем фоновую музыку и полноэкранный режим после первого взаимодействия
   const startOnFirstInteraction = () => {
-    (game as any).onFirstInteraction();
+    game.handleFirstInteraction();
     document.removeEventListener('mousedown', startOnFirstInteraction);
     document.removeEventListener('touchstart', startOnFirstInteraction);
   };

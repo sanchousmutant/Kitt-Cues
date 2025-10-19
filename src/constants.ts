@@ -115,7 +115,7 @@ export const SCALING_CONFIG = {
     SM: 5,
     MD: 6,
     LG: 10,
-  },
+  } as const,
 } as const;
 
 // Константы для настроек

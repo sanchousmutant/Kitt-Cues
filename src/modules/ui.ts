@@ -1,5 +1,5 @@
 import { DeviceInfo, GameElements, ControlButtons, ScoreElements, VolumeControls } from '../types';
-import { DOM_SELECTORS, UI_CONFIG, SCALING_CONFIG, CAT_CONFIG } from '../constants';
+import { DOM_SELECTORS, UI_CONFIG, SCALING_CONFIG } from '../constants';
 import { soundManager } from './sound';
 import { vibrate, getDeviceInfo } from '../utils/device';
 import { debounce } from '../utils/helpers';
@@ -23,35 +23,35 @@ export class UIManager {
 
   private initializeElements(): void {
     // Основные элементы игры
-    this.elements.gameArea = document.querySelector(DOM_SELECTORS.GAME_AREA)!;
-    this.elements.table = document.querySelector(DOM_SELECTORS.TABLE)!;
-    this.elements.tableContainer = document.querySelector(DOM_SELECTORS.TABLE_CONTAINER)!;
-    this.elements.cue = document.querySelector(DOM_SELECTORS.CUE)!;
-    this.elements.aimLine = document.querySelector(DOM_SELECTORS.AIM_LINE)!;
-    this.elements.powerIndicator = document.querySelector(DOM_SELECTORS.POWER_INDICATOR)!;
-    this.elements.powerFill = document.querySelector(DOM_SELECTORS.POWER_FILL)!;
-    this.elements.pyramidContainer = document.querySelector(DOM_SELECTORS.PYRAMID_CONTAINER)!;
-    this.elements.helpModal = document.querySelector(DOM_SELECTORS.HELP_MODAL)!;
-    this.elements.rotationNotice = document.querySelector(DOM_SELECTORS.ROTATION_NOTICE)!;
+    this.elements.gameArea = document.querySelector(DOM_SELECTORS.GAME_AREA) as HTMLElement;
+    this.elements.table = document.querySelector(DOM_SELECTORS.TABLE) as HTMLElement;
+    this.elements.tableContainer = document.querySelector(DOM_SELECTORS.TABLE_CONTAINER) as HTMLElement;
+    this.elements.cue = document.querySelector(DOM_SELECTORS.CUE) as HTMLElement;
+    this.elements.aimLine = document.querySelector(DOM_SELECTORS.AIM_LINE) as HTMLElement;
+    this.elements.powerIndicator = document.querySelector(DOM_SELECTORS.POWER_INDICATOR) as HTMLElement;
+    this.elements.powerFill = document.querySelector(DOM_SELECTORS.POWER_FILL) as HTMLElement;
+    this.elements.pyramidContainer = document.querySelector(DOM_SELECTORS.PYRAMID_CONTAINER) as HTMLElement;
+    this.elements.helpModal = document.querySelector(DOM_SELECTORS.HELP_MODAL) as HTMLElement;
+    this.elements.rotationNotice = document.querySelector(DOM_SELECTORS.ROTATION_NOTICE) as HTMLElement;
 
     // Кнопки управления
-    this.buttons.soundToggle = document.querySelector('#sound-toggle');
-    this.buttons.musicToggle = document.querySelector('#music-toggle');
-    this.buttons.helpButton = document.querySelector('#help-button');
-    this.buttons.resetButton = document.querySelector('#reset-button');
-    this.buttons.closeHelp = document.querySelector('#close-help');
-    this.buttons.soundToggleLandscape = document.querySelector('#sound-toggle-landscape');
-    this.buttons.musicToggleLandscape = document.querySelector('#music-toggle-landscape');
-    this.buttons.helpButtonLandscape = document.querySelector('#help-button-landscape');
-    this.buttons.resetButtonLandscape = document.querySelector('#reset-button-landscape');
+    this.buttons.soundToggle = document.querySelector('#sound-toggle') as HTMLButtonElement;
+    this.buttons.musicToggle = document.querySelector('#music-toggle') as HTMLButtonElement;
+    this.buttons.helpButton = document.querySelector('#help-button') as HTMLButtonElement;
+    this.buttons.resetButton = document.querySelector('#reset-button') as HTMLButtonElement;
+    this.buttons.closeHelp = document.querySelector('#close-help') as HTMLButtonElement;
+    this.buttons.soundToggleLandscape = document.querySelector('#sound-toggle-landscape') as HTMLButtonElement;
+    this.buttons.musicToggleLandscape = document.querySelector('#music-toggle-landscape') as HTMLButtonElement;
+    this.buttons.helpButtonLandscape = document.querySelector('#help-button-landscape') as HTMLButtonElement;
+    this.buttons.resetButtonLandscape = document.querySelector('#reset-button-landscape') as HTMLButtonElement;
 
     // Элементы отображения счета
-    this.scoreElements.scoreDisplay = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY);
-    this.scoreElements.scoreDisplayLandscape = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY_LANDSCAPE);
+    this.scoreElements.scoreDisplay = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY) as HTMLElement;
+    this.scoreElements.scoreDisplayLandscape = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY_LANDSCAPE) as HTMLElement;
 
     // Слайдеры громкости
-    this.volumeControls.musicVolume = document.querySelector('#music-volume');
-    this.volumeControls.musicVolumeLandscape = document.querySelector('#music-volume-landscape');
+    this.volumeControls.musicVolume = document.querySelector('#music-volume') as HTMLInputElement;
+    this.volumeControls.musicVolumeLandscape = document.querySelector('#music-volume-landscape') as HTMLInputElement;
   }
 
   private setupEventListeners(): void {
@@ -639,6 +639,7 @@ export class UIManager {
   get pyramidContainer(): HTMLElement | undefined { return this.elements.pyramidContainer; }
   get resetButton(): HTMLButtonElement | null { return this.buttons.resetButton || null; }
   get resetButtonLandscape(): HTMLButtonElement | null { return this.buttons.resetButtonLandscape || null; }
+  get helpModal(): HTMLElement | undefined { return this.elements.helpModal; }
   
   get isMobileDevice(): boolean { return this.isMobile; }
   get isPortraitMode(): boolean { return this.isPortrait; }
