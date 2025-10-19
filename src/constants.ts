@@ -111,10 +111,10 @@ export const SCALING_CONFIG = {
   },
   BALL_SIZES: {
     BASE: 16,
-    XS: 4,
-    SM: 5,
-    MD: 6,
-    LG: 10,
+    XS: 16,
+    SM: 16,
+    MD: 16,
+    LG: 16,
   } as const,
 } as const;
 

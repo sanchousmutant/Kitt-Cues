@@ -673,7 +673,7 @@ class Game {
     const triangleY = tableHeight * 0.5;
     const ballSpacing = Math.min(ballRadius * 2.2, (tableWidth - triangleX) / 4);
     
-    let ballIndex = 0;
+    // let ballIndex = 0; // Не используется в текущей реализации
     
     const setBallPosition = (ball: BallObject, x: number, y: number) => {
       ball.x = clamp(x, ballRadius, tableWidth - ballRadius);

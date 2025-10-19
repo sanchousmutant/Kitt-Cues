@@ -106,13 +106,13 @@ class SimpleGame {
     // Соотношение сторон бильярдного стола (обычно 2:1)
     const tableAspect = 2;
     
-    let tableWidth, tableHeight;
-    
+            let tableWidth, tableHeight;
+            
     if (availableWidth / availableHeight > tableAspect) {
       // Ограничиваем по высоте
       tableHeight = Math.min(availableHeight, 400);
       tableWidth = tableHeight * tableAspect;
-    } else {
+            } else {
       // Ограничиваем по ширине
       tableWidth = Math.min(availableWidth, 800);
       tableHeight = tableWidth / tableAspect;
@@ -485,7 +485,7 @@ class SimpleGame {
       const hitTransform = `rotate(${degrees}deg) translateX(-${recoil}px)`;
 
       this.cue.style.transform = hitTransform;
-      setTimeout(() => {
+        setTimeout(() => {
         if (this.cue) this.cue.style.transform = baseTransform;
       }, 100);
     }
@@ -523,8 +523,8 @@ class SimpleGame {
   updatePhysics() {
     // Обновляем кулдауны котов
     this.cats.forEach(cat => {
-      if (cat.cooldown > 0) cat.cooldown--;
-    });
+            if (cat.cooldown > 0) cat.cooldown--;
+        });
 
     const friction = this.isMobile ? PHYSICS_CONFIG.MOBILE_FRICTION : PHYSICS_CONFIG.BASE_FRICTION;
     const minVelocity = this.isMobile ? PHYSICS_CONFIG.MOBILE_MIN_VELOCITY : PHYSICS_CONFIG.BASE_MIN_VELOCITY;
@@ -540,8 +540,8 @@ class SimpleGame {
 
       ball.vx *= friction;
       ball.vy *= friction;
-      ball.x += ball.vx;
-      ball.y += ball.vy;
+            ball.x += ball.vx;
+            ball.y += ball.vy;
 
       // Проверяем попадание в лузы
       this.checkPocketCollisions(ball);
@@ -560,32 +560,32 @@ class SimpleGame {
 
   checkPocketCollisions(ball) {
     for (const pocket of this.pockets) {
-      const dx = ball.x - pocket.x;
-      const dy = ball.y - pocket.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+                const dx = ball.x - pocket.x;
+                const dy = ball.y - pocket.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
       
       if ((distance + ball.radius) < pocket.radius && !ball.sunk) {
-        ball.sunk = true;
-        ball.vx = 0;
-        ball.vy = 0;
-        ball.el.style.display = 'none';
-        
-        if (ball.el.id !== 'cue-ball') {
+                    ball.sunk = true;
+                    ball.vx = 0;
+                    ball.vy = 0;
+                    ball.el.style.display = 'none';
+                    
+                    if (ball.el.id !== 'cue-ball') {
           this.score++;
           this.updateScore();
           this.playHitSound();
-        } else {
+                    } else {
           // Возвращаем биток
-          setTimeout(() => {
+                        setTimeout(() => {
             ball.x = this.table.offsetWidth * 0.25;
             ball.y = this.table.offsetHeight * 0.5;
-            ball.vx = 0;
-            ball.vy = 0;
-            ball.sunk = false;
-            ball.el.style.display = 'block';
+                            ball.vx = 0;
+                            ball.vy = 0;
+                            ball.sunk = false;
+                            ball.el.style.display = 'block';
             this.render();
-          }, 1000);
-        }
+                        }, 1000);
+                    }
         return;
       }
     }
@@ -594,17 +594,17 @@ class SimpleGame {
   checkWallCollisions(ball) {
     if ((ball.x - ball.radius < 0 && ball.vx < 0) || 
         (ball.x + ball.radius > this.table.offsetWidth && ball.vx > 0)) {
-      ball.vx *= -1;
+                ball.vx *= -1;
       this.playWallHitSound();
-      if (ball.x - ball.radius < 0) ball.x = ball.radius;
+                if (ball.x - ball.radius < 0) ball.x = ball.radius;
       if (ball.x + ball.radius > this.table.offsetWidth) ball.x = this.table.offsetWidth - ball.radius;
-    }
+            }
     
     if ((ball.y - ball.radius < 0 && ball.vy < 0) || 
         (ball.y + ball.radius > this.table.offsetHeight && ball.vy > 0)) {
-      ball.vy *= -1;
+                ball.vy *= -1;
       this.playWallHitSound();
-      if (ball.y - ball.radius < 0) ball.y = ball.radius;
+                if (ball.y - ball.radius < 0) ball.y = ball.radius;
       if (ball.y + ball.radius > this.table.offsetHeight) ball.y = this.table.offsetHeight - ball.radius;
     }
   }
@@ -613,11 +613,11 @@ class SimpleGame {
     for (const cat of this.cats) {
       if (cat.cooldown > 0 || ball.sunk) continue;
       
-      const dx = ball.x - cat.x;
-      const dy = ball.y - cat.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+                const dx = ball.x - cat.x;
+                const dy = ball.y - cat.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < ball.radius + cat.radius) {
+                if (distance < ball.radius + cat.radius) {
         if (this.isMobile) {
           const speed = Math.hypot(ball.vx, ball.vy);
           if (speed < 3) continue;
@@ -627,24 +627,24 @@ class SimpleGame {
         cat.cooldown = this.isMobile ? PHYSICS_CONFIG.CAT_COOLDOWN * 2 : PHYSICS_CONFIG.CAT_COOLDOWN;
         
         // Анимация лапки
-        const pawElement = cat.pawEl || cat.el;
-        pawElement.classList.add('swat-animation');
+                        const pawElement = cat.pawEl || cat.el;
+                        pawElement.classList.add('swat-animation');
         setTimeout(() => pawElement.classList.remove('swat-animation'), 300);
 
         // Отталкиваем шар
-        const angle = Math.atan2(dy, dx);
+                    const angle = Math.atan2(dy, dx);
         const effectivePawPower = this.isMobile ? 
           Math.max(1, PHYSICS_CONFIG.PAW_HIT_POWER * 0.25) : 
           PHYSICS_CONFIG.PAW_HIT_POWER;
-        
+
         ball.vx = Math.cos(angle) * effectivePawPower;
         ball.vy = Math.sin(angle) * effectivePawPower;
 
         // Предотвращаем залипание
-        const overlap = (ball.radius + cat.radius) - distance + 1;
-        ball.x += Math.cos(angle) * overlap;
-        ball.y += Math.sin(angle) * overlap;
-      }
+                    const overlap = (ball.radius + cat.radius) - distance + 1;
+                    ball.x += Math.cos(angle) * overlap;
+                    ball.y += Math.sin(angle) * overlap;
+                }
     }
   }
 
@@ -657,38 +657,38 @@ class SimpleGame {
         
         const ball1 = this.balls[i];
         const ball2 = this.balls[j];
-        const dx = ball2.x - ball1.x;
-        const dy = ball2.y - ball1.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+                const dx = ball2.x - ball1.x;
+                const dy = ball2.y - ball1.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < ball1.radius + ball2.radius) {
-          const angle = Math.atan2(dy, dx);
-          const sin = Math.sin(angle);
-          const cos = Math.cos(angle);
+                if (distance < ball1.radius + ball2.radius) {
+                    const angle = Math.atan2(dy, dx);
+                    const sin = Math.sin(angle);
+                    const cos = Math.cos(angle);
 
           // Упрощенная физика столкновений
-          let vx1 = ball1.vx * cos + ball1.vy * sin;
-          let vy1 = ball1.vy * cos - ball1.vx * sin;
-          let vx2 = ball2.vx * cos + ball2.vy * sin;
-          let vy2 = ball2.vy * cos - ball2.vx * sin;
+                    let vx1 = ball1.vx * cos + ball1.vy * sin;
+                    let vy1 = ball1.vy * cos - ball1.vx * sin;
+                    let vx2 = ball2.vx * cos + ball2.vy * sin;
+                    let vy2 = ball2.vy * cos - ball2.vx * sin;
 
-          const tempVx = vx1;
-          vx1 = vx2;
-          vx2 = tempVx;
+                    const tempVx = vx1;
+                    vx1 = vx2;
+                    vx2 = tempVx;
 
-          ball1.vx = vx1 * cos - vy1 * sin;
-          ball1.vy = vy1 * cos + vx1 * sin;
-          ball2.vx = vx2 * cos - vy2 * sin;
-          ball2.vy = vy2 * cos + vx2 * sin;
+                    ball1.vx = vx1 * cos - vy1 * sin;
+                    ball1.vy = vy1 * cos + vx1 * sin;
+                    ball2.vx = vx2 * cos - vy2 * sin;
+                    ball2.vy = vy2 * cos + vx2 * sin;
 
           // Разделяем шары
-          const overlap = (ball1.radius + ball2.radius) - distance + 1;
-          const moveX = (overlap / 2) * cos;
-          const moveY = (overlap / 2) * sin;
-          ball1.x -= moveX;
-          ball1.y -= moveY;
-          ball2.x += moveX;
-          ball2.y += moveY;
+                    const overlap = (ball1.radius + ball2.radius) - distance + 1;
+                    const moveX = (overlap / 2) * cos;
+                    const moveY = (overlap / 2) * sin;
+                    ball1.x -= moveX;
+                    ball1.y -= moveY;
+                    ball2.x += moveX;
+                    ball2.y += moveY;
 
           this.playHitSound();
         }
@@ -706,13 +706,13 @@ class SimpleGame {
 
   render() {
     this.balls.forEach(ball => {
-      if (!ball.sunk) {
-        ball.el.style.left = '0px';
-        ball.el.style.top = '0px';
+            if (!ball.sunk) {
+                ball.el.style.left = '0px';
+                ball.el.style.top = '0px';
         ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
-      }
-    });
-  }
+            }
+        });
+    }
 
   updateScore() {
     const scoreDisplay = document.getElementById('score-display');
@@ -883,39 +883,39 @@ class SimpleGame {
 
   toggleSound() {
     this.soundEnabled = !this.soundEnabled;
-    
-    const soundButton = document.getElementById('sound-toggle');
-    const soundButtonLandscape = document.getElementById('sound-toggle-landscape');
+        
+        const soundButton = document.getElementById('sound-toggle');
+        const soundButtonLandscape = document.getElementById('sound-toggle-landscape');
     
     const icon = this.soundEnabled ? '🔊' : '🔇';
     const title = this.soundEnabled ? 'Отключить звук' : 'Включить звук';
-    
-    if (soundButton) {
+        
+        if (soundButton) {
       soundButton.textContent = icon;
       soundButton.title = title;
-    }
-    
-    if (soundButtonLandscape) {
+        }
+        
+        if (soundButtonLandscape) {
       soundButtonLandscape.textContent = icon;
       soundButtonLandscape.title = title;
+        }
     }
-  }
 
   toggleMusic() {
     this.musicEnabled = !this.musicEnabled;
     
-    const musicButton = document.getElementById('music-toggle');
-    const musicButtonLandscape = document.getElementById('music-toggle-landscape');
+        const musicButton = document.getElementById('music-toggle');
+        const musicButtonLandscape = document.getElementById('music-toggle-landscape');
     
     const icon = this.musicEnabled ? '🎵' : '🔇';
     const title = this.musicEnabled ? 'Отключить музыку' : 'Включить музыку';
-    
-    if (musicButton) {
+        
+        if (musicButton) {
       musicButton.textContent = icon;
       musicButton.title = title;
-    }
-    
-    if (musicButtonLandscape) {
+        }
+        
+        if (musicButtonLandscape) {
       musicButtonLandscape.textContent = icon;
       musicButtonLandscape.title = title;
     }
@@ -930,14 +930,14 @@ class SimpleGame {
   showHelp() {
     if (this.helpModal) {
       this.helpModal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
     }
   }
 
   hideHelp() {
     if (this.helpModal) {
       this.helpModal.classList.add('hidden');
-      document.body.style.overflow = '';
+            document.body.style.overflow = '';
     }
   }
 }
