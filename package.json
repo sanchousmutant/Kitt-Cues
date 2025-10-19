@@ -3,16 +3,19 @@
   "version": "1.0.0",
   "description": "Бильярд с кошками - уникальная браузерная игра с анимированными котиками",
   "main": "index.html",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "game",
     "billiards",
     "cats",
     "javascript",
+    "typescript",
     "html5",
     "canvas-free",
     "browser-game",
@@ -22,7 +25,9 @@
   "author": "Kitt-Cues Team",
   "license": "MIT",
   "devDependencies": {
-    "vite": "^5.2.0"
+    "@types/node": "^24.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.20"
   },
   "engines": {
     "node": ">=14.0.0"

@@ -35,8 +35,17 @@ export function createLayoutManager(ctx, physics) {
                 baseScale = 1.1;
             }
 
-            const finalScale = baseScale * scaleFactor;
-            cat.style.transform = `scale(${Math.max(0.05, finalScale)})`;
+            const finalScale = Math.max(0.05, baseScale * scaleFactor);
+            if (!cat.dataset.baseTransform) {
+                cat.dataset.baseTransform = cat.style.transform || '';
+            }
+            const baseTransform = cat.dataset.baseTransform;
+            const transformParts = [];
+            if (baseTransform && baseTransform.trim().length > 0) {
+                transformParts.push(baseTransform.trim());
+            }
+            transformParts.push(`scale(${finalScale})`);
+            cat.style.transform = transformParts.join(' ');
         });
 
         const balls = doc.querySelectorAll('.billiard-ball');

@@ -6,6 +6,16 @@ export default defineConfig(() => ({
     },
     build: {
         outDir: 'dist',
-        emptyOutDir: true
+        emptyOutDir: true,
+        rollupOptions: {
+            input: {
+                main: 'index.html'
+            }
+        }
+    },
+    resolve: {
+        alias: {
+            '@': new URL('./src', import.meta.url).pathname
+        }
     }
 }));
