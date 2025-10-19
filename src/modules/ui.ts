@@ -56,15 +56,15 @@ export class UIManager {
 
   private setupEventListeners(): void {
     // Обработчики кнопок
-    this.addButtonListener(this.buttons.soundToggle, () => this.toggleSound());
-    this.addButtonListener(this.buttons.musicToggle, () => this.toggleMusic());
-    this.addButtonListener(this.buttons.helpButton, () => this.showHelp());
-    this.addButtonListener(this.buttons.closeHelp, () => this.hideHelp());
+    if (this.buttons.soundToggle) this.addButtonListener(this.buttons.soundToggle, () => this.toggleSound());
+    if (this.buttons.musicToggle) this.addButtonListener(this.buttons.musicToggle, () => this.toggleMusic());
+    if (this.buttons.helpButton) this.addButtonListener(this.buttons.helpButton, () => this.showHelp());
+    if (this.buttons.closeHelp) this.addButtonListener(this.buttons.closeHelp, () => this.hideHelp());
     
     // Ландшафтные кнопки
-    this.addButtonListener(this.buttons.soundToggleLandscape, () => this.toggleSound());
-    this.addButtonListener(this.buttons.musicToggleLandscape, () => this.toggleMusic());
-    this.addButtonListener(this.buttons.helpButtonLandscape, () => this.showHelp());
+    if (this.buttons.soundToggleLandscape) this.addButtonListener(this.buttons.soundToggleLandscape, () => this.toggleSound());
+    if (this.buttons.musicToggleLandscape) this.addButtonListener(this.buttons.musicToggleLandscape, () => this.toggleMusic());
+    if (this.buttons.helpButtonLandscape) this.addButtonListener(this.buttons.helpButtonLandscape, () => this.showHelp());
 
     // Слайдеры громкости
     if (this.volumeControls.musicVolume) {

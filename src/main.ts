@@ -612,7 +612,6 @@ class Game {
     // Показываем кий после полной остановки шаров
     const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
     if (cueBallObj && this.uiManager.cue) {
-      const tipOffset = cueBallObj.radius + 4;
       // Используем переменные для позиционирования кия
       this.uiManager.cue.style.visibility = 'visible';
       this.updateCuePosition(cueBallObj);
@@ -699,9 +698,10 @@ class Game {
       [triangleX + ballSpacing * 3, triangleY + ballSpacing * 1.5],
     ];
     
-    positions.forEach(([x, y], index) => {
-      if (index < coloredBalls.length) {
-        setBallPosition(coloredBalls[index], x, y);
+    positions.forEach(([x, y]) => {
+      const ballIndex = positions.indexOf([x, y]);
+      if (ballIndex < coloredBalls.length) {
+        setBallPosition(coloredBalls[ballIndex], x, y);
       }
     });
   }
@@ -716,7 +716,7 @@ class Game {
   }
 
   // Метод для обработки первого взаимодействия пользователя
-  private handleFirstInteraction(): void {
+  public handleFirstInteraction(): void {
     soundManager.initAudio();
     if (soundManager.isMusicEnabled) {
       soundManager.startBackgroundMusic();
