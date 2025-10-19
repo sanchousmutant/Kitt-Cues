@@ -56,11 +56,13 @@ class SimpleGame {
     this.dragStartY = 0;
     this.isMobile = isMobileDevice();
     this.soundEnabled = true;
+    this.musicEnabled = true; // Добавлено отдельное управление музыкой
     this.audioContext = null;
 
     this.initializeElements();
     this.setupEventListeners();
     this.resetGame();
+    this.initializeLayout(); // Добавляем инициализацию лейаута
   }
 
   initializeElements() {
@@ -73,6 +75,64 @@ class SimpleGame {
     this.powerFill = document.getElementById('power-fill');
     this.pyramidContainer = document.getElementById('ball-pyramid');
     this.helpModal = document.getElementById('help-modal');
+  }
+
+  // Инициализация правильного лейаута
+  initializeLayout() {
+    this.resizeTable();
+    window.addEventListener('resize', () => this.resizeTable());
+    
+    // Добавляем обработчики для кнопки музыки
+    const musicToggle = document.getElementById('music-toggle');
+    const musicToggleLandscape = document.getElementById('music-toggle-landscape');
+    
+    if (musicToggle) {
+      musicToggle.addEventListener('click', () => this.toggleMusic());
+    }
+    
+    if (musicToggleLandscape) {
+      musicToggleLandscape.addEventListener('click', () => this.toggleMusic());
+    }
+  }
+
+  // Правильное масштабирование стола
+  resizeTable() {
+    if (!this.gameArea || !this.tableContainer || !this.table) return;
+    
+    const gameRect = this.gameArea.getBoundingClientRect();
+    const availableWidth = gameRect.width - 160; // Отступы для кнопок
+    const availableHeight = gameRect.height - 100;
+    
+    // Соотношение сторон бильярдного стола (обычно 2:1)
+    const tableAspect = 2;
+    
+    let tableWidth, tableHeight;
+    
+    if (availableWidth / availableHeight > tableAspect) {
+      // Ограничиваем по высоте
+      tableHeight = Math.min(availableHeight, 400);
+      tableWidth = tableHeight * tableAspect;
+    } else {
+      // Ограничиваем по ширине
+      tableWidth = Math.min(availableWidth, 800);
+      tableHeight = tableWidth / tableAspect;
+    }
+    
+    // Устанавливаем размеры контейнера стола
+    this.tableContainer.style.width = `${tableWidth + 40}px`; // +40 для рамки
+    this.tableContainer.style.height = `${tableHeight + 40}px`;
+    this.tableContainer.style.position = 'absolute';
+    this.tableContainer.style.left = '50%';
+    this.tableContainer.style.top = '50%';
+    this.tableContainer.style.transform = 'translate(-50%, -50%)';
+    this.tableContainer.style.zIndex = '1';
+    
+    // Устанавливаем размеры игрового поля
+    this.table.style.width = `${tableWidth}px`;
+    this.table.style.height = `${tableHeight}px`;
+    this.table.style.position = 'absolute';
+    this.table.style.top = '20px';
+    this.table.style.left = '20px';
   }
 
   setupEventListeners() {
@@ -838,6 +898,32 @@ class SimpleGame {
     if (soundButtonLandscape) {
       soundButtonLandscape.textContent = icon;
       soundButtonLandscape.title = title;
+    }
+  }
+
+  toggleMusic() {
+    this.musicEnabled = !this.musicEnabled;
+    
+    const musicButton = document.getElementById('music-toggle');
+    const musicButtonLandscape = document.getElementById('music-toggle-landscape');
+    
+    const icon = this.musicEnabled ? '🎵' : '🔇';
+    const title = this.musicEnabled ? 'Отключить музыку' : 'Включить музыку';
+    
+    if (musicButton) {
+      musicButton.textContent = icon;
+      musicButton.title = title;
+    }
+    
+    if (musicButtonLandscape) {
+      musicButtonLandscape.textContent = icon;
+      musicButtonLandscape.title = title;
+    }
+
+    // Если музыка включена, попробуем запустить
+    if (this.musicEnabled) {
+      this.initAudio();
+      // Добавить логику для фоновой музыки если нужно
     }
   }
 
