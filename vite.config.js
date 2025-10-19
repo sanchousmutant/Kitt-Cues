@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
     // Базовый путь для GitHub Pages
-    base: process.env.NODE_ENV === 'production' ? '/Kitt-Cues/' : '/',
+    base: '/Kitt-Cues/',
     
     define: {
         __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
