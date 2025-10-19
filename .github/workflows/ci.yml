@@ -1,0 +1,128 @@
+name: 🔄 Continuous Integration
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Проверяем каждый день в 2:00 UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  test-matrix:
+    name: 🧪 Test on Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+        
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      - name: 📋 Install dependencies
+        run: npm ci --prefer-offline
+        
+      - name: 🔍 Type check
+        run: npm run type-check
+        
+      - name: 🏗️ Test build
+        run: npm run build-with-types || npm run build
+        
+      - name: 📊 Build size check
+        run: |
+          echo "## 📊 Build Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "Node.js version: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+          if [ -d "dist" ]; then
+            echo "Build directory size: $(du -sh dist/ | cut -f1)" >> $GITHUB_STEP_SUMMARY
+            echo "Files in build:" >> $GITHUB_STEP_SUMMARY
+            ls -lah dist/ >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Build directory not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  security-audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 📋 Install dependencies
+        run: npm ci --prefer-offline
+        
+      - name: 🔒 Run security audit
+        run: |
+          npm audit --audit-level=moderate
+          echo "✅ Security audit completed" >> $GITHUB_STEP_SUMMARY
+          
+      - name: 📦 Check for outdated packages
+        run: |
+          echo "## 📦 Package Status" >> $GITHUB_STEP_SUMMARY
+          npm outdated >> $GITHUB_STEP_SUMMARY || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
+
+  performance-check:
+    name: ⚡ Performance Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 📋 Install dependencies
+        run: npm ci --prefer-offline
+        
+      - name: 🏗️ Build project
+        run: npm run build-with-types || npm run build
+        
+      - name: 📏 Bundle size analysis
+        run: |
+          echo "## ⚡ Performance Analysis" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "dist" ]; then
+            # Размер основных файлов
+            echo "### 📊 Bundle Sizes" >> $GITHUB_STEP_SUMMARY
+            find dist -name "*.js" -exec ls -lh {} \; | awk '{print "- JavaScript: " $5 " (" $9 ")"}' >> $GITHUB_STEP_SUMMARY
+            find dist -name "*.css" -exec ls -lh {} \; | awk '{print "- CSS: " $5 " (" $9 ")"}' >> $GITHUB_STEP_SUMMARY
+            
+            # Общий размер
+            total_size=$(du -sh dist/ | cut -f1)
+            echo "- **Total build size: ${total_size}**" >> $GITHUB_STEP_SUMMARY
+            
+            # Количество файлов
+            file_count=$(find dist -type f | wc -l)
+            echo "- **File count: ${file_count}**" >> $GITHUB_STEP_SUMMARY
+            
+            # Проверка на большие файлы
+            echo "### 🚨 Large Files Check" >> $GITHUB_STEP_SUMMARY
+            large_files=$(find dist -size +500k -type f)
+            if [ -n "$large_files" ]; then
+              echo "⚠️ Large files detected:" >> $GITHUB_STEP_SUMMARY
+              echo "$large_files" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ No large files detected" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ Build directory not found" >> $GITHUB_STEP_SUMMARY
+          fi

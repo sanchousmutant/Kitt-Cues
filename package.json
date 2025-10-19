@@ -5,11 +5,18 @@
   "main": "index.html",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "build-with-types": "tsc && vite build",
-    "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "build-with-types": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "type-check:watch": "tsc --noEmit --skipLibCheck --watch",
+    "clean": "rimraf dist node_modules/.vite",
+    "deploy": "npm run build-with-types && gh-pages -d dist",
+    "analyze": "npx vite-bundle-analyzer dist",
+    "serve": "npm run preview",
+    "format": "prettier --write src/**/*.{ts,js,css,md}",
+    "lint": "eslint src --ext .ts,.js --fix"
   },
   "keywords": [
     "game",
