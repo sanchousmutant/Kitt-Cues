@@ -17,6 +17,8 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  issues: write  # Необходимо для комментирования в PR/issues
+  pull-requests: write  # Необходимо для комментирования в PR
 
 # Разрешаем только одну сборку одновременно
 concurrency:
