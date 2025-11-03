@@ -642,14 +642,16 @@ class Game {
     
     // Сброс всех шаров
     this.gameState.balls.forEach(ball => {
-      ball.sunk = false;
-      ball.vx = 0;
-      ball.vy = 0;
-      ball.el.style.display = 'block';
+      if (ball && ball.el) {
+        ball.sunk = false;
+        ball.vx = 0;
+        ball.vy = 0;
+        ball.el.style.display = 'block';
+      }
     });
     
     // Позиционируем белый шар слева по центру
-    const cueBall = this.gameState.balls.find(b => b.el.id === 'cue-ball');
+    const cueBall = this.gameState.balls.find(b => b && b.el && b.el.id === 'cue-ball');
     if (cueBall && this.uiManager.table) {
       cueBall.x = this.uiManager.table.offsetWidth * 0.25;
       cueBall.y = this.uiManager.table.offsetHeight * 0.5;
@@ -664,7 +666,11 @@ class Game {
   private positionColoredBalls(): void {
     if (!this.uiManager.table) return;
 
-    const coloredBalls = this.gameState.balls.filter(b => b.el.id !== 'cue-ball');
+    const coloredBalls = this.gameState.balls.filter(b => b && b.el && b.el.id !== 'cue-ball');
+    
+    // Проверяем, что есть шары для позиционирования
+    if (coloredBalls.length === 0) return;
+    
     const ballRadius = coloredBalls[0]?.radius || 12;
     const tableWidth = this.uiManager.table.offsetWidth;
     const tableHeight = this.uiManager.table.offsetHeight;
@@ -698,10 +704,9 @@ class Game {
       [triangleX + ballSpacing * 3, triangleY + ballSpacing * 1.5],
     ];
     
-    positions.forEach(([x, y]) => {
-      const ballIndex = positions.indexOf([x, y]);
-      if (ballIndex < coloredBalls.length) {
-        setBallPosition(coloredBalls[ballIndex], x, y);
+    positions.forEach(([x, y], index) => {
+      if (index < coloredBalls.length && coloredBalls[index]) {
+        setBallPosition(coloredBalls[index], x, y);
       }
     });
   }
