@@ -121,6 +121,17 @@ jobs:
           echo "- 📁 Files generated:" >> $GITHUB_STEP_SUMMARY
           ls -la dist/ | head -10 >> $GITHUB_STEP_SUMMARY
           
+      - name: ✅ Verify .nojekyll file
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [ -f "dist/.nojekyll" ]; then
+            echo "✅ .nojekyll file exists in dist/"
+            ls -la dist/.nojekyll
+          else
+            echo "⚠️ .nojekyll file not found, creating it..."
+            touch dist/.nojekyll
+          fi
+          
       - name: 🔧 Setup GitHub Pages
         if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v4
