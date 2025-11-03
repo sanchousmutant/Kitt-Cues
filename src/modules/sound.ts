@@ -286,10 +286,35 @@ export class SoundManager {
   get getIsMusicPlaying(): boolean { return this.isMusicPlaying; }
 }
 
-// Создаем глобальный экземпляр менеджера звука
-export const soundManager = new SoundManager();
+// Создаем глобальный экземпляр менеджера звука с отложенной инициализацией
+// Это предотвращает проблемы с порядком загрузки модулей и циклическими зависимостями
+let _soundManager: SoundManager | null = null;
+
+function getSoundManager(): SoundManager {
+  if (!_soundManager) {
+    _soundManager = new SoundManager();
+  }
+  return _soundManager;
+}
+
+// Экспортируем объект через геттер для предотвращения проблем с инициализацией
+export const soundManager = {
+  get initAudio() { return getSoundManager().initAudio.bind(getSoundManager()); },
+  get playHitSound() { return getSoundManager().playHitSound.bind(getSoundManager()); },
+  get playWallHitSound() { return getSoundManager().playWallHitSound.bind(getSoundManager()); },
+  get playMeowSound() { return getSoundManager().playMeowSound.bind(getSoundManager()); },
+  get toggleSound() { return getSoundManager().toggleSound.bind(getSoundManager()); },
+  get toggleMusic() { return getSoundManager().toggleMusic.bind(getSoundManager()); },
+  get setMusicVolume() { return getSoundManager().setMusicVolume.bind(getSoundManager()); },
+  get startBackgroundMusic() { return getSoundManager().startBackgroundMusic.bind(getSoundManager()); },
+  get stopBackgroundMusic() { return getSoundManager().stopBackgroundMusic.bind(getSoundManager()); },
+  get isSoundEnabled() { return getSoundManager().isSoundEnabled; },
+  get isMusicEnabled() { return getSoundManager().isMusicEnabled; },
+  get getMusicVolume() { return getSoundManager().getMusicVolume; },
+  get getIsMusicPlaying() { return getSoundManager().getIsMusicPlaying; },
+};
 
 // Экспортируем функции для обратной совместимости
-export const playHitSound = () => soundManager.playHitSound();
-export const playWallHitSound = () => soundManager.playWallHitSound();
-export const playMeowSound = () => soundManager.playMeowSound();
+export const playHitSound = () => getSoundManager().playHitSound();
+export const playWallHitSound = () => getSoundManager().playWallHitSound();
+export const playMeowSound = () => getSoundManager().playMeowSound();

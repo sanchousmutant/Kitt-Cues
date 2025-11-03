@@ -17,6 +17,11 @@ export default defineConfig(({ mode }) => ({
         emptyOutDir: true,
         sourcemap: mode === 'development',
         minify: mode === 'production' ? 'esbuild' : false,
+        // Предотвращаем проблемы с порядком инициализации модулей
+        commonjsOptions: {
+            include: [/node_modules/],
+            transformMixedEsModules: true
+        },
         
         rollupOptions: {
             input: {
@@ -133,7 +138,7 @@ export default defineConfig(({ mode }) => ({
                 }
                 
                 // Копируем существующие иконки
-                const icons = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png'];
+                const icons = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png', 'icon-192x192.svg'];
                 icons.forEach(icon => {
                     const src = join(process.cwd(), 'icons', icon);
                     const dest = join(iconsDir, icon);
