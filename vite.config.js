@@ -1,4 +1,6 @@
 import { defineConfig } from 'vite';
+import { copyFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 
 export default defineConfig(({ mode }) => ({
     // Базовый путь для GitHub Pages
@@ -44,6 +46,9 @@ export default defineConfig(({ mode }) => ({
         
         // Настройки для PWA
         manifest: true,
+        
+        // Копируем иконки после сборки
+        copyPublicDir: true,
         
         // Оптимизация для мобильных устройств
         target: ['es2020', 'chrome80', 'safari13'],
@@ -115,5 +120,34 @@ export default defineConfig(({ mode }) => ({
         environment: 'jsdom',
         globals: true,
         setupFiles: ['./src/test/setup.ts']
-    }
+    },
+    
+    // Плагин для копирования иконок
+    plugins: [
+        {
+            name: 'copy-icons',
+            writeBundle() {
+                const iconsDir = join(process.cwd(), 'dist', 'icons');
+                if (!existsSync(iconsDir)) {
+                    mkdirSync(iconsDir, { recursive: true });
+                }
+                
+                // Копируем существующие иконки
+                const icons = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png'];
+                icons.forEach(icon => {
+                    const src = join(process.cwd(), 'icons', icon);
+                    const dest = join(iconsDir, icon);
+                    if (existsSync(src)) {
+                        copyFileSync(src, dest);
+                    } else if (icon === 'icon-192x192.png' || icon === 'icon-512x512.png') {
+                        // Если отсутствует, копируем icon-72x72.png с новым именем
+                        const fallback = join(process.cwd(), 'icons', 'icon-72x72.png');
+                        if (existsSync(fallback)) {
+                            copyFileSync(fallback, dest);
+                        }
+                    }
+                });
+            }
+        }
+    ]
 }));
