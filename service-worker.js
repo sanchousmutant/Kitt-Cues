@@ -1,15 +1,20 @@
 const version = new URL(self.location.href).searchParams.get('v') || 'dev';
 const CACHE_NAME = `kitt-cues-v${version}`;
 
+// Detect base path (important for GitHub Pages under /Kitt-Cues/)
+const SCOPE_PATH = new URL(self.registration.scope).pathname.replace(/\/$/, '');
+const BASE = SCOPE_PATH === '' ? '/' : SCOPE_PATH + '/';
+
+// Only cache URLs that certainly exist after build/deploy
+// Do NOT cache style.css (Vite outputs hashed CSS in assets/)
 const ASSETS = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/manifest.json',
-    '/browserconfig.xml',
-    '/icons/icon-72x72.png',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    `${BASE}`,
+    `${BASE}index.html`,
+    `${BASE}manifest.json`,
+    `${BASE}browserconfig.xml`,
+    `${BASE}icons/icon-72x72.png`,
+    `${BASE}icons/icon-192x192.png`,
+    `${BASE}icons/icon-512x512.png`
 ];
 
 self.addEventListener('install', event => {
@@ -73,7 +78,7 @@ self.addEventListener('fetch', event => {
                 })
                 .catch(error => {
                     if (event.request.destination === 'document') {
-                        return caches.match('/index.html');
+                        return caches.match(`${BASE}index.html`);
                     }
                     throw error;
                 });
