@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { copyFileSync, mkdirSync, existsSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 export default defineConfig(({ mode }) => ({
@@ -152,6 +152,12 @@ export default defineConfig(({ mode }) => ({
                         }
                     }
                 });
+                
+                // Создаем .nojekyll файл для отключения обработки Jekyll на GitHub Pages
+                // Это предотвращает проблемы с MIME типами для JS файлов
+                const nojekyllPath = join(process.cwd(), 'dist', '.nojekyll');
+                writeFileSync(nojekyllPath, '', 'utf8');
+                console.log('✅ Created .nojekyll file to disable Jekyll processing');
             }
         }
     ]
