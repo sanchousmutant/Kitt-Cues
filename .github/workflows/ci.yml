@@ -16,7 +16,8 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: ['20.19', '22.12']
+        # Removed Node 18 as Vite 7 requires Node 20.19+ or 22.12+
         
     steps:
       - name: 📥 Checkout code
@@ -28,12 +29,17 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           
+      - name: ✅ Verify Node.js version
+        run: |
+          node --version
+          echo "✅ Using Node.js $(node --version)"
+          
       - name: 📋 Install dependencies
         run: npm ci --prefer-offline
-        
+          
       - name: 🔍 Type check
         run: npm run type-check
-        
+          
       - name: 🏗️ Test build
         run: npm run build-with-types || npm run build
         
@@ -60,12 +66,17 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.19'
           cache: 'npm'
+          
+      - name: ✅ Verify Node.js version
+        run: |
+          node --version
+          echo "✅ Using Node.js $(node --version)"
           
       - name: 📋 Install dependencies
         run: npm ci --prefer-offline
-        
+          
       - name: 🔒 Run security audit
         run: |
           npm audit --audit-level=moderate
@@ -87,12 +98,17 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.19'
           cache: 'npm'
+          
+      - name: ✅ Verify Node.js version
+        run: |
+          node --version
+          echo "✅ Using Node.js $(node --version)"
           
       - name: 📋 Install dependencies
         run: npm ci --prefer-offline
-        
+          
       - name: 🏗️ Build project
         run: npm run build-with-types || npm run build
         

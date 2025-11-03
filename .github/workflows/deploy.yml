@@ -39,8 +39,13 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.19'
           cache: 'npm'
+          
+      - name: ✅ Verify Node.js version
+        run: |
+          node --version
+          echo "✅ Using Node.js $(node --version)"
           
       - name: 📋 Install dependencies
         run: |
@@ -68,8 +73,21 @@ jobs:
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.19'
           cache: 'npm'
+          
+      - name: ✅ Verify Node.js version
+        run: |
+          node --version
+          npm --version
+          echo "Node.js version check: $(node --version)"
+          NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1,2)
+          REQUIRED_VERSION="20.19"
+          if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$NODE_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then
+            echo "❌ Node.js version $NODE_VERSION is too old. Required: 20.19+"
+            exit 1
+          fi
+          echo "✅ Node.js version is compatible"
           
       - name: 🔧 Configure npm
         run: |
