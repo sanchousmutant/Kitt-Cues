@@ -33,7 +33,7 @@
   "author": "Kitt-Cues Team",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^24.8.1",
+    "@types/node": "^24.10.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.12"
   },
