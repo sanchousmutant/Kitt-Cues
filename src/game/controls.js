@@ -32,8 +32,10 @@ export function createControlManager(ctx, physics, audioManager, deviceInfo, lay
             dom.powerIndicator.classList.add('visible');
             const cueBallObj = physics.getCueBall();
             if (cueBallObj) {
-                dom.powerIndicator.style.left = `${cueBallObj.x - 50}px`;
-                dom.powerIndicator.style.top = `${cueBallObj.y - 30}px`;
+                // console.log('PowerIndicator Pos:', cueBallObj.x, cueBallObj.y);
+                dom.powerIndicator.style.left = `${cueBallObj.x}px`;
+                dom.powerIndicator.style.top = `${cueBallObj.y}px`;
+                dom.powerIndicator.style.transform = `translate(-50%, -100%) translateY(-${cueBallObj.radius + 20}px)`;
             }
         }
     }

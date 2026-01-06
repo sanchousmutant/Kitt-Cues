@@ -277,10 +277,12 @@ export function createLayoutManager(ctx, physics) {
             mobileScore.style.bottom = 'auto';
         }
 
+        /* Power indicator is now handled by controls.js dynamically
         if (powerIndicator) {
             powerIndicator.style.left = `${dom.table.offsetWidth * 0.5 - 50}px`;
             powerIndicator.style.top = `${dom.table.offsetHeight * 0.5 - 30}px`;
         }
+        */
     }
 
     function handleResize() {

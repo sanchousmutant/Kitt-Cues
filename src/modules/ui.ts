@@ -60,7 +60,7 @@ export class UIManager {
     if (this.buttons.musicToggle) this.addButtonListener(this.buttons.musicToggle, () => this.toggleMusic());
     if (this.buttons.helpButton) this.addButtonListener(this.buttons.helpButton, () => this.showHelp());
     if (this.buttons.closeHelp) this.addButtonListener(this.buttons.closeHelp, () => this.hideHelp());
-    
+
     // Ландшафтные кнопки
     if (this.buttons.soundToggleLandscape) this.addButtonListener(this.buttons.soundToggleLandscape, () => this.toggleSound());
     if (this.buttons.musicToggleLandscape) this.addButtonListener(this.buttons.musicToggleLandscape, () => this.toggleMusic());
@@ -68,12 +68,12 @@ export class UIManager {
 
     // Слайдеры громкости
     if (this.volumeControls.musicVolume) {
-      this.volumeControls.musicVolume.addEventListener('input', (e) => 
+      this.volumeControls.musicVolume.addEventListener('input', (e) =>
         this.setMusicVolumeFromPercent((e.target as HTMLInputElement).value)
       );
     }
     if (this.volumeControls.musicVolumeLandscape) {
-      this.volumeControls.musicVolumeLandscape.addEventListener('input', (e) => 
+      this.volumeControls.musicVolumeLandscape.addEventListener('input', (e) =>
         this.setMusicVolumeFromPercent((e.target as HTMLInputElement).value)
       );
     }
@@ -98,7 +98,7 @@ export class UIManager {
         vibrate(30);
         action();
       }, { passive: false });
-      
+
       element.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -115,15 +115,15 @@ export class UIManager {
     element.addEventListener('touchstart', () => {
       element.style.transform = 'scale(0.95)';
     }, { passive: true });
-    
+
     element.addEventListener('touchend', () => {
       element.style.transform = 'scale(1)';
     }, { passive: true });
-    
+
     element.addEventListener('mousedown', () => {
       element.style.transform = 'scale(0.95)';
     });
-    
+
     element.addEventListener('mouseup', () => {
       element.style.transform = 'scale(1)';
     });
@@ -172,9 +172,9 @@ export class UIManager {
 
   private setupResizeListeners(): void {
     const debouncedResize = debounce(() => this.handleResize(), UI_CONFIG.DEBOUNCE_DELAY);
-    
+
     window.addEventListener('resize', debouncedResize);
-    
+
     if (this.deviceInfo.supportsOrientation) {
       window.addEventListener('orientationchange', () => {
         setTimeout(debouncedResize, UI_CONFIG.ORIENTATION_CHANGE_DELAY);
@@ -191,7 +191,7 @@ export class UIManager {
   checkOrientation(): void {
     this.isMobile = window.innerWidth <= UI_CONFIG.MOBILE_BREAKPOINT;
     this.isPortrait = window.innerHeight > window.innerWidth;
-    
+
     if (this.elements.rotationNotice) {
       if (this.isMobile && this.isPortrait) {
         this.elements.rotationNotice.style.display = 'flex';
@@ -206,19 +206,19 @@ export class UIManager {
 
     const gameAreaRect = this.elements.gameArea.getBoundingClientRect();
     const gameAreaStyle = window.getComputedStyle(this.elements.gameArea);
-    
+
     const paddingLeft = parseFloat(gameAreaStyle.paddingLeft);
     const paddingRight = parseFloat(gameAreaStyle.paddingRight);
     const paddingTop = parseFloat(gameAreaStyle.paddingTop);
     const paddingBottom = parseFloat(gameAreaStyle.paddingBottom);
-    
+
     const availableWidth = gameAreaRect.width - paddingLeft - paddingRight;
     const availableHeight = gameAreaRect.height - paddingTop - paddingBottom;
-    
+
     // Рассчитываем оптимальный размер стола
     const aspectRatio = 1.5;
     let tableWidth: number, tableHeight: number;
-    
+
     if (availableWidth / availableHeight > aspectRatio) {
       tableHeight = availableHeight;
       tableWidth = tableHeight * aspectRatio;
@@ -226,22 +226,22 @@ export class UIManager {
       tableWidth = availableWidth;
       tableHeight = tableWidth / aspectRatio;
     }
-    
+
     const borderWidth = 20;
     const containerWidth = tableWidth + borderWidth * 2;
     const containerHeight = tableHeight + borderWidth * 2;
-    
+
     // Устанавливаем размеры
     this.elements.tableContainer.style.width = `${containerWidth}px`;
     this.elements.tableContainer.style.height = `${containerHeight}px`;
     this.elements.tableContainer.style.left = `${paddingLeft + (availableWidth - containerWidth) / 2}px`;
     this.elements.tableContainer.style.top = `${paddingTop + (availableHeight - containerHeight) / 2}px`;
-    
+
     this.elements.table.style.width = `${tableWidth}px`;
     this.elements.table.style.height = `${tableHeight}px`;
     this.elements.table.style.left = `${borderWidth}px`;
     this.elements.table.style.top = `${borderWidth}px`;
-    
+
     // Применяем динамическое масштабирование
     this.applyDynamicScaling(tableWidth, tableHeight);
   }
@@ -250,7 +250,7 @@ export class UIManager {
     const scaleFactorX = tableWidth / SCALING_CONFIG.BASE_TABLE_WIDTH;
     const scaleFactorY = tableHeight / SCALING_CONFIG.BASE_TABLE_HEIGHT;
     const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
-    
+
     this.scaleCats(scaleFactor);
     this.scaleBalls(scaleFactor);
     this.scalePockets(scaleFactor);
@@ -263,7 +263,7 @@ export class UIManager {
     const cats = document.querySelectorAll('.cat-container');
     cats.forEach(cat => {
       let baseScale = 1.0;
-      
+
       if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
         baseScale = SCALING_CONFIG.CAT_SCALES.XS;
       } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
@@ -275,7 +275,7 @@ export class UIManager {
       } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XL) {
         baseScale = SCALING_CONFIG.CAT_SCALES.XL;
       }
-      
+
       const finalScale = baseScale * scaleFactor;
       (cat as HTMLElement).style.transform = `scale(${Math.max(0.05, finalScale)})`;
     });
@@ -285,7 +285,7 @@ export class UIManager {
     const balls = document.querySelectorAll('.billiard-ball');
     balls.forEach(ball => {
       let baseSize = SCALING_CONFIG.BALL_SIZES.BASE;
-      
+
       if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
         baseSize = SCALING_CONFIG.BALL_SIZES.XS;
       } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
@@ -295,7 +295,7 @@ export class UIManager {
       } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
         baseSize = SCALING_CONFIG.BALL_SIZES.LG;
       }
-      
+
       const finalSize = Math.max(3, baseSize * scaleFactor);
       (ball as HTMLElement).style.width = `${finalSize}px`;
       (ball as HTMLElement).style.height = `${finalSize}px`;
@@ -306,7 +306,7 @@ export class UIManager {
     const pockets = document.querySelectorAll('[data-pocket]');
     pockets.forEach(pocket => {
       let baseSize = 32;
-      
+
       if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
         baseSize = 12;
       } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
@@ -316,7 +316,7 @@ export class UIManager {
       } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
         baseSize = 20;
       }
-      
+
       const pocketScaleFactor = Math.max(0.8, scaleFactor);
       const finalSize = Math.max(8, baseSize * pocketScaleFactor);
       (pocket as HTMLElement).style.width = `${finalSize}px`;
@@ -329,7 +329,7 @@ export class UIManager {
 
     let baseHeight = 8;
     let baseWidth = 40;
-    
+
     if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
       baseHeight = 1;
       baseWidth = 10;
@@ -343,10 +343,10 @@ export class UIManager {
       baseHeight = 1;
       baseWidth = 25;
     }
-    
+
     const finalHeight = Math.max(1, baseHeight * scaleFactor);
     const finalWidth = Math.max(5, baseWidth);
-    
+
     this.elements.cue.style.height = `${finalHeight}px`;
     this.elements.cue.style.width = `${finalWidth}%`;
   }
@@ -355,13 +355,13 @@ export class UIManager {
     const buttons = document.querySelectorAll('button');
     buttons.forEach(button => {
       if (button.closest('.landscape-mobile-controls')) return;
-      
+
       let baseFontSize = 16;
       let basePaddingX = 16;
       let basePaddingY = 8;
       let baseMinWidth = 40;
       let baseMinHeight = 40;
-      
+
       if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
         baseFontSize = 8;
         basePaddingX = 4;
@@ -381,13 +381,13 @@ export class UIManager {
         baseMinWidth = 20;
         baseMinHeight = 20;
       }
-      
+
       const finalFontSize = Math.max(6, baseFontSize * scaleFactor);
       const finalPaddingX = Math.max(2, basePaddingX * scaleFactor);
       const finalPaddingY = Math.max(1, basePaddingY * scaleFactor);
       const finalMinWidth = Math.max(10, baseMinWidth * scaleFactor);
       const finalMinHeight = Math.max(10, baseMinHeight * scaleFactor);
-      
+
       button.style.fontSize = `${finalFontSize}px`;
       button.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
       button.style.minWidth = `${finalMinWidth}px`;
@@ -400,14 +400,14 @@ export class UIManager {
       { element: this.scoreElements.scoreDisplay, isLandscape: false },
       { element: this.scoreElements.scoreDisplayLandscape, isLandscape: true }
     ];
-    
+
     scoreElements.forEach(({ element, isLandscape }) => {
       if (!element) return;
-      
+
       let baseFontSize = 18;
       let basePaddingX = 32;
       let basePaddingY = 16;
-      
+
       if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
         baseFontSize = 8;
         basePaddingX = 8;
@@ -425,14 +425,14 @@ export class UIManager {
         basePaddingX = 12;
         basePaddingY = 4;
       }
-      
+
       const finalFontSize = Math.max(8, baseFontSize * scaleFactor);
       const finalPaddingX = Math.max(4, basePaddingX * scaleFactor);
       const finalPaddingY = Math.max(2, basePaddingY * scaleFactor);
-      
+
       element.style.fontSize = `${finalFontSize}px`;
       element.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
-      
+
       if (!isLandscape) {
         const baseMinWidth = 80;
         const finalMinWidth = Math.max(40, baseMinWidth * scaleFactor);
@@ -460,21 +460,34 @@ export class UIManager {
     if (soundToggle?.parentElement) {
       const leftButtons = soundToggle.parentElement;
       const leftX = tableRect.left - gameAreaRect.left - leftButtons.offsetWidth - margin;
-      leftButtons.style.left = `${Math.max(10, leftX)}px`;
+
+      // Если недостаточно места слева, скрываем или переносим
+      if (leftX < 10) {
+        leftButtons.style.display = 'none'; // Скрываем на очень узких экранах
+      } else {
+        leftButtons.style.display = 'flex';
+        leftButtons.style.left = `${leftX}px`;
+      }
       leftButtons.style.right = 'auto';
     }
   }
 
   private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
-    const tableRightEdge = (gameAreaRect.width - this.elements.tableContainer!.offsetWidth) / 2 + 
-                          this.elements.tableContainer!.offsetWidth;
+    const tableRightEdge = (gameAreaRect.width - this.elements.tableContainer!.offsetWidth) / 2 +
+      this.elements.tableContainer!.offsetWidth;
     const commonLeftOffset = tableRightEdge + margin;
+    const availableWidth = gameAreaRect.width - commonLeftOffset;
 
     // Правые кнопки
     const resetButton = this.buttons.resetButton;
     if (resetButton?.parentElement) {
-      resetButton.parentElement.style.left = `${commonLeftOffset}px`;
-      resetButton.parentElement.style.right = 'auto';
+      if (availableWidth < 40) {
+        resetButton.parentElement.style.display = 'none';
+      } else {
+        resetButton.parentElement.style.display = 'block';
+        resetButton.parentElement.style.left = `${commonLeftOffset}px`;
+        resetButton.parentElement.style.right = 'auto';
+      }
     }
 
     // Счет в правом верхнем углу
@@ -482,11 +495,16 @@ export class UIManager {
     if (scoreDisplay?.parentElement) {
       const topRightScore = scoreDisplay.parentElement;
       const topY = tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin;
-      
-      topRightScore.style.top = `${Math.max(10, topY)}px`;
-      topRightScore.style.left = `${commonLeftOffset}px`;
-      topRightScore.style.right = 'auto';
-      topRightScore.style.bottom = 'auto';
+
+      if (availableWidth < 80) {
+        topRightScore.style.display = 'none';
+      } else {
+        topRightScore.style.display = 'block';
+        topRightScore.style.top = `${Math.max(10, topY)}px`;
+        topRightScore.style.left = `${commonLeftOffset}px`;
+        topRightScore.style.right = 'auto';
+        topRightScore.style.bottom = 'auto';
+      }
     }
   }
 
@@ -496,42 +514,44 @@ export class UIManager {
     if (soundToggleLandscape?.parentElement) {
       const mobileButtons = soundToggleLandscape.parentElement;
       const topY = tableRect.top - gameAreaRect.top - mobileButtons.offsetHeight - margin;
-      mobileButtons.style.top = `${Math.max(10, topY)}px`;
+      // Гарантируем, что кнопки не улетают вверх за экран
+      mobileButtons.style.top = `${Math.max(5, topY)}px`;
       mobileButtons.style.bottom = 'auto';
     }
-    
+
     const scoreDisplayLandscape = this.scoreElements.scoreDisplayLandscape;
     if (scoreDisplayLandscape?.parentElement) {
       const mobileScore = scoreDisplayLandscape.parentElement;
       const topY = tableRect.top - gameAreaRect.top - mobileScore.offsetHeight - margin;
-      mobileScore.style.top = `${Math.max(10, topY)}px`;
+      // Гарантируем, что счет не улетает вверх за экран
+      mobileScore.style.top = `${Math.max(5, topY)}px`;
       mobileScore.style.bottom = 'auto';
     }
   }
 
   private applyDeviceOptimizations(): void {
     const body = document.body;
-    
+
     if (this.deviceInfo.isIOS) {
       body.classList.add('ios-device');
       body.style.overflow = 'hidden';
       body.style.position = 'fixed';
       body.style.width = '100%';
       body.style.height = '100%';
-      
+
       const viewport = document.querySelector('meta[name="viewport"]');
       if (viewport) {
-        viewport.setAttribute('content', 
+        viewport.setAttribute('content',
           'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
         );
       }
     }
-    
+
     if (this.deviceInfo.isAndroid) {
       body.classList.add('android-device');
       body.style.transform = 'translateZ(0)';
     }
-    
+
     if (this.deviceInfo.isSamsung) {
       body.classList.add('samsung-browser');
     }
@@ -552,12 +572,12 @@ export class UIManager {
     const enabled = soundManager.isSoundEnabled;
     const icon = enabled ? '🔊' : '🔇';
     const title = enabled ? 'Отключить звуковые эффекты' : 'Включить звуковые эффекты';
-    
+
     if (this.buttons.soundToggle) {
       this.buttons.soundToggle.textContent = icon;
       this.buttons.soundToggle.title = title;
     }
-    
+
     if (this.buttons.soundToggleLandscape) {
       this.buttons.soundToggleLandscape.textContent = icon;
       this.buttons.soundToggleLandscape.title = title;
@@ -568,12 +588,12 @@ export class UIManager {
     const enabled = soundManager.isMusicEnabled;
     const icon = enabled ? '🎵' : '🔇';
     const title = enabled ? 'Отключить фоновую музыку' : 'Включить фоновую музыку';
-    
+
     if (this.buttons.musicToggle) {
       this.buttons.musicToggle.textContent = icon;
       this.buttons.musicToggle.title = title;
     }
-    
+
     if (this.buttons.musicToggleLandscape) {
       this.buttons.musicToggleLandscape.textContent = icon;
       this.buttons.musicToggleLandscape.title = title;
@@ -583,9 +603,9 @@ export class UIManager {
   setMusicVolumeFromPercent(percent: string): void {
     const clamped = Math.max(0, Math.min(100, Number(percent)));
     const volume = clamped / 100;
-    
+
     soundManager.setMusicVolume(volume);
-    
+
     // Синхронизируем оба слайдера
     if (this.volumeControls.musicVolume && this.volumeControls.musicVolume.value !== percent) {
       this.volumeControls.musicVolume.value = String(clamped);
@@ -597,11 +617,11 @@ export class UIManager {
 
   updateScore(score: number): void {
     const scoreText = `Счет: ${score}`;
-    
+
     if (this.scoreElements.scoreDisplay) {
       this.scoreElements.scoreDisplay.textContent = scoreText;
     }
-    
+
     if (this.scoreElements.scoreDisplayLandscape) {
       this.scoreElements.scoreDisplayLandscape.textContent = scoreText;
     }
@@ -612,7 +632,7 @@ export class UIManager {
       this.elements.helpModal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'auto';
-      
+
       const scrollableContent = this.elements.helpModal.querySelector('.overflow-y-auto');
       if (scrollableContent) {
         (scrollableContent as HTMLElement).scrollTop = 0;
@@ -640,7 +660,7 @@ export class UIManager {
   get resetButton(): HTMLButtonElement | null { return this.buttons.resetButton || null; }
   get resetButtonLandscape(): HTMLButtonElement | null { return this.buttons.resetButtonLandscape || null; }
   get helpModal(): HTMLElement | undefined { return this.elements.helpModal; }
-  
+
   get isMobileDevice(): boolean { return this.isMobile; }
   get isPortraitMode(): boolean { return this.isPortrait; }
 
@@ -648,7 +668,7 @@ export class UIManager {
   loadUISettings(): void {
     this.updateSoundButtons();
     this.updateMusicButtons();
-    
+
     const volume = Math.round(soundManager.getMusicVolume * 100);
     if (this.volumeControls.musicVolume) {
       this.volumeControls.musicVolume.value = String(volume);

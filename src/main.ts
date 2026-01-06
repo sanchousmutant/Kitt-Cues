@@ -18,11 +18,11 @@ class Game {
   constructor() {
     this.isMobile = isMobileDevice();
     this.isPortrait = isPortraitOrientation();
-    
+
     // Инициализация движков и менеджеров
     this.physicsEngine = new PhysicsEngine(this.isMobile);
     this.uiManager = new UIManager();
-    
+
     // Начальное состояние игры
     this.gameState = {
       balls: [],
@@ -54,14 +54,14 @@ class Game {
 
     this.setupEventListeners();
     this.uiManager.loadUISettings();
-    
+
     // Инициализация игровых объектов
     this.initializeCats();
     this.initializePockets();
-    
+
     // Настройка layout
     this.setupLayout();
-    
+
     // Настройка PWA
     this.setupPWA();
   }
@@ -72,49 +72,66 @@ class Game {
 
     // Обработчики для управления игрой
     this.setupGameControls(gameArea);
-    
+
     // Обработчики для кнопок UI
     this.setupUIControls();
-    
+
     // Обработчики изменения размера и ориентации
     this.setupResizeHandlers();
   }
 
   private setupGameControls(gameArea: HTMLElement): void {
-    // Мышь
-    gameArea.addEventListener('mousemove', (e) => this.aimCue(e));
+    // Мышь - глобальный слушатель для поддержки перетаскивания за пределы поля
+    window.addEventListener('mousemove', (e) => {
+      // Обрабатываем событие, если мы тащим шар ИЛИ если курсор над игровым полем
+      const isOverGame = e.target instanceof Node && gameArea.contains(e.target);
+      if (this.gameState.isDragging || isOverGame) {
+        this.aimCue(e);
+        this.updatePowerIndicatorFromEvent(e);
+      }
+    });
     gameArea.addEventListener('mousedown', (e) => this.startDrag(e));
     window.addEventListener('mouseup', (e) => this.endDrag(e));
-    
+
     // Сенсорное управление
-    gameArea.addEventListener('touchmove', (e) => {
+    // Сенсорное управление - глобальное для удобства у краев
+    window.addEventListener('touchmove', (e) => {
       if (this.uiManager.helpModal && !this.uiManager.helpModal.classList.contains('hidden')) return;
-      
+
+      const target = e.target as HTMLElement;
+      // Разрешаем скролл внутри модалок и списков
+      if (target.closest('.overflow-y-auto')) return;
+
       e.preventDefault();
-      e.stopPropagation();
-      
+
       if (e.touches?.length > 0) {
         this.aimCue(e);
         this.updatePowerIndicatorFromEvent(e);
       }
     }, { passive: false });
-    
-    gameArea.addEventListener('touchstart', (e) => {
+
+    window.addEventListener('touchstart', (e) => {
       if (this.uiManager.helpModal && !this.uiManager.helpModal.classList.contains('hidden')) return;
-      
+
+      const target = e.target as HTMLElement;
+
+      // Игнорируем касания по кнопкам и интерактивным элементам UI
+      if (target.closest('button') || target.closest('.overflow-y-auto')) {
+        return;
+      }
+
       e.preventDefault();
-      e.stopPropagation();
-      
+
       if (e.touches?.[0]) {
         this.startDrag(e);
+        this.aimCue(e); // Сразу обновляем направление
         vibrate(20);
       }
     }, { passive: false });
-    
-    gameArea.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
+
+    window.addEventListener('touchend', (e) => {
+      if (this.uiManager.helpModal && !this.uiManager.helpModal.classList.contains('hidden')) return;
+
       this.endDrag(e);
       if (this.gameState.isDragging) {
         vibrate(40);
@@ -150,17 +167,17 @@ class Game {
     const debouncedRecomputeLayout = debounce(() => {
       this.handleResize();
       this.uiManager.positionUIElements();
-      
+
       if (!this.didInitialReset) {
         this.resetGame();
         this.didInitialReset = true;
       }
-      
+
       this.maybeAttemptFullscreen();
     }, 100);
 
     window.addEventListener('resize', debouncedRecomputeLayout);
-    
+
     window.addEventListener('orientationchange', () => {
       setTimeout(debouncedRecomputeLayout, 200);
     });
@@ -171,18 +188,66 @@ class Game {
   }
 
   private handleResize(): void {
+    const oldTableWidth = this.uiManager.table?.offsetWidth || 0;
+    const oldTableHeight = this.uiManager.table?.offsetHeight || 0;
+
     this.isMobile = isMobileDevice();
     this.isPortrait = isPortraitOrientation();
-    
+
     this.physicsEngine.updateSettings(this.isMobile);
     catManager.updateMobileSettings(this.isMobile);
     this.uiManager.checkOrientation();
     this.uiManager.updateLayout();
-    
-    // Переинициализируем игровые объекты
+
+    // Переинициализируем статические объекты
     this.initializeCats();
     this.initializePockets();
-    this.initializeBalls();
+
+    // Обновляем позиции шаров вместо сброса
+    if (oldTableWidth > 0 && oldTableHeight > 0) {
+      this.updateBallsOnResize(oldTableWidth, oldTableHeight);
+    } else {
+      this.initializeBalls();
+    }
+  }
+
+  private updateBallsOnResize(oldWidth: number, oldHeight: number): void {
+    if (!this.uiManager.table) return;
+
+    const newWidth = this.uiManager.table.offsetWidth;
+    const newHeight = this.uiManager.table.offsetHeight;
+
+    if (newWidth === 0 || newHeight === 0) return;
+
+    const scaleX = newWidth / oldWidth;
+    const scaleY = newHeight / oldHeight;
+
+    this.gameState.balls.forEach(ball => {
+      // Масштабируем координаты
+      ball.x *= scaleX;
+      ball.y *= scaleY;
+
+      // Обновляем радиус (он меняется через CSS в uiManager.updateLayout -> applyDynamicScaling)
+      ball.radius = ball.el.offsetWidth / 2;
+
+      // Ограничиваем координаты границами (clamping)
+      // Используем простой Math.max / Math.min, так как функция clamp может быть не импортирована
+      ball.x = Math.max(ball.radius, Math.min(ball.x, newWidth - ball.radius));
+      ball.y = Math.max(ball.radius, Math.min(ball.y, newHeight - ball.radius));
+
+      // Обновляем визуальное положение
+      if (!ball.sunk) {
+        ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
+      }
+    });
+
+    // Обновляем позицию кия если он активен
+    if (this.uiManager.cue && this.uiManager.cue.style.visibility === 'visible') {
+      const cueBall = this.gameState.balls.find(b => b.el.id === 'cue-ball');
+      if (cueBall) {
+        this.updateCuePosition(cueBall);
+      }
+    }
   }
 
   private maybeAttemptFullscreen(): void {
@@ -190,15 +255,15 @@ class Game {
     const orientationChanged = newIsPortrait !== this.isPortrait;
     this.isPortrait = newIsPortrait;
     this.isMobile = isMobileDevice();
-    
+
     if (this.isMobile && !this.isPortrait && !isFullscreenActive()) {
       setTimeout(() => enterFullscreen(), 100);
     }
-    
+
     if (this.isMobile && this.isPortrait && isFullscreenActive()) {
       exitFullscreen();
     }
-    
+
     if (orientationChanged && this.isMobile) {
       vibrate(50);
     }
@@ -248,25 +313,25 @@ class Game {
 
     const pocketElements = document.querySelectorAll(DOM_SELECTORS.POCKETS);
     const tableRect = this.uiManager.table.getBoundingClientRect();
-    
+
     pocketElements.forEach((el) => {
       const pocketRect = el.getBoundingClientRect();
       const pocketX = (pocketRect.left - tableRect.left) + pocketRect.width / 2;
       const pocketY = (pocketRect.top - tableRect.top) + pocketRect.height / 2;
-      
+
       const visualRadius = Math.max((el as HTMLElement).offsetWidth, (el as HTMLElement).offsetHeight) / 2;
       let pocketRadius = Math.max(
-        POCKET_CONFIG.MIN_RADIUS, 
+        POCKET_CONFIG.MIN_RADIUS,
         visualRadius * POCKET_CONFIG.VISUAL_RADIUS_MULTIPLIER
       );
-      
+
       if (this.isMobile) {
         pocketRadius = Math.max(
-          POCKET_CONFIG.MIN_MOBILE_RADIUS, 
+          POCKET_CONFIG.MIN_MOBILE_RADIUS,
           visualRadius * POCKET_CONFIG.MOBILE_VISUAL_RADIUS_MULTIPLIER
         );
       }
-      
+
       this.gameState.pockets.push({
         x: pocketX,
         y: pocketY,
@@ -280,18 +345,18 @@ class Game {
     if (!this.uiManager.table || !this.uiManager.pyramidContainer) return;
 
     this.uiManager.pyramidContainer.style.display = 'block';
-    
+
     const ballElements = document.querySelectorAll(DOM_SELECTORS.BILLIARD_BALLS);
     const tableRect = this.uiManager.table.getBoundingClientRect();
-    
+
     ballElements.forEach(el => {
       (el as HTMLElement).style.transform = '';
       (el as HTMLElement).style.display = 'block';
-      
+
       const elRect = el.getBoundingClientRect();
       const posX = (elRect.left - tableRect.left) + elRect.width / 2;
       const posY = (elRect.top - tableRect.top) + elRect.height / 2;
-      
+
       const ball: BallObject = {
         el: el as HTMLElement,
         x: posX,
@@ -301,16 +366,16 @@ class Game {
         radius: (el as HTMLElement).offsetWidth / 2,
         sunk: false
       };
-      
+
       this.gameState.balls.push(ball);
-      
+
       // Переносим шар на стол
       this.uiManager.table!.appendChild(el);
       (el as HTMLElement).style.position = 'absolute';
       (el as HTMLElement).style.left = '0px';
       (el as HTMLElement).style.top = '0px';
     });
-    
+
     this.uiManager.pyramidContainer.innerHTML = '';
     this.uiManager.pyramidContainer.style.display = 'none';
     this.render();
@@ -322,7 +387,7 @@ class Game {
 
     const tableRect = this.uiManager.table.getBoundingClientRect();
     let clientX: number, clientY: number;
-    
+
     if ('touches' in e && e.touches.length > 0) {
       clientX = e.touches[0].clientX;
       clientY = e.touches[0].clientY;
@@ -332,7 +397,7 @@ class Game {
     } else {
       return;
     }
-    
+
     let mouseX = clientX - tableRect.left;
     let mouseY = clientY - tableRect.top;
 
@@ -360,22 +425,22 @@ class Game {
     this.uiManager.cue.style.transformOrigin = 'left center';
     this.uiManager.cue.style.left = '0px';
     this.uiManager.cue.style.top = '0px';
-    this.uiManager.cue.style.transform = 
+    this.uiManager.cue.style.transform =
       `translate(${tipX}px, ${tipY - this.uiManager.cue.offsetHeight / 2}px) rotate(${degrees}deg)`;
   }
 
   private updateAimLine(startX: number, startY: number, angle: number): void {
     if (!this.uiManager.aimLine) return;
-    
+
     const lineLength = GAME_CONFIG.AIM_LINE_LENGTH;
-    
+
     this.uiManager.aimLine.style.left = '0px';
     this.uiManager.aimLine.style.top = '0px';
     this.uiManager.aimLine.style.width = `${lineLength}px`;
-    this.uiManager.aimLine.style.transform = 
+    this.uiManager.aimLine.style.transform =
       `translate(${startX}px, ${startY - 1}px) rotate(${angle * (180 / Math.PI)}deg)`;
     this.uiManager.aimLine.style.transformOrigin = 'left center';
-    
+
     if (this.gameState.isDragging) {
       this.uiManager.aimLine.classList.add('visible');
     }
@@ -383,17 +448,19 @@ class Game {
 
   private updatePowerIndicator(power: number): void {
     if (!this.uiManager.powerIndicator || !this.uiManager.powerFill) return;
-    
+
     const powerPercent = Math.min((power / GAME_CONFIG.MAX_POWER) * 100, 100);
     this.uiManager.powerFill.style.width = `${powerPercent}%`;
-    
+
     if (this.gameState.isDragging && power > 0) {
       this.uiManager.powerIndicator.classList.add('visible');
-      
       const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
+
       if (cueBallObj) {
-        this.uiManager.powerIndicator.style.left = `${cueBallObj.x - 50}px`;
-        this.uiManager.powerIndicator.style.top = `${cueBallObj.y - 30}px`;
+        // Use transform for reliable positioning extended from ball center
+        this.uiManager.powerIndicator.style.left = `${cueBallObj.x}px`;
+        this.uiManager.powerIndicator.style.top = `${cueBallObj.y}px`;
+        this.uiManager.powerIndicator.style.transform = `translate(-50%, -100%) translateY(-${cueBallObj.radius + 20}px)`;
       }
     }
   }
@@ -415,7 +482,7 @@ class Game {
     }
 
     const distance = Math.sqrt(
-      (currentX - this.gameState.dragStartX) ** 2 + 
+      (currentX - this.gameState.dragStartX) ** 2 +
       (currentY - this.gameState.dragStartY) ** 2
     );
     const power = Math.min(distance / GAME_CONFIG.POWER_SENSITIVITY, GAME_CONFIG.MAX_POWER);
@@ -424,16 +491,16 @@ class Game {
 
   private startDrag(e: MouseEvent | TouchEvent): void {
     if (this.gameState.animationFrameId) return;
-    
+
     if ((e.target as Element)?.tagName === 'BUTTON' || (e.target as Element)?.closest('button')) {
       return;
     }
-    
+
     this.gameState.isDragging = true;
-    
+
     if (!this.uiManager.table) return;
     const tableRect = this.uiManager.table.getBoundingClientRect();
-    
+
     let clientX: number, clientY: number;
     if ('touches' in e && e.touches.length > 0) {
       clientX = e.touches[0].clientX;
@@ -444,30 +511,30 @@ class Game {
     } else {
       return;
     }
-    
+
     this.gameState.dragStartX = clientX - tableRect.left;
     this.gameState.dragStartY = clientY - tableRect.top;
-    
+
     this.aimCue(e);
-    
+
     if (this.uiManager.aimLine) this.uiManager.aimLine.classList.add('visible');
     if (this.uiManager.powerIndicator) this.uiManager.powerIndicator.classList.add('visible');
   }
 
   private endDrag(e: MouseEvent | TouchEvent): void {
     if (!this.gameState.isDragging || this.gameState.animationFrameId) return;
-    
+
     if ((e.target as Element)?.tagName === 'BUTTON' || (e.target as Element)?.closest('button')) {
       this.gameState.isDragging = false;
       this.hideVisualHelpers();
       return;
     }
-    
+
     this.gameState.isDragging = false;
-    
+
     if (!this.uiManager.table) return;
     const tableRect = this.uiManager.table.getBoundingClientRect();
-    
+
     let clientX: number, clientY: number;
     if ('changedTouches' in e && e.changedTouches.length > 0) {
       clientX = e.changedTouches[0].clientX;
@@ -479,19 +546,19 @@ class Game {
       clientX = this.gameState.dragStartX + tableRect.left;
       clientY = this.gameState.dragStartY + tableRect.top;
     }
-    
+
     const dragEndX = clientX - tableRect.left;
     const dragEndY = clientY - tableRect.top;
     const dragDistance = distance(
-      dragEndX, dragEndY, 
+      dragEndX, dragEndY,
       this.gameState.dragStartX, this.gameState.dragStartY
     );
-    
+
     let power = Math.min(dragDistance / GAME_CONFIG.POWER_SENSITIVITY, GAME_CONFIG.MAX_POWER);
     if (dragDistance < 10) {
       power = this.physicsEngine.getSettings().hitPower;
     }
-    
+
     this.hideVisualHelpers();
     this.hitBall(power);
   }
@@ -503,15 +570,15 @@ class Game {
 
   private hitBall(power: number = this.physicsEngine.getSettings().hitPower): void {
     soundManager.initAudio();
-    
+
     if (this.gameState.animationFrameId) return;
-    
+
     const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
     if (!cueBallObj) return;
 
     soundManager.playHitSound();
     this.physicsEngine.applyForce(cueBallObj, this.gameState.cueAngle, power);
-    
+
     // Анимация удара кием
     if (this.uiManager.cue) {
       const degrees = this.gameState.cueAngle * (180 / Math.PI);
@@ -528,7 +595,7 @@ class Game {
     }
 
     this.startGameLoop();
-    
+
     if (this.uiManager.cue) {
       this.uiManager.cue.style.visibility = 'hidden';
     }
@@ -538,14 +605,14 @@ class Game {
     if (this.gameState.animationFrameId) {
       cancelAnimationFrame(this.gameState.animationFrameId);
     }
-    
+
     this.gameState.animationFrameId = requestAnimationFrame(() => this.gameLoop());
   }
 
   private gameLoop(): void {
     this.updatePhysics();
     this.render();
-    
+
     const allStopped = this.physicsEngine.areAllBallsStopped(this.gameState.balls);
     if (allStopped) {
       this.gameState.animationFrameId = null;
@@ -557,9 +624,9 @@ class Game {
 
   private updatePhysics(): void {
     catManager.updateCatCooldowns();
-    
+
     if (!this.uiManager.table) return;
-    
+
     for (const ball of this.gameState.balls) {
       const wasMoving = this.physicsEngine.updateBallPhysics(
         ball,
@@ -582,7 +649,7 @@ class Game {
     if (ball.el.id !== 'cue-ball') {
       this.gameState.score++;
       this.uiManager.updateScore(this.gameState.score);
-      
+
       // Показываем грустные эмодзи над котами
       if (this.uiManager.table) {
         catManager.showAllCatsEmoji('😿', this.uiManager.table);
@@ -592,7 +659,7 @@ class Game {
       if (this.uiManager.table) {
         catManager.showAllCatsEmoji('😺', this.uiManager.table);
       }
-      
+
       // Возвращаем биток на стартовую позицию
       setTimeout(() => {
         if (this.uiManager.table) {
@@ -633,13 +700,13 @@ class Game {
       cancelAnimationFrame(this.gameState.animationFrameId);
       this.gameState.animationFrameId = null;
     }
-    
+
     this.gameState.score = 0;
     this.uiManager.updateScore(this.gameState.score);
-    
+
     this.initializePockets();
     this.initializeBalls();
-    
+
     // Сброс всех шаров
     this.gameState.balls.forEach(ball => {
       if (ball && ball.el) {
@@ -649,14 +716,14 @@ class Game {
         ball.el.style.display = 'block';
       }
     });
-    
+
     // Позиционируем белый шар слева по центру
     const cueBall = this.gameState.balls.find(b => b && b.el && b.el.id === 'cue-ball');
     if (cueBall && this.uiManager.table) {
       cueBall.x = this.uiManager.table.offsetWidth * 0.25;
       cueBall.y = this.uiManager.table.offsetHeight * 0.5;
     }
-    
+
     this.positionColoredBalls();
     catManager.resetAllCats();
     this.render();
@@ -667,25 +734,25 @@ class Game {
     if (!this.uiManager.table) return;
 
     const coloredBalls = this.gameState.balls.filter(b => b && b.el && b.el.id !== 'cue-ball');
-    
+
     // Проверяем, что есть шары для позиционирования
     if (coloredBalls.length === 0) return;
-    
+
     const ballRadius = coloredBalls[0]?.radius || 12;
     const tableWidth = this.uiManager.table.offsetWidth;
     const tableHeight = this.uiManager.table.offsetHeight;
-    
+
     const triangleX = Math.min(tableWidth * 0.6, tableWidth - ballRadius * 8);
     const triangleY = tableHeight * 0.5;
     const ballSpacing = Math.min(ballRadius * 2.2, (tableWidth - triangleX) / 4);
-    
+
     // let ballIndex = 0; // Не используется в текущей реализации
-    
+
     const setBallPosition = (ball: BallObject, x: number, y: number) => {
       ball.x = clamp(x, ballRadius, tableWidth - ballRadius);
       ball.y = clamp(y, ballRadius, tableHeight - ballRadius);
     };
-    
+
     // Треугольник из 10 шаров (4 ряда: 1, 2, 3, 4)
     const positions = [
       // Ряд 1 (1 шар)
@@ -703,7 +770,7 @@ class Game {
       [triangleX + ballSpacing * 3, triangleY + ballSpacing * 0.5],
       [triangleX + ballSpacing * 3, triangleY + ballSpacing * 1.5],
     ];
-    
+
     positions.forEach(([x, y], index) => {
       if (index < coloredBalls.length && coloredBalls[index]) {
         setBallPosition(coloredBalls[index], x, y);
@@ -733,14 +800,14 @@ class Game {
 // Инициализация игры при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
   const game = new Game();
-  
+
   // Запускаем фоновую музыку и полноэкранный режим после первого взаимодействия
   const startOnFirstInteraction = () => {
     game.handleFirstInteraction();
     document.removeEventListener('mousedown', startOnFirstInteraction);
     document.removeEventListener('touchstart', startOnFirstInteraction);
   };
-  
+
   document.addEventListener('mousedown', startOnFirstInteraction);
   document.addEventListener('touchstart', startOnFirstInteraction, { passive: true });
 });
