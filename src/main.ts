@@ -650,9 +650,14 @@ class Game {
       this.gameState.score++;
       this.uiManager.updateScore(this.gameState.score);
 
-      // Показываем грустные эмодзи над котами
+      // Показываем грустные эмодзи над котами (или ничего если победа)
       if (this.uiManager.table) {
-        catManager.showAllCatsEmoji('😿', this.uiManager.table);
+        if (this.gameState.score >= 10) {
+          // Победа! Запускаем Котонадо
+          catManager.startCatnado(this.uiManager.table);
+        } else {
+          catManager.showAllCatsEmoji('😿', this.uiManager.table);
+        }
       }
     } else {
       // Радостные коты при забитии битка

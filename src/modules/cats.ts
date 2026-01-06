@@ -18,7 +18,7 @@ export class CatManager {
       const catRect = el.getBoundingClientRect();
       const catCenterX = (catRect.left - tableRect.left) + catRect.width / 2;
       const catCenterY = (catRect.top - tableRect.top) + catRect.height / 2;
-      
+
       // Увеличиваем радиус для маленького кота для лучшего взаимодействия
       let radius = Math.max(catRect.width, catRect.height) / 2;
       if (el.classList.contains('cat-small')) {
@@ -48,8 +48,8 @@ export class CatManager {
     // Пересчитываем радиусы кошек при изменении мобильного режима
     this.cats.forEach(cat => {
       const originalRadius = Math.max(cat.el.offsetWidth, cat.el.offsetHeight) / 2;
-      cat.radius = this.isMobile ? 
-        originalRadius * CAT_CONFIG.MOBILE_RADIUS_MULTIPLIER : 
+      cat.radius = this.isMobile ?
+        originalRadius * CAT_CONFIG.MOBILE_RADIUS_MULTIPLIER :
         originalRadius;
     });
   }
@@ -59,19 +59,19 @@ export class CatManager {
       const emojiElement = document.createElement('div');
       emojiElement.className = 'cat-emoji';
       emojiElement.textContent = emoji;
-      
+
       // Позиционируем по центру головы кота
       const head = cat.el.querySelector('.cat-head') || cat.el;
       const headRect = head.getBoundingClientRect();
       const tableRect = table.getBoundingClientRect();
       const centerX = (headRect.left - tableRect.left) + headRect.width / 2;
       const topY = (headRect.top - tableRect.top) - 6;
-      
+
       emojiElement.style.left = `${centerX}px`;
       emojiElement.style.top = `${topY}px`;
-      
+
       table.appendChild(emojiElement);
-      
+
       setTimeout(() => {
         if (emojiElement.parentElement) {
           emojiElement.remove();
@@ -99,7 +99,7 @@ export class CatManager {
   }
 
   setCatCooldown(cat: CatObject): void {
-    cat.cooldown = this.isMobile ? 
+    cat.cooldown = this.isMobile ?
       CAT_CONFIG.MOBILE_COOLDOWN_MULTIPLIER * 60 : // 60 frames = 1 second at 60fps
       60;
   }
@@ -124,7 +124,7 @@ export class CatManager {
       const dx = x - cat.x;
       const dy = y - cat.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (distance < cat.radius + radius) {
         return cat;
       }
@@ -223,7 +223,7 @@ export class CatManager {
   // Обновить позиции кошек (если элементы сдвинулись)
   updateCatPositions(table: HTMLElement): void {
     const tableRect = table.getBoundingClientRect();
-    
+
     this.cats.forEach(cat => {
       const catRect = cat.el.getBoundingClientRect();
       cat.x = (catRect.left - tableRect.left) + catRect.width / 2;
@@ -234,17 +234,17 @@ export class CatManager {
   // Найти ближайшую к точке кошку
   getClosestCat(x: number, y: number): { cat: CatObject; distance: number } | null {
     let closest: { cat: CatObject; distance: number } | null = null;
-    
+
     for (const cat of this.cats) {
       const dx = x - cat.x;
       const dy = y - cat.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       if (!closest || distance < closest.distance) {
         closest = { cat, distance };
       }
     }
-    
+
     return closest;
   }
 
@@ -260,10 +260,10 @@ export class CatManager {
 
   // Проверить, пересекается ли траектория с какой-либо кошкой
   checkTrajectoryIntersection(
-    startX: number, 
-    startY: number, 
-    endX: number, 
-    endY: number, 
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
     ballRadius: number = 8
   ): CatObject | null {
     const trajectory = {
@@ -295,13 +295,13 @@ export class CatManager {
 
     const dot = C * A + D * B;
     const lenSq = A * A + B * B;
-    
+
     if (lenSq === 0) return false; // Line has no length
-    
+
     const param = dot / lenSq;
-    
+
     let closestX: number, closestY: number;
-    
+
     if (param < 0) {
       closestX = line.x1;
       closestY = line.y1;
@@ -312,12 +312,80 @@ export class CatManager {
       closestX = line.x1 + param * A;
       closestY = line.y1 + param * B;
     }
-    
+
     const dx = circleX - closestX;
     const dy = circleY - closestY;
     const distanceSq = dx * dx + dy * dy;
-    
+
     return distanceSq <= radius * radius;
+  }
+  startCatnado(table: HTMLElement): void {
+    const tableRect = table.getBoundingClientRect();
+    const cx = tableRect.width / 2;
+    const cy = tableRect.height / 2;
+
+    // Убираем котов из потока физики, чтобы они не мешали (хотя игра уже закончена)
+    // В данном случае мы просто анимируем их визуальное представление
+
+    const catsData = this.cats.map(cat => {
+      const dx = cat.x - cx;
+      const dy = cat.y - cy;
+      return {
+        cat,
+        angle: Math.atan2(dy, dx),
+        radius: Math.sqrt(dx * dx + dy * dy),
+        speed: 0.02,
+        expanding: false
+      };
+    });
+
+    let animationFrame: number;
+
+    const animate = () => {
+      let stillVisible = false;
+
+      catsData.forEach(data => {
+        // Увеличиваем скорость
+        data.speed += 0.002;
+
+        // Обновляем угол
+        data.angle += data.speed;
+
+        // Если скорость достаточно большая, начинаем разлет
+        if (data.speed > 0.2) {
+          data.expanding = true;
+        }
+
+        if (data.expanding) {
+          data.radius += 10 + data.speed * 50;
+        }
+
+        // Вычисляем новую позицию
+        // cat.x и cat.y в локальных координатах стола
+        const newX = cx + Math.cos(data.angle) * data.radius;
+        const newY = cy + Math.sin(data.angle) * data.radius;
+
+        // Обновляем визуальный элемент
+        // Нам нужно учесть, что координаты кота (x,y) - это центр
+        // А transform работает относительно начальной позиции или требует пересчета
+        // Проще всего задать left/top и transform
+
+        data.cat.el.style.left = `${newX - data.cat.el.offsetWidth / 2}px`;
+        data.cat.el.style.top = `${newY - data.cat.el.offsetHeight / 2}px`;
+        data.cat.el.style.transform = `rotate(${data.angle * 57.29 + 90}deg) scale(${data.expanding ? 1 + data.speed : 1})`;
+
+        // Проверяем, виден ли еще
+        if (data.radius < 3000) {
+          stillVisible = true;
+        }
+      });
+
+      if (stillVisible) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
   }
 }
 

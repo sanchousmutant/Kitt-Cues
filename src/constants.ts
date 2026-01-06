@@ -74,7 +74,7 @@ export const DOM_SELECTORS = {
 
 // Константы для кошек
 export const CAT_CONFIG = {
-  MOBILE_RADIUS_MULTIPLIER: 0.1,
+  MOBILE_RADIUS_MULTIPLIER: 0.05,
   MOBILE_COOLDOWN_MULTIPLIER: 2,
   MOBILE_SPEED_THRESHOLD: 3, // минимальная скорость для реакции кота на мобильных
   MOBILE_PAW_POWER_MULTIPLIER: 0.25,
