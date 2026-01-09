@@ -339,7 +339,8 @@ export class CatManager {
       };
     });
 
-    let animationFrame: number;
+    // animationFrame is not used
+
 
     const animate = () => {
       let stillVisible = false;
@@ -381,11 +382,11 @@ export class CatManager {
       });
 
       if (stillVisible) {
-        animationFrame = requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
       }
     };
 
-    animationFrame = requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
   }
 }
 
