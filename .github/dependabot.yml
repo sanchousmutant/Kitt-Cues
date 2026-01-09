@@ -1,0 +1,64 @@
+version: 2
+
+updates:
+  # Мониторинг npm зависимостей
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "sanchousmutant"
+    assignees:
+      - "sanchousmutant"
+    commit-message:
+      prefix: "🔄"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "javascript"
+      - "typescript"
+    
+    # Группировка обновлений
+    groups:
+      development-dependencies:
+        patterns:
+          - "@types/*"
+          - "typescript"
+          - "vite"
+          - "@typescript-eslint/*"
+        update-types:
+          - "minor"
+          - "patch"
+          
+      production-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@types/*"
+          - "typescript"
+          - "vite"
+          - "@typescript-eslint/*"
+        update-types:
+          - "patch"
+    
+    # Игнорировать определенные зависимости
+    ignore:
+      - dependency-name: "typescript"
+        versions: ["5.0.0"]
+        
+  # Мониторинг GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    commit-message:
+      prefix: "🔄 ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "ci/cd"

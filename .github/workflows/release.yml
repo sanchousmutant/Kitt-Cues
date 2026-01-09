@@ -1,0 +1,103 @@
+name: 🏷️ Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.2.3)'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    name: 📦 Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: 📋 Install dependencies
+        run: npm ci --prefer-offline
+        
+      - name: 🔍 Type check
+        run: npm run type-check
+        
+      - name: 🏗️ Build project
+        run: npm run build-with-types || npm run build
+        
+      - name: 📦 Create release archive
+        run: |
+          # Создаем архив с собранным проектом
+          tar -czf kitt-cues-build.tar.gz dist/
+          
+          # Создаем архив с исходным кодом
+          git archive --format=tar.gz --prefix=kitt-cues-source/ HEAD > kitt-cues-source.tar.gz
+          
+      - name: 📝 Generate changelog
+        run: |
+          # Получаем последний тег
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          echo "## 🎉 Release Notes" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          
+          if [ -n "$LAST_TAG" ]; then
+            echo "### 📋 Changes since $LAST_TAG" >> RELEASE_NOTES.md
+            git log --pretty=format:"- %s" $LAST_TAG..HEAD >> RELEASE_NOTES.md
+          else
+            echo "### 🎯 Initial Release" >> RELEASE_NOTES.md
+            echo "- ✨ Complete TypeScript refactoring" >> RELEASE_NOTES.md
+            echo "- 🏗️ Modular architecture (physics, sound, UI, cats)" >> RELEASE_NOTES.md
+            echo "- 📱 Mobile optimization and responsive design" >> RELEASE_NOTES.md
+            echo "- 🎵 Enhanced audio system with Web Audio API" >> RELEASE_NOTES.md
+            echo "- 🐱 Interactive cats with animations" >> RELEASE_NOTES.md
+            echo "- ⚙️ PWA support with offline capabilities" >> RELEASE_NOTES.md
+          fi
+          
+          echo "" >> RELEASE_NOTES.md
+          echo "### 🏗️ Build Information" >> RELEASE_NOTES.md
+          echo "- Built with TypeScript $(npx tsc --version | cut -d' ' -f2)" >> RELEASE_NOTES.md
+          echo "- Bundled with Vite" >> RELEASE_NOTES.md
+          echo "- Target: ES2020" >> RELEASE_NOTES.md
+          echo "- Build time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> RELEASE_NOTES.md
+          
+          echo "" >> RELEASE_NOTES.md
+          echo "### 📊 Bundle Size" >> RELEASE_NOTES.md
+          if [ -d "dist" ]; then
+            echo "- Total size: $(du -sh dist/ | cut -f1)" >> RELEASE_NOTES.md
+            echo "- Files: $(find dist -type f | wc -l)" >> RELEASE_NOTES.md
+          fi
+          
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name || inputs.version }}
+          name: "🎱 Kitt-Cues ${{ github.ref_name || inputs.version }}"
+          body_path: RELEASE_NOTES.md
+          files: |
+            kitt-cues-build.tar.gz
+            kitt-cues-source.tar.gz
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(inputs.version, 'beta') || contains(inputs.version, 'alpha') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 📝 Release summary
+        run: |
+          echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏷️ Version: ${{ github.ref_name || inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Build artifacts attached" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌐 Available on GitHub Releases" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 Auto-deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
