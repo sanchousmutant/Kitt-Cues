@@ -121,6 +121,8 @@ export interface GameElements {
   trajectoryCanvas: HTMLCanvasElement;
   gameOverModal: HTMLElement | null;
   finalScore: HTMLElement | null;
+  mainRightButtonsContainer?: HTMLElement;
+  mainScoreContainer?: HTMLElement;
 }
 
 // Кнопки управления

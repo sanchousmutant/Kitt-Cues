@@ -56,6 +56,10 @@ export class UIManager {
     // Слайдеры громкости
     this.volumeControls.musicVolume = document.querySelector('#music-volume') as HTMLInputElement;
     this.volumeControls.musicVolumeLandscape = document.querySelector('#music-volume-landscape') as HTMLInputElement;
+
+    // Контейнеры для динамического позиционирования
+    this.elements.mainRightButtonsContainer = document.querySelector('#main-right-buttons-container') as HTMLElement;
+    this.elements.mainScoreContainer = document.querySelector('#main-score-container') as HTMLElement;
   }
 
   private setupEventListeners(): void {
@@ -472,25 +476,34 @@ export class UIManager {
   }
 
   private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
-    const resetButton = this.buttons.resetButton;
-    if (!resetButton?.parentElement) return;
+    const { mainRightButtonsContainer, mainScoreContainer } = this.elements;
 
-    const buttonsContainer = resetButton.parentElement;
-    
-    // Position the button container to the right of the table
-    const newLeft = tableRect.right - gameAreaRect.left + margin;
-    
-    // Ensure it doesn't go off-screen
-    const finalLeft = Math.min(
-      newLeft,
-      gameAreaRect.width - buttonsContainer.offsetWidth - margin
-    );
+    if (mainRightButtonsContainer) {
+      // Кнопки управления (вертикально по центру справа)
+      const buttonsWidth = mainRightButtonsContainer.offsetWidth;
+      const buttonsHeight = mainRightButtonsContainer.offsetHeight;
 
-    buttonsContainer.style.position = 'absolute';
-    buttonsContainer.style.left = `${finalLeft}px`;
-    // Vertically center it relative to the table
-    buttonsContainer.style.top = `${tableRect.top + (tableRect.height / 2) - (buttonsContainer.offsetHeight / 2)}px`;
-    buttonsContainer.style.right = 'auto'; // Remove fixed 'right' positioning
+      const newLeft = tableRect.right - gameAreaRect.left + margin;
+      const finalLeft = Math.min(newLeft, gameAreaRect.width - buttonsWidth - margin);
+
+      mainRightButtonsContainer.style.position = 'absolute';
+      mainRightButtonsContainer.style.left = `${finalLeft}px`;
+      mainRightButtonsContainer.style.top = `${tableRect.top - gameAreaRect.top + (tableRect.height / 2) - (buttonsHeight / 2)}px`;
+      mainRightButtonsContainer.style.right = 'auto'; // Сброс, если был
+    }
+
+    if (mainScoreContainer) {
+      // Счет (справа сверху)
+      const scoreWidth = mainScoreContainer.offsetWidth;
+
+      const newLeft = tableRect.right - gameAreaRect.left + margin;
+      const finalLeft = Math.min(newLeft, gameAreaRect.width - scoreWidth - margin);
+
+      mainScoreContainer.style.position = 'absolute';
+      mainScoreContainer.style.left = `${finalLeft}px`;
+      mainScoreContainer.style.top = `${tableRect.top - gameAreaRect.top + margin}px`;
+      mainScoreContainer.style.right = 'auto'; // Сброс, если был
+    }
   }
 
   private positionMobileElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
