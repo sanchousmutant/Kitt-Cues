@@ -2,7 +2,11 @@
 
         body {
             font-family: 'Comfortaa', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background-color: #3a2d27; /* Темно-коричневый фон, как в бильярдной */
+            background-color: #3a2d27; /* Fallback */
+            background-image: url('img/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             overflow: hidden; /* Полностью убираем прокрутку */
             touch-action: none; /* Отключаем действия по умолчанию для касаний */
             user-select: none; /* Запрещаем выделение текста */
