@@ -275,6 +275,53 @@ export class SoundManager {
     }
   }
 
+  playPawHit(velocity: number): void {
+    if (!this.audioContext || !this.soundEnabled || !this.masterGain) return;
+
+    try {
+      const now = this.audioContext.currentTime;
+      const volume = Math.min(velocity / 15, 0.8) * AUDIO_CONFIG.SOUND_EFFECT_VOLUME;
+
+      // 1. Низкочастотный "пуф"
+      const bodyOsc = this.audioContext.createOscillator();
+      const bodyGain = this.audioContext.createGain();
+      bodyOsc.type = 'sine';
+      bodyOsc.frequency.setValueAtTime(80, now);
+      bodyOsc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+      bodyGain.gain.setValueAtTime(volume, now);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      bodyOsc.connect(bodyGain);
+      bodyGain.connect(this.masterGain);
+      bodyOsc.start();
+      bodyOsc.stop(now + 0.2);
+
+      // 2. Высокочастотный шелест шерсти (белый шум с фильтром)
+      const sampleRate = this.audioContext.sampleRate;
+      const bufferSize = sampleRate * 0.1;
+      const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+
+      const noiseSource = this.audioContext.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+      const noiseFilter = this.audioContext.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 1000;
+      const noiseGain = this.audioContext.createGain();
+      noiseGain.gain.setValueAtTime(volume * 0.3, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+      noiseSource.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(this.masterGain);
+      noiseSource.start();
+    } catch (error) {
+      console.error('Error playing paw hit sound:', error);
+    }
+  }
+
   toggleSound(): void {
     this.soundEnabled = !this.soundEnabled;
     console.log('Sound toggled - soundEnabled is now:', this.soundEnabled);
@@ -342,6 +389,59 @@ export class SoundManager {
   get isMusicEnabled(): boolean { return this.musicEnabled; }
   get getMusicVolume(): number { return this.musicVolume; }
   get getIsMusicPlaying(): boolean { return this.isMusicPlaying; }
+  playCueFall(): void {
+    if (!this.soundEnabled || !this.audioContext) return;
+
+    try {
+      const now = this.audioContext.currentTime;
+
+      const osc = this.audioContext.createOscillator();
+      const g = this.audioContext.createGain();
+
+      osc.type = 'sine';
+      // Скользящая вниз частота
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.4);
+
+      g.gain.setValueAtTime(0.3 * AUDIO_CONFIG.SOUND_EFFECT_VOLUME, now);
+      g.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+      osc.connect(g);
+      g.connect(this.masterGain);
+      osc.start();
+      osc.stop(now + 0.5);
+
+      // Дополнительный глухой щелчок в конце
+      setTimeout(() => this.playThud(8), 350);
+    } catch (error) {
+      console.error('Error playing cue fall sound:', error);
+    }
+  }
+
+  private playThud(power: number): void {
+    if (!this.soundEnabled || !this.audioContext) return;
+
+    try {
+      const now = this.audioContext.currentTime;
+      const osc = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+
+      gainNode.gain.setValueAtTime(power * 0.05 * AUDIO_CONFIG.SOUND_EFFECT_VOLUME, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+      osc.connect(gainNode);
+      gainNode.connect(this.masterGain);
+
+      osc.start();
+      osc.stop(now + 0.15);
+    } catch (error) {
+      console.error('Error playing thud:', error);
+    }
+  }
 }
 
 // Создаем глобальный экземпляр менеджера звука с отложенной инициализацией
@@ -362,6 +462,8 @@ export const soundManager = {
   get playWallHitSound() { return getSoundManager().playWallHitSound.bind(getSoundManager()); },
   get playPocketSound() { return getSoundManager().playPocketSound.bind(getSoundManager()); },
   get playMeowSound() { return getSoundManager().playMeowSound.bind(getSoundManager()); },
+  get playPawHit() { return getSoundManager().playPawHit.bind(getSoundManager()); },
+  get playCueFall() { return getSoundManager().playCueFall.bind(getSoundManager()); },
   get toggleSound() { return getSoundManager().toggleSound.bind(getSoundManager()); },
   get toggleMusic() { return getSoundManager().toggleMusic.bind(getSoundManager()); },
   get setMusicVolume() { return getSoundManager().setMusicVolume.bind(getSoundManager()); },

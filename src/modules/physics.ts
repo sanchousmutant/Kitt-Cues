@@ -1,6 +1,6 @@
 import { BallObject, CatObject, PocketObject, PhysicsSettings } from '../types';
 import { PHYSICS_CONFIG, CAT_CONFIG } from '../constants';
-import { playHitSound, playWallHitSound, playMeowSound, playPocketSound } from './sound';
+import { playHitSound, playWallHitSound, playPocketSound, soundManager } from './sound';
 import { vibrate } from '../utils/device';
 
 export class PhysicsEngine {
@@ -65,8 +65,12 @@ export class PhysicsEngine {
       const dy = ball.y - pocket.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // Засчитываем, только если весь шар внутри радиуса лузы
-      if ((distance + ball.radius) < pocket.radius && !ball.sunk) {
+      // Засчитываем попадание.
+      // Для мобильных делаем проверку чуть строже (0.6 от радиуса), чтобы не было "читерских" попаданий
+      // Для десктопа оставляем 0.8 (или < radius, но с учетом физики шара) - здесь упрощенно берем < radius
+      const threshold = this.isMobile ? pocket.radius * 0.6 : pocket.radius;
+
+      if (distance < threshold && !ball.sunk) {
         ball.sunk = true;
         ball.vx = 0;
         ball.vy = 0;
@@ -114,7 +118,7 @@ export class PhysicsEngine {
   }
 
   private handleCatHit(ball: BallObject, cat: CatObject, dx: number, dy: number, distance: number): void {
-    playMeowSound();
+
     cat.cooldown = this.isMobile ?
       PHYSICS_CONFIG.CAT_COOLDOWN * CAT_CONFIG.MOBILE_COOLDOWN_MULTIPLIER :
       PHYSICS_CONFIG.CAT_COOLDOWN;
@@ -127,6 +131,12 @@ export class PhysicsEngine {
     const effectivePawPower = this.isMobile ?
       Math.max(1, PHYSICS_CONFIG.PAW_HIT_POWER * CAT_CONFIG.MOBILE_PAW_POWER_MULTIPLIER) :
       PHYSICS_CONFIG.PAW_HIT_POWER;
+
+    // Звук удара лапой
+    soundManager.playPawHit(effectivePawPower);
+
+    // Событие удара кота
+    document.dispatchEvent(new CustomEvent('cat-hit'));
 
     ball.vx = Math.cos(angle) * effectivePawPower;
     ball.vy = Math.sin(angle) * effectivePawPower;

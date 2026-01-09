@@ -1,19 +1,23 @@
 import { BallObject, GameState } from './types';
-import { DOM_SELECTORS, GAME_CONFIG, POCKET_CONFIG } from './constants';
+import { DOM_SELECTORS, GAME_CONFIG, POCKET_CONFIG, JOYSTICK_CONFIG } from './constants';
 import { PhysicsEngine } from './modules/physics';
 import { soundManager } from './modules/sound';
 import { UIManager } from './modules/ui';
 import { catManager } from './modules/cats';
+import { JoystickManager } from './modules/joystick';
 import { debounce, smoothAngle, clamp, distance, angle } from './utils/helpers';
 import { isMobileDevice, isPortraitOrientation, vibrate, enterFullscreen, exitFullscreen, isFullscreenActive } from './utils/device';
 
 class Game {
   private physicsEngine: PhysicsEngine;
   private uiManager: UIManager;
+  private joystickManager: JoystickManager | null = null;
+  private lastJoystickPower: number = 0;
   private gameState: GameState;
   private isMobile: boolean = false;
   private isPortrait: boolean = false;
   private didInitialReset: boolean = false;
+  private trajectoryCtx: CanvasRenderingContext2D | null = null;
 
   constructor() {
     this.isMobile = isMobileDevice();
@@ -38,7 +42,12 @@ class Game {
       soundEnabled: soundManager.isSoundEnabled,
       musicEnabled: soundManager.isMusicEnabled,
       isMusicPlaying: soundManager.getIsMusicPlaying,
-      musicVolume: soundManager.getMusicVolume
+      musicVolume: soundManager.getMusicVolume,
+      stats: {
+        playerShots: 0,
+        catHits: 0,
+        foulCount: 0
+      }
     };
 
     this.init();
@@ -55,12 +64,29 @@ class Game {
     this.setupEventListeners();
     this.uiManager.loadUISettings();
 
+    // Инициализация джойстика для всех устройств
+    this.joystickManager = new JoystickManager();
+    this.setupJoystickCallbacks();
+
     // Инициализация игровых объектов
     this.initializeCats();
     this.initializePockets();
 
     // Настройка layout
     this.setupLayout();
+
+    // Настройка layout
+    this.setupLayout();
+
+    if (this.uiManager.trajectoryCanvas) {
+      if (this.uiManager.table) {
+        // Force layout update to get correct dimensions
+        this.uiManager.table.style.display = 'block'; // Ensure it's rendered
+        this.uiManager.trajectoryCanvas.width = this.uiManager.table.clientWidth;
+        this.uiManager.trajectoryCanvas.height = this.uiManager.table.clientHeight;
+      }
+      this.trajectoryCtx = this.uiManager.trajectoryCanvas.getContext('2d');
+    }
 
     // Настройка PWA
     this.setupPWA();
@@ -115,8 +141,10 @@ class Game {
 
       const target = e.target as HTMLElement;
 
-      // Игнорируем касания по кнопкам и интерактивным элементам UI
-      if (target.closest('button') || target.closest('.overflow-y-auto')) {
+      // Игнорируем касания по кнопкам, интерактивным элементам UI и джойстику
+      if (target.closest('button') ||
+        target.closest('.overflow-y-auto') ||
+        target.closest('.joystick-container')) {
         return;
       }
 
@@ -145,6 +173,61 @@ class Game {
     gameArea.addEventListener('gestureend', (e) => e.preventDefault());
   }
 
+  private setupJoystickCallbacks(): void {
+    if (!this.joystickManager) return;
+
+    // Callback при движении джойстика
+    this.joystickManager.onMove((state) => {
+      if (this.gameState.animationFrameId) return; // Не управляем во время анимации
+
+      const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
+      if (!cueBallObj || !this.uiManager.table) return;
+
+      // Преобразуем угол джойстика в угол прицеливания
+      // Джойстик: угол от центра (0 = вправо, PI/2 = вниз)
+      // Механика рогатки: тянем назад - бьем вперед (направление уже инвертировано)
+      const aimAngle = state.angle;
+
+      // Обновляем угол кия
+      this.gameState.cueAngle = aimAngle;
+
+      // Обновляем позицию кия
+      this.updateCuePosition(cueBallObj);
+
+      // Обновляем линию прицеливания (симметрично кию, с противоположной стороны битка)
+      this.updateAimLine(cueBallObj.x, cueBallObj.y, aimAngle + Math.PI);
+
+      // Сохраняем силу и обновляем индикатор
+      const power = state.power * JOYSTICK_CONFIG.POWER_MULTIPLIER;
+      this.lastJoystickPower = power;
+      this.updatePowerIndicator(power);
+
+      // Рисуем траекторию
+      if (state.power > JOYSTICK_CONFIG.MIN_POWER_THRESHOLD) {
+        const distance = state.power * 100; // Преобразуем в расстояние для траектории
+        this.drawTrajectory(cueBallObj, distance);
+      }
+
+      // Показываем визуальные помощники
+      if (this.uiManager.aimLine) this.uiManager.aimLine.classList.add('visible');
+      if (this.uiManager.powerIndicator) this.uiManager.powerIndicator.classList.add('visible');
+    });
+
+    // Callback при отпускании джойстика
+    this.joystickManager.onRelease(() => {
+      if (this.gameState.animationFrameId) return;
+
+      // Скрываем визуальные помощники
+      this.hideVisualHelpers();
+
+      // Выполняем удар используя сохраненную силу
+      if (this.lastJoystickPower > JOYSTICK_CONFIG.MIN_POWER_THRESHOLD * JOYSTICK_CONFIG.POWER_MULTIPLIER) {
+        this.hitBall(this.lastJoystickPower);
+        this.lastJoystickPower = 0; // Сбрасываем после удара
+      }
+    });
+  }
+
   private setupUIControls(): void {
     // Кнопка сброса игры
     if (this.uiManager.resetButton) {
@@ -153,6 +236,24 @@ class Game {
     if (this.uiManager.resetButtonLandscape) {
       this.addButtonHandler(this.uiManager.resetButtonLandscape, () => this.resetGame());
     }
+
+    // Обработчик события завершения Catnado
+    document.addEventListener('catnado-finished', () => {
+      this.uiManager.showGameOver(this.gameState.score, this.gameState.stats);
+    });
+
+    // Обработчик удара кота
+    document.addEventListener('cat-hit', () => {
+      this.gameState.stats.catHits++;
+    });
+
+    // Обработчик запроса на сброс игры из модального окна
+    document.addEventListener('game-reset-requested', () => {
+      this.resetGame();
+    });
+
+    // Экспортируем функцию сброса для HTML onclick
+    (window as any).resetGame = () => this.resetGame();
   }
 
   private addButtonHandler(button: HTMLElement, handler: () => void): void {
@@ -198,6 +299,11 @@ class Game {
     catManager.updateMobileSettings(this.isMobile);
     this.uiManager.checkOrientation();
     this.uiManager.updateLayout();
+
+    if (this.uiManager.trajectoryCanvas && this.uiManager.table) {
+      this.uiManager.trajectoryCanvas.width = this.uiManager.table.offsetWidth;
+      this.uiManager.trajectoryCanvas.height = this.uiManager.table.offsetHeight;
+    }
 
     // Переинициализируем статические объекты
     this.initializeCats();
@@ -372,6 +478,7 @@ class Game {
       // Переносим шар на стол
       this.uiManager.table!.appendChild(el);
       (el as HTMLElement).style.position = 'absolute';
+      (el as HTMLElement).style.zIndex = '10'; // Ensure balls are above trajectory
       (el as HTMLElement).style.left = '0px';
       (el as HTMLElement).style.top = '0px';
     });
@@ -410,6 +517,15 @@ class Game {
     const followFactor = this.isMobile ? 0.08 : 0.15;
     this.gameState.cueAngle = smoothAngle(this.gameState.cueAngle, targetAngle, followFactor);
 
+    // Рисование траектории
+    if (this.gameState.isDragging) {
+      const dragDistance = distance(
+        this.gameState.dragStartX, this.gameState.dragStartY,
+        mouseX, mouseY
+      );
+      this.drawTrajectory(cueBallObj, dragDistance);
+    }
+
     this.updateCuePosition(cueBallObj);
     this.updateAimLine(cueBallObj.x, cueBallObj.y, this.gameState.cueAngle + Math.PI);
   }
@@ -425,8 +541,12 @@ class Game {
     this.uiManager.cue.style.transformOrigin = 'left center';
     this.uiManager.cue.style.left = '0px';
     this.uiManager.cue.style.top = '0px';
+    // Use style height for precise un-rotated height, fallback to offsetHeight
+    const styleHeight = parseFloat(this.uiManager.cue.style.height);
+    const cueHeight = !isNaN(styleHeight) ? styleHeight : this.uiManager.cue.offsetHeight;
+
     this.uiManager.cue.style.transform =
-      `translate(${tipX}px, ${tipY - this.uiManager.cue.offsetHeight / 2}px) rotate(${degrees}deg)`;
+      `translate(${tipX}px, ${tipY - cueHeight / 2}px) rotate(${degrees}deg)`;
   }
 
   private updateAimLine(startX: number, startY: number, angle: number): void {
@@ -434,11 +554,16 @@ class Game {
 
     const lineLength = GAME_CONFIG.AIM_LINE_LENGTH;
 
+    // Use style height for precise un-rotated height, fallback to default
+    const styleHeight = parseFloat(this.uiManager.aimLine.style.height);
+    const computedHeight = parseFloat(window.getComputedStyle(this.uiManager.aimLine).height);
+    const lineHeight = !isNaN(styleHeight) ? styleHeight : (!isNaN(computedHeight) ? computedHeight : 2);
+
     this.uiManager.aimLine.style.left = '0px';
     this.uiManager.aimLine.style.top = '0px';
     this.uiManager.aimLine.style.width = `${lineLength}px`;
     this.uiManager.aimLine.style.transform =
-      `translate(${startX}px, ${startY - 1}px) rotate(${angle * (180 / Math.PI)}deg)`;
+      `translate(${startX}px, ${startY - lineHeight / 2}px) rotate(${angle * (180 / Math.PI)}deg)`;
     this.uiManager.aimLine.style.transformOrigin = 'left center';
 
     if (this.gameState.isDragging) {
@@ -555,17 +680,111 @@ class Game {
     );
 
     let power = Math.min(dragDistance / GAME_CONFIG.POWER_SENSITIVITY, GAME_CONFIG.MAX_POWER);
+
+    // For visual indicator, we want smooth growth from 0. 
+    // The physics hitPower enforcement happens strictly at hit time.
+    this.updatePowerIndicator(power);
+
     if (dragDistance < 10) {
-      power = this.physicsEngine.getSettings().hitPower;
+      power = this.physicsEngine.getSettings().hitPower; // Min power for physics
     }
 
     this.hideVisualHelpers();
     this.hitBall(power);
   }
 
+  private drawTrajectory(cueBall: BallObject, dragDistance: number): void {
+    if (!this.trajectoryCtx || !this.uiManager.trajectoryCanvas) return;
+
+    const ctx = this.trajectoryCtx;
+    const canvas = this.uiManager.trajectoryCanvas;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Направление удара противоположно углу кия
+    const angle = this.gameState.cueAngle + Math.PI;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    let collisionPoint = null;
+    let hitTarget = null;
+
+    // Raycasting parameters
+    const rayLength = 1000;
+    const stepSize = 5;
+
+    for (let d = 0; d < rayLength; d += stepSize) {
+      const nextX = cueBall.x + cos * d;
+      const nextY = cueBall.y + sin * d;
+
+      // Check ball collisions
+      for (const b of this.gameState.balls) {
+        if (b === cueBall || b.sunk) continue;
+
+        const dist = Math.sqrt((nextX - b.x) ** 2 + (nextY - b.y) ** 2);
+        // Используем 1.9 радиуса, чтобы учесть радиус самого битка и целевого шара (с небольшим запасом)
+        if (dist < cueBall.radius + b.radius) {
+          collisionPoint = { x: nextX, y: nextY };
+          hitTarget = b;
+          break;
+        }
+      }
+      if (collisionPoint) break;
+
+      // Check wall collisions (с учетом радиуса битка)
+      if (nextX < cueBall.radius || nextX > canvas.width - cueBall.radius ||
+        nextY < cueBall.radius || nextY > canvas.height - cueBall.radius) {
+        collisionPoint = { x: nextX, y: nextY };
+        break;
+      }
+    }
+
+    if (collisionPoint) {
+      ctx.save();
+
+      // 1. Пунктирная линия пути
+      ctx.beginPath();
+      ctx.setLineDash([5, 8]);
+      ctx.moveTo(cueBall.x, cueBall.y);
+      ctx.lineTo(collisionPoint.x, collisionPoint.y);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 2. Призрачный шар ("Ghost Ball")
+      ctx.beginPath();
+      ctx.arc(collisionPoint.x, collisionPoint.y, cueBall.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.stroke();
+
+      // 3. Направление отскока прицельного шара (если есть)
+      if (hitTarget) {
+        const hitAngle = Math.atan2(hitTarget.y - collisionPoint.y, hitTarget.x - collisionPoint.x);
+
+        ctx.beginPath();
+        ctx.setLineDash([]); // Сплошная линия
+        ctx.moveTo(hitTarget.x, hitTarget.y);
+        ctx.lineTo(hitTarget.x + Math.cos(hitAngle) * 60, hitTarget.y + Math.sin(hitAngle) * 60);
+        ctx.strokeStyle = 'rgba(243, 229, 171, 0.4)'; // Желтоватый
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+  }
+
   private hideVisualHelpers(): void {
     if (this.uiManager.aimLine) this.uiManager.aimLine.classList.remove('visible');
     if (this.uiManager.powerIndicator) this.uiManager.powerIndicator.classList.remove('visible');
+
+    // Очищаем траекторию при отпускании
+    if (this.trajectoryCtx && this.uiManager.trajectoryCanvas) {
+      this.trajectoryCtx.clearRect(0, 0, this.uiManager.trajectoryCanvas.width, this.uiManager.trajectoryCanvas.height);
+    }
   }
 
   private hitBall(power: number = this.physicsEngine.getSettings().hitPower): void {
@@ -577,6 +796,7 @@ class Game {
     if (!cueBallObj) return;
 
     soundManager.playHitSound(power);
+    this.gameState.stats.playerShots++;
     this.physicsEngine.applyForce(cueBallObj, this.gameState.cueAngle, power);
 
     // Анимация удара кием
@@ -642,8 +862,75 @@ class Game {
       }
     }
 
+    // Проверяем коллизии для каждого шара
+    this.gameState.balls.forEach(ball => {
+      this.physicsEngine.checkPocketCollisions(ball, this.gameState.pockets);
+      // this.physicsEngine.checkCatCollisions(ball, catManager.getCats()); // Removed as per new logic
+    });
+
+    // Проверка на падение белого шара (штраф)
+    const cueBall = this.gameState.balls.find(b => b.el.id === 'cue-ball');
+    if (cueBall && cueBall.sunk && !this.gameState.isFoulPending) {
+      // Штраф! Помечаем, что был фол
+      soundManager.playCueFall();
+      this.gameState.isFoulPending = true;
+      // Не прерываем игру, ждем остановки всех шаров
+    }
+
+    this.physicsEngine.checkCatCollisions(this.gameState.balls, catManager.getCats());
     this.physicsEngine.checkBallCollisions(this.gameState.balls);
   }
+
+  // Удаляем методы saveState и restoreState, так как логика изменилась
+  // private saveState(): void {
+  //   this.gameState.previousState = {
+  //     score: this.gameState.score,
+  //     balls: this.gameState.balls.map(b => ({
+  //       x: b.x,
+  //       y: b.y,
+  //       sunk: b.sunk,
+  //       vx: b.vx,
+  //       vy: b.vy
+  //     }))
+  //   };
+  // }
+
+  // public restoreState(): void {
+  //   if (!this.gameState.previousState) return;
+
+  //   console.log('Foul! Restoring state...');
+
+  //   // Восстанавливаем счет (минус 1 за штраф)
+  //   this.gameState.score = Math.max(0, this.gameState.previousState.score - 1);
+  //   this.uiManager.updateScore(this.gameState.score);
+
+  //   // Восстанавливаем шары
+  //   this.gameState.balls.forEach((ball, index) => {
+  //     const savedBall = this.gameState.previousState!.balls[index];
+  //     if (savedBall) {
+  //       ball.x = savedBall.x;
+  //       ball.y = savedBall.y;
+  //       ball.sunk = savedBall.sunk;
+  //       ball.vx = 0;
+  //       ball.vy = 0;
+
+  //       // Обновляем визуальное состояние
+  //       if (ball.el) {
+  //         ball.el.style.display = ball.sunk ? 'none' : 'block';
+  //       }
+  //     }
+  //   });
+
+  //   // Сбрасываем анимацию и состояние
+  //   if (this.gameState.animationFrameId) {
+  //     cancelAnimationFrame(this.gameState.animationFrameId);
+  //     this.gameState.animationFrameId = null;
+  //   }
+
+  //   // Показываем кий и обновляем рендер
+  //   this.onGameStopped();
+  //   this.render();
+  // }
 
   private onBallSunk(ball: BallObject): void {
     if (ball.el.id !== 'cue-ball') {
@@ -652,7 +939,9 @@ class Game {
 
       // Показываем грустные эмодзи над котами (или ничего если победа)
       if (this.uiManager.table) {
-        if (this.gameState.score >= 10) {
+        const allTargetsSunk = this.gameState.balls.every(b => b.el.id === 'cue-ball' || b.sunk);
+
+        if (allTargetsSunk) {
           // Победа! Запускаем Котонадо
           catManager.startCatnado(this.uiManager.table);
         } else {
@@ -660,34 +949,43 @@ class Game {
         }
       }
     } else {
-      // Радостные коты при забитии битка
+      // Для белого шара логика теперь обрабатывается через isFoulPending и onGameStopped
       if (this.uiManager.table) {
         catManager.showAllCatsEmoji('😺', this.uiManager.table);
       }
-
-      // Возвращаем биток на стартовую позицию
-      setTimeout(() => {
-        if (this.uiManager.table) {
-          ball.x = this.uiManager.table.offsetWidth * 0.25;
-          ball.y = this.uiManager.table.offsetHeight * 0.5;
-          ball.vx = 0;
-          ball.vy = 0;
-          ball.sunk = false;
-          ball.el.style.display = 'block';
-          this.render();
-        }
-      }, 1000);
     }
   }
 
   private onGameStopped(): void {
+    // Проверяем, был ли фол (утоплен белый шар)
+    if (this.gameState.isFoulPending) {
+      console.log('Foul pending resolved.');
+      this.gameState.isFoulPending = false;
+      this.gameState.stats.foulCount++;
+      this.gameState.score = Math.max(0, this.gameState.score - 1);
+      this.uiManager.updateScore(this.gameState.score);
+
+      const cueBall = this.gameState.balls.find(b => b.el.id === 'cue-ball');
+      if (cueBall && this.uiManager.table) {
+        // Возвращаем биток на исходную позицию
+        cueBall.sunk = false;
+        cueBall.x = this.uiManager.table.offsetWidth * 0.25;
+        cueBall.y = this.uiManager.table.offsetHeight * 0.5;
+        cueBall.vx = 0;
+        cueBall.vy = 0;
+        cueBall.el.style.display = 'block';
+      }
+    }
+
     // Показываем кий после полной остановки шаров
     const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
-    if (cueBallObj && this.uiManager.cue) {
+    if (cueBallObj && !cueBallObj.sunk && this.uiManager.cue) {
       // Используем переменные для позиционирования кия
       this.uiManager.cue.style.visibility = 'visible';
       this.updateCuePosition(cueBallObj);
     }
+
+    this.render();
   }
 
   private render(): void {
@@ -695,22 +993,36 @@ class Game {
       if (!ball.sunk) {
         ball.el.style.left = '0px';
         ball.el.style.top = '0px';
-        ball.el.style.transform = `translate(${ball.x - ball.radius}px, ${ball.y - ball.radius}px)`;
+        // Use visual radius for centering
+        // Fallback to physics radius if visual size is not yet set
+        const visualWidth = parseFloat(ball.el.style.width);
+        const visualRadius = !isNaN(visualWidth) ? visualWidth / 2 : ball.radius;
+
+        ball.el.style.transform = `translate(${ball.x - visualRadius}px, ${ball.y - visualRadius}px)`;
       }
     });
   }
 
   public resetGame(): void {
+    this.uiManager.hideGameOver(); // Скрываем модальное окно проигрыша
     if (this.gameState.animationFrameId) {
       cancelAnimationFrame(this.gameState.animationFrameId);
       this.gameState.animationFrameId = null;
     }
 
     this.gameState.score = 0;
+    this.gameState.stats = {
+      playerShots: 0,
+      catHits: 0,
+      foulCount: 0
+    };
     this.uiManager.updateScore(this.gameState.score);
 
     this.initializePockets();
     this.initializeBalls();
+
+    // Сброс котов
+    catManager.resetCats();
 
     // Сброс всех шаров
     this.gameState.balls.forEach(ball => {

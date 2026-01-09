@@ -33,6 +33,7 @@ export class UIManager {
     this.elements.pyramidContainer = document.querySelector(DOM_SELECTORS.PYRAMID_CONTAINER) as HTMLElement;
     this.elements.helpModal = document.querySelector(DOM_SELECTORS.HELP_MODAL) as HTMLElement;
     this.elements.rotationNotice = document.querySelector(DOM_SELECTORS.ROTATION_NOTICE) as HTMLElement;
+    this.elements.trajectoryCanvas = document.querySelector(DOM_SELECTORS.TRAJECTORY_CANVAS) as HTMLCanvasElement;
 
     // Кнопки управления
     this.buttons.soundToggle = document.querySelector('#sound-toggle') as HTMLButtonElement;
@@ -48,6 +49,9 @@ export class UIManager {
     // Элементы отображения счета
     this.scoreElements.scoreDisplay = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY) as HTMLElement;
     this.scoreElements.scoreDisplayLandscape = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY_LANDSCAPE) as HTMLElement;
+    this.elements.gameOverModal = document.querySelector('#game-over') as HTMLElement;
+    this.elements.finalScore = document.querySelector('#final-score') as HTMLElement;
+    this.buttons.restartButtonModal = document.querySelector('#restart-button-modal') as HTMLButtonElement;
 
     // Слайдеры громкости
     this.volumeControls.musicVolume = document.querySelector('#music-volume') as HTMLInputElement;
@@ -65,6 +69,20 @@ export class UIManager {
     if (this.buttons.soundToggleLandscape) this.addButtonListener(this.buttons.soundToggleLandscape, () => this.toggleSound());
     if (this.buttons.musicToggleLandscape) this.addButtonListener(this.buttons.musicToggleLandscape, () => this.toggleMusic());
     if (this.buttons.helpButtonLandscape) this.addButtonListener(this.buttons.helpButtonLandscape, () => this.showHelp());
+
+    // Game Over Restart Button is handled in main.ts via direct access or callback, 
+    // but better to expose a method or event. For now, we will add a getter or let main.ts bind it.
+    // Actually, let's bind a custom event or callback if we had one.
+    // Simpler: let main.ts attach the listener because it has access to resetGame.
+    // Or we can modify UIManager to accept onReset callback.
+    // Let's just expose the button or leave it for main.ts to find? 
+    // No, good practice is to handle UI events here.
+    // Let's dispatch a custom event 'request-reset' on window or document.
+    if (this.buttons.restartButtonModal) {
+      this.addButtonListener(this.buttons.restartButtonModal, () => {
+        document.dispatchEvent(new CustomEvent('game-reset-requested'));
+      });
+    }
 
     // Слайдеры громкости
     if (this.volumeControls.musicVolume) {
@@ -257,6 +275,7 @@ export class UIManager {
     this.scaleCue(scaleFactor);
     this.scaleButtons(scaleFactor);
     this.scaleScore(scaleFactor);
+    this.scalePowerIndicator(scaleFactor);
   }
 
   private scaleCats(scaleFactor: number): void {
@@ -332,16 +351,16 @@ export class UIManager {
     let baseWidth = 40;
 
     if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
-      baseHeight = 1;
+      baseHeight = 3;
       baseWidth = 10;
     } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
-      baseHeight = 1;
+      baseHeight = 4;
       baseWidth = 15;
     } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
-      baseHeight = 1;
+      baseHeight = 5;
       baseWidth = 20;
     } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
-      baseHeight = 1;
+      baseHeight = 6;
       baseWidth = 25;
     }
 
@@ -441,6 +460,33 @@ export class UIManager {
         element.style.minWidth = 'auto'; // Убираем минимальную ширину
       }
     });
+  }
+
+  private scalePowerIndicator(scaleFactor: number): void {
+    if (!this.elements.powerIndicator) return;
+
+    let baseWidth = 200;
+    let baseHeight = 15;
+
+    if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
+      baseWidth = 40;
+      baseHeight = 4;
+    } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
+      baseWidth = 50;
+      baseHeight = 5;
+    } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
+      baseWidth = 80;
+      baseHeight = 8;
+    } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
+      baseWidth = 120;
+      baseHeight = 10;
+    }
+
+    const finalWidth = Math.max(30, baseWidth * scaleFactor);
+    const finalHeight = Math.max(3, baseHeight * scaleFactor);
+
+    this.elements.powerIndicator.style.width = `${finalWidth}px`;
+    this.elements.powerIndicator.style.height = `${finalHeight}px`;
   }
 
   positionUIElements(): void {
@@ -644,6 +690,7 @@ export class UIManager {
   get resetButton(): HTMLButtonElement | null { return this.buttons.resetButton || null; }
   get resetButtonLandscape(): HTMLButtonElement | null { return this.buttons.resetButtonLandscape || null; }
   get helpModal(): HTMLElement | undefined { return this.elements.helpModal; }
+  get trajectoryCanvas(): HTMLCanvasElement | undefined { return this.elements.trajectoryCanvas; }
 
   get isMobileDevice(): boolean { return this.isMobile; }
   get isPortraitMode(): boolean { return this.isPortrait; }
@@ -659,6 +706,32 @@ export class UIManager {
     }
     if (this.volumeControls.musicVolumeLandscape) {
       this.volumeControls.musicVolumeLandscape.value = String(volume);
+    }
+  }
+
+  public showGameOver(score: number, stats?: { playerShots: number; catHits: number; foulCount: number }): void {
+    if (this.elements.gameOverModal) {
+      this.elements.gameOverModal.style.display = 'flex';
+
+      if (this.elements.finalScore) {
+        this.elements.finalScore.textContent = score.toString();
+      }
+
+      if (stats) {
+        const shotsEl = document.getElementById('stat-player-shots');
+        const catHitsEl = document.getElementById('stat-cat-hits');
+        const foulsEl = document.getElementById('stat-fouls');
+
+        if (shotsEl) shotsEl.textContent = stats.playerShots.toString();
+        if (catHitsEl) catHitsEl.textContent = stats.catHits.toString();
+        if (foulsEl) foulsEl.textContent = stats.foulCount.toString();
+      }
+    }
+  }
+
+  public hideGameOver(): void {
+    if (this.elements.gameOverModal) {
+      this.elements.gameOverModal.style.display = 'none';
     }
   }
 }

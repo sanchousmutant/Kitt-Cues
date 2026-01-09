@@ -20,6 +20,11 @@ export interface CatObject extends Position {
   pawEl: HTMLElement | null;
   radius: number;
   cooldown: number;
+  initialPosition: {
+    left: string;
+    top: string;
+    transform: string;
+  };
 }
 
 export interface PocketObject extends Position {
@@ -56,6 +61,16 @@ export interface GameState {
   musicEnabled: boolean;
   isMusicPlaying: boolean;
   musicVolume: number;
+  isFoulPending?: boolean;
+  stats: {
+    playerShots: number;
+    catHits: number;
+    foulCount: number;
+  };
+  previousState?: {
+    balls: { x: number; y: number; sunk: boolean; vx: number; vy: number }[];
+    score: number;
+  };
 }
 
 // Аудио контекст и узлы
@@ -79,7 +94,7 @@ export interface Dimensions {
   height: number;
 }
 
-export interface Rect extends Dimensions, Position {}
+export interface Rect extends Dimensions, Position { }
 
 // Конфигурация масштабирования
 export interface ScalingConfig {
@@ -103,6 +118,7 @@ export interface GameElements {
   pyramidContainer: HTMLElement;
   helpModal: HTMLElement;
   rotationNotice: HTMLElement;
+  trajectoryCanvas: HTMLCanvasElement;
 }
 
 // Кнопки управления

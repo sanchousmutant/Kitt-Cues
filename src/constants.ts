@@ -58,6 +58,7 @@ export const DOM_SELECTORS = {
   GAME_AREA: '#game-area',
   TABLE: '#billiard-table',
   TABLE_CONTAINER: '#billiard-table-container',
+  TRAJECTORY_CANVAS: '#trajectory-canvas',
   CUE: '#cue',
   AIM_LINE: '#aim-line',
   POWER_INDICATOR: '#power-indicator',
@@ -74,7 +75,7 @@ export const DOM_SELECTORS = {
 
 // Константы для кошек
 export const CAT_CONFIG = {
-  MOBILE_RADIUS_MULTIPLIER: 0.5,
+  MOBILE_RADIUS_MULTIPLIER: 0.4,
   MOBILE_COOLDOWN_MULTIPLIER: 2,
   MOBILE_SPEED_THRESHOLD: 3, // минимальная скорость для реакции кота на мобильных
   MOBILE_PAW_POWER_MULTIPLIER: 0.25,
@@ -131,4 +132,10 @@ export const CAT_TYPES = {
   GRAY: 'cat-gray',
   WHITE: 'cat-white',
   SMALL: 'cat-small',
+} as const;
+
+// Константы джойстика
+export const JOYSTICK_CONFIG = {
+  POWER_MULTIPLIER: 25, // множитель для преобразования силы джойстика в силу удара
+  MIN_POWER_THRESHOLD: 0.1, // минимальная сила для регистрации удара
 } as const;

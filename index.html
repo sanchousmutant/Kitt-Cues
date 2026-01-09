@@ -73,39 +73,32 @@
 
 
     <div class="relative flex-1 w-full max-w-full sm:pl-24 sm:pt-20 sm:pr-8" id="game-area">
-        <!-- Левые кнопки за пределами стола (только для больших экранов) -->
-        <!-- Левые кнопки: вертикальный столбик слева -->
-        <div class="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 flex-col gap-4 z-10">
+        <!-- Кнопки управления справа (только для больших экранов) -->
+        <div class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 flex-col gap-4 z-10">
             <button id="sound-toggle" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
-                title="Включить/отключить звуковые эффекты">🔊</button>
+                title="Звуковые эффекты">🔊</button>
             <button id="music-toggle" aria-label="Переключить фоновую музыку"
                 class="bg-purple-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-purple-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
-                title="Включить/отключить фоновую музыку">🎵</button>
+                title="Фоновая музыка">🎵</button>
             <button id="help-button" aria-label="Открыть справку"
                 class="bg-green-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-green-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Справка">❓</button>
-        </div>
-
-        <!-- Правая кнопка Reset за пределами стола (только для больших экранов) -->
-        <!-- Позиционируем внизу справа или в том же ряду, но пока оставим по центру справа, но с отступом -->
-        <div class="hidden sm:block absolute right-4 top-1/2 -translate-y-1/2 z-10">
             <button id="reset-button" aria-label="Сбросить игру"
                 class="bg-yellow-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-yellow-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Сброс">🔄</button>
         </div>
 
-        <!-- Счет в правом верхнем углу за пределами стола (только для больших экранов) -->
-        <!-- Счет в правом верхнем углу (только текст) -->
-        <div class="hidden sm:block absolute top-6 right-8 z-10 pointer-events-none">
+        <!-- Счет в правом верхнем углу (только для больших экранов) -->
+        <div class="hidden sm:block absolute top-6 right-24 z-10 pointer-events-none">
             <div id="score-display"
                 class="text-[#facc15] font-bold text-2xl sm:text-3xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-comfortaa">
                 Счет: 0</div>
         </div>
 
-        <!-- Дополнительные кнопки для мобильных в ландшафтной ориентации: вертикально по центру слева -->
+        <!-- Дополнительные кнопки для мобильных в ландшафтной ориентации: вертикально по центру справа -->
         <div
-            class="absolute top-1/2 -translate-y-1/2 left-2 flex flex-col gap-3 sm:hidden landscape-mobile-controls z-20">
+            class="absolute top-1/2 -translate-y-1/2 right-2 flex flex-col gap-3 sm:hidden landscape-mobile-controls z-20">
             <button id="sound-toggle-landscape" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-8 h-8 rounded-full shadow-md text-xs flex items-center justify-center opacity-80 hover:opacity-100"
                 title="Звуковые эффекты">🔊</button>
@@ -126,6 +119,16 @@
                 class="text-[#facc15] font-bold text-xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-comfortaa">Счет: 0
             </div>
         </div>
+
+        <!-- Виртуальный джойстик -->
+        <div class="joystick-container landscape-mobile-controls">
+            <div class="joystick-base">
+                <div class="joystick-stick">
+                    <span class="joystick-paw">🐾</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Рамка стола -->
         <div id="billiard-table-container" class="absolute bg-[#8B4513] rounded-2xl shadow-2xl">
             <!-- Игровая поверхность -->
@@ -159,10 +162,14 @@
                         <div class="billiard-ball bg-red-600" style="top: 46px; left: 20px;"></div>
                         <!-- Ряд 3 -->
                         <div class="billiard-ball bg-purple-600" style="top: 10px; left: 40px;"></div>
-                        <div class="billiard-ball bg-black" style="top: 34px; left: 40px;"></div>
+                        <div class="billiard-ball"
+                            style="top: 34px; left: 40px; background: linear-gradient(to bottom, #ffffff 25%, #000000 25%, #000000 75%, #ffffff 75%);">
+                        </div>
                         <div class="billiard-ball bg-orange-500" style="top: 58px; left: 40px;"></div>
                         <!-- Ряд 4 -->
-                        <div class="billiard-ball bg-green-800" style="top: -2px; left: 60px;"></div>
+                        <div class="billiard-ball"
+                            style="top: -2px; left: 60px; background: linear-gradient(to bottom, #ffffff 25%, #54f134 25%, #54f134 75%, #ffffff 75%);">
+                        </div>
                         <div class="billiard-ball bg-red-900" style="top: 22px; left: 60px;"></div>
                         <div class="billiard-ball bg-yellow-900" style="top: 46px; left: 60px;"></div>
                         <div class="billiard-ball bg-blue-900" style="top: 70px; left: 60px;"></div>
@@ -413,54 +420,61 @@
                 <h2 id="help-title" class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800 flex-shrink-0">🎱
                     Как играть</h2>
                 <div class="text-sm sm:text-base text-gray-600 space-y-2 sm:space-y-3 overflow-y-auto flex-1 pr-2">
-                    <p><strong>Цель:</strong> Забить все цветные шары в лузы</p>
+                    <p><strong>🎯 Цель:</strong> Забить все цветные шары в лузы!</p>
 
                     <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
-                        <p><strong>📱 Управление на смартфоне:</strong></p>
+                        <p><strong>🕹️ Джойстик (рекомендуется):</strong></p>
                         <ul class="list-disc list-inside ml-3 sm:ml-4 space-y-1 mt-2">
-                            <li><span class="text-blue-600">Прицеливание:</span> Касайтесь экрана и ведите пальцем</li>
-                            <li><span class="text-blue-600">Удар:</span> Нажмите и потяните от битка, затем отпустите
-                            </li>
-                            <li><span class="text-blue-600">Сила удара:</span> Чем дальше тянете - тем сильнее удар</li>
-                            <li><span class="text-blue-600">Линия прицеливания:</span> Показывает направление удара</li>
-                            <li><span class="text-blue-600">Индикатор силы:</span> Зеленый→желтый→красный</li>
-                            <li><span class="text-blue-600">Вибрация:</span> Подтверждает выполнение удара</li>
+                            <li>Найдите лапку 🐾 слева внизу</li>
+                            <li>Коснитесь и потяните в нужную сторону</li>
+                            <li>Чем дальше тянете - тем сильнее удар</li>
+                            <li>Отпустите - биток ударится</li>
+                            <li><span class="text-blue-600">Механика рогатки:</span> тянете назад → бьет вперед</li>
                         </ul>
                     </div>
 
                     <div class="bg-green-50 p-3 rounded-lg border-l-4 border-green-400">
-                        <p><strong>💻 Управление на компьютере:</strong></p>
+                        <p><strong>👆 Касание экрана:</strong></p>
                         <ul class="list-disc list-inside ml-3 sm:ml-4 space-y-1 mt-2">
-                            <li>Наведите курсор для прицеливания</li>
-                            <li>Зажмите и потяните для силы удара</li>
-                            <li>Отпустите для выполнения удара</li>
-                        </ul>
-                    </div>
-
-                    <p><strong>🐱 Кошки:</strong> Могут ударить шары лапками! Они реагируют на движущиеся шары</p>
-                    <p><strong>📊 Счет:</strong> +1 очко за каждый забитый цветной шар</p>
-                    <p><strong>🎵 Звук:</strong> Фоновая музыка и звуковые эффекты для атмосферы</p>
-
-                    <div class="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
-                        <p><strong>⌨️ Горячие клавиши (компьютер):</strong></p>
-                        <ul class="list-disc list-inside ml-3 sm:ml-4 space-y-1 mt-2">
-                            <li><span class="font-mono bg-gray-200 px-1 rounded">S</span> - переключить звуковые эффекты
-                                (мяуканье, удары)</li>
-                            <li><span class="font-mono bg-gray-200 px-1 rounded">M</span> - переключить фоновую музыку
-                            </li>
-                            <li><span class="font-mono bg-gray-200 px-1 rounded">H</span> - открыть справку</li>
-                            <li><span class="font-mono bg-gray-200 px-1 rounded">Esc</span> - закрыть окна</li>
+                            <li>Коснитесь экрана в нужном направлении</li>
+                            <li>Потяните палец от битка для силы</li>
+                            <li>Отпустите для удара</li>
                         </ul>
                     </div>
 
                     <div class="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-400">
-                        <p><strong>💡 Советы для смартфона:</strong></p>
+                        <p><strong>🔍 Подсказки на экране:</strong></p>
                         <ul class="list-disc list-inside ml-3 sm:ml-4 space-y-1 mt-2">
-                            <li>Поверните телефон горизонтально для лучшего обзора</li>
-                            <li>Используйте короткие движения для точных ударов</li>
-                            <li>Длинные движения для мощных ударов</li>
-                            <li>Следите за цветом индикатора силы</li>
-                            <li>Кошки добавляют веселья в игру! 🐾</li>
+                            <li><span class="text-purple-600">Белая линия</span> - направление удара</li>
+                            <li><span class="text-purple-600">Цветная полоска</span> - сила удара:
+                                <span class="text-green-600">🟢 слабый</span>,
+                                <span class="text-yellow-600">🟡 средний</span>,
+                                <span class="text-red-600">🔴 сильный</span>
+                            </li>
+                            <li><span class="text-purple-600">Пунктирная линия</span> - путь битка</li>
+                        </ul>
+                    </div>
+
+                    <p><strong>🐱 Котики:</strong> Могут отбить шар лапкой и помочь направить его в лузу!</p>
+                    <p><strong>📊 Счет:</strong> +1 очко за каждый забитый цветной шар</p>
+
+                    <div class="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
+                        <p><strong>💡 Советы:</strong></p>
+                        <ul class="list-disc list-inside ml-3 sm:ml-4 space-y-1 mt-2">
+                            <li>Начинайте с джойстика - он проще</li>
+                            <li>Смотрите на цвет индикатора силы</li>
+                            <li>Средние удары (желтая зона) - оптимальны</li>
+                            <li>Поверните телефон горизонтально</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded-lg border-l-4 border-gray-400">
+                        <p><strong>🎛️ Кнопки (справа):</strong></p>
+                        <ul class="list-disc list-inside ml-3 sm:ml-4 space-y-1 mt-2">
+                            <li>🔊 Звук - звуковые эффекты</li>
+                            <li>🎵 Музыка - фоновая музыка</li>
+                            <li>❓ Справка - это окно</li>
+                            <li>🔄 Сброс - начать заново</li>
                         </ul>
                     </div>
                 </div>
@@ -469,12 +483,47 @@
             </div>
         </div>
 
-        <!-- 
+        <!-- Модальное окно завершения игры -->
+        <div id="game-over"
+            class="fixed inset-0 bg-black bg-opacity-75 z-[100] hidden flex-col items-center justify-center text-yellow-100"
+            style="display: none;">
+            <div
+                class="stats-card bg-gray-800 p-6 rounded-xl border-2 border-yellow-600 text-center shadow-2xl max-w-sm mx-4 transform transition-all">
+                <h2 class="text-3xl font-bold mb-4 text-white">Игра окончена!</h2>
+                <div class="mb-6">
+                    <p class="text-gray-400 text-lg mb-1">Финальный счет</p>
+                    <p id="final-score" class="text-5xl font-bold text-yellow-400">0</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 mb-6 text-left bg-gray-900 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Ударов по шару:</span>
+                        <span id="stat-player-shots" class="text-xl font-bold text-blue-400">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Шлепков котов:</span>
+                        <span id="stat-cat-hits" class="text-xl font-bold text-orange-400">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Падений белого:</span>
+                        <span id="stat-fouls" class="text-xl font-bold text-red-400">0</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button id="restart-button-modal"
+                        class="restart-btn bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg transition transform hover:scale-105 shadow-lg active:scale-95 duration-200">
+                        Начать заново 🔄
+                    </button>
+                </div>
+            </div>
+
+            <!-- 
   ⚠️ ВНИМАНИЕ: Этот файл используется только для разработки!
   Для production используйте собранную версию из dist/ через GitHub Actions.
   НЕ используйте этот файл напрямую на GitHub Pages!
 -->
-        <script type="module" src="./src/main.ts"></script>
+            <script type="module" src="./src/main.ts"></script>
 </body>
 
 </html>

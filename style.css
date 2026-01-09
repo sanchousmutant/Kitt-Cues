@@ -1,1072 +1,1602 @@
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
 
-        body {
-            font-family: 'Comfortaa', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background-color: #3a2d27; /* Fallback */
-            background-image: url('./img/background.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            overflow: hidden; /* Полностью убираем прокрутку */
-            touch-action: none; /* Отключаем действия по умолчанию для касаний */
-            user-select: none; /* Запрещаем выделение текста */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE/Edge */
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            /* Ускорение анимаций */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-perspective: 1000px;
-            perspective: 1000px;
-        }
-
-        /* Гарантируем, что все помещается в экран */
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            /* Предотвращаем зум на iOS */
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
-
-        /* iOS Safari оптимизации */
-        .ios-device {
-            -webkit-overflow-scrolling: touch;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Android оптимизации */
-        .android-device {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Samsung Internet оптимизации */
-        .samsung-browser {
-            will-change: transform;
-        }
-
-        /* Оптимизации для старых Android браузеров */
-        @media screen and (-webkit-min-device-pixel-ratio: 1) {
-            .billiard-ball {
-                -webkit-transform: translateZ(0);
-                transform: translateZ(0);
-            }
-        }
-
-        /* Firefox mobile оптимизации */
-        @-moz-document url-prefix() {
-            .billiard-ball {
-                -moz-transform: translateZ(0);
-                transform: translateZ(0);
-            }
-        }
-
-        /* Оптимизации для экранов с высокой плотностью пикселей */
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .billiard-ball {
-                image-rendering: -webkit-optimize-contrast;
-                image-rendering: crisp-edges;
-            }
-        }
-
-        /* Улучшенные анимации для устройств с поддержкой аппаратного ускорения */
-        @media (prefers-reduced-motion: no-preference) {
-            .cat-container * {
-                will-change: transform;
-                -webkit-backface-visibility: hidden;
-                backface-visibility: hidden;
-            }
-        }
-
-        /* Снижение анимаций для пользователей, предпочитающих меньше движения */
-        @media (prefers-reduced-motion: reduce) {
-            .cat-container * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* PWA стили */
-        #pwa-install-button {
-            animation: pwa-bounce 2s infinite;
-        }
-
-        @keyframes pwa-bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        @-webkit-keyframes pwa-bounce {
-            0%, 20%, 50%, 80%, 100% { -webkit-transform: translateY(0); }
-            40% { -webkit-transform: translateY(-10px); }
-            60% { -webkit-transform: translateY(-5px); }
-        }
-
-        /* PWA режим - скрываем некоторые элементы браузера */
-        .pwa-mode {
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-
-        /* Стили для уведомлений */
-        .notification {
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        /* Улучшенные стили для мобильных устройств в PWA режиме */
-        @media (display-mode: standalone) {
-            body {
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                -khtml-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-            }
-            
-            /* Скрываем полосы прокрутки в PWA */
-            ::-webkit-scrollbar {
-                display: none;
-            }
-            
-            html {
-                scrollbar-width: none;
-                -ms-overflow-style: none;
-            }
-        }
-
-        /* Анимация для поворота телефона */
-        @keyframes rotate-phone {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg); }
-            50% { transform: rotate(90deg); }
-            75% { transform: rotate(0deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        .animate-rotate-phone {
-            animation: rotate-phone 2s infinite ease-in-out;
-        }
-
-        /* Адаптивные размеры шаров */
-        .billiard-ball {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-            transition: transform 0.1s ease-out;
-            -webkit-transition: -webkit-transform 0.1s ease-out;
-            -moz-transition: -moz-transform 0.1s ease-out;
-            -o-transition: -o-transform 0.1s ease-out;
-            /* Аппаратное ускорение */
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            will-change: transform;
-        }
-
-        /* Увеличенные размеры для больших экранов */
-        @media (min-width: 640px) {
-            .billiard-ball {
-                width: 18px;
-                height: 18px;
-                box-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.4);
-            }
-        }
-
-        @media (min-width: 768px) {
-            .billiard-ball {
-                width: 20px;
-                height: 20px;
-                box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .billiard-ball {
-                width: 22px;
-                height: 22px;
-                box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-            }
-        }
-
-        @media (min-width: 1280px) {
-            .billiard-ball {
-                width: 24px;
-                height: 24px;
-                box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
-            }
-        }
-
-        /* Анимация для хвоста кошки */
-        @keyframes tail-wag {
-            0%, 100% { transform: rotate(5deg); }
-            50% { transform: rotate(-15deg); }
-        }
-        @-webkit-keyframes tail-wag {
-            0%, 100% { -webkit-transform: rotate(5deg); }
-            50% { -webkit-transform: rotate(-15deg); }
-        }
-        @-moz-keyframes tail-wag {
-            0%, 100% { -moz-transform: rotate(5deg); }
-            50% { -moz-transform: rotate(-15deg); }
-        }
-
-        /* Анимация для головы кошки (кивок) */
-        @keyframes head-nod {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        @-webkit-keyframes head-nod {
-            0%, 100% { -webkit-transform: translateY(0); }
-            50% { -webkit-transform: translateY(-5px); }
-        }
-        @-moz-keyframes head-nod {
-            0%, 100% { -moz-transform: translateY(0); }
-            50% { -moz-transform: translateY(-5px); }
-        }
-
-        /* Анимация для лапки */
-        @keyframes paw-tap {
-            0%, 100% { transform: translateY(0) rotate(5deg); }
-            50% { transform: translateY(-3px) rotate(-5deg); }
-        }
-        @-webkit-keyframes paw-tap {
-            0%, 100% { -webkit-transform: translateY(0) rotate(5deg); }
-            50% { -webkit-transform: translateY(-3px) rotate(-5deg); }
-        }
-        @-moz-keyframes paw-tap {
-            0%, 100% { -moz-transform: translateY(0) rotate(5deg); }
-            50% { -moz-transform: translateY(-3px) rotate(-5deg); }
-        }
-        
-        /* Анимация для моргания */
-        @keyframes blink {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95% { transform: scaleY(0.1); }
-        }
-        @-webkit-keyframes blink {
-            0%, 90%, 100% { -webkit-transform: scaleY(1); }
-            95% { -webkit-transform: scaleY(0.1); }
-        }
-        @-moz-keyframes blink {
-            0%, 90%, 100% { -moz-transform: scaleY(1); }
-            95% { -moz-transform: scaleY(0.1); }
-        }
-
-        /* Анимация для удара лапой */
-        @keyframes paw-swat {
-            0% { transform: scale(1) rotate(5deg); }
-            50% { transform: scale(1.4) rotate(-40deg); }
-            100% { transform: scale(1) rotate(5deg); }
-        }
-
-        /* Усиленная анимация для всего маленького кота */
-        @keyframes small-cat-swat {
-            0% { 
-                transform: scale(1) rotate(0deg); 
-            }
-            25% {
-                transform: scale(1.1) rotate(-5deg);
-            }
-            50% { 
-                transform: scale(1.2) rotate(-8deg); 
-            }
-            75% {
-                transform: scale(1.1) rotate(-3deg);
-            }
-            100% { 
-                transform: scale(1) rotate(0deg); 
-            }
-        }
-
-        /* Анимация испуга кота */
-        @keyframes cat-scared {
-            0% { transform: scale(1) translateY(0); }
-            25% { transform: scale(1.1) translateY(-5px); }
-            50% { transform: scale(1.05) translateY(-3px); }
-            75% { transform: scale(1.08) translateY(-4px); }
-            100% { transform: scale(1) translateY(0); }
-        }
-
-        .swat-animation {
-            animation: paw-swat 0.3s ease-out;
-        }
-
-        /* Специальная анимация для всего маленького кота */
-        .cat-small.swat-animation {
-            animation: small-cat-swat 0.5s ease-out;
-        }
-
-        .cat-scared {
-            animation: cat-scared 0.5s ease-out;
-        }
-
-        /* Дополнительные анимации для элементов котов */
-        @keyframes whisker-twitch {
-            0%, 95%, 100% { transform: rotate(0deg); }
-            2%, 5% { transform: rotate(5deg); }
-        }
-
-        @keyframes ear-twitch {
-            0%, 90%, 100% { transform: rotate(0deg); }
-            5%, 15% { transform: rotate(8deg); }
-        }
-
-        @keyframes gentle-breathing {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        /* Анимации усов, ушей и дыхания для каждого кота */
-        .cat-container:nth-child(1) .whisker {
-            animation: whisker-twitch 8s infinite;
-            animation-delay: 2s;
-        }
-
-        /* Анимации для оранжевого кота */
-        .cat-orange .whisker {
-            animation: whisker-twitch 8s infinite;
-            animation-delay: 2s;
-        }
-
-        .cat-orange .cat-head {
-            animation: head-nod 4s infinite ease-in-out, gentle-breathing 3s infinite ease-in-out;
-            animation-delay: 0.3s, 1s;
-        }
-
-        .cat-orange .cat-tail {
-            animation: tail-wag 2.5s infinite ease-in-out;
-            animation-delay: 0s;
-            transform-origin: right bottom;
-        }
-        .cat-orange .cat-paw {
-            animation: paw-tap 1.5s infinite ease-in-out;
-            animation-delay: 0.1s;
-        }
-        .cat-orange .cat-eye {
-            animation: blink 4.2s infinite;
-            animation-delay: 0.5s;
-        }
-
-        /* Анимации для серого кота */
-        .cat-gray .whisker {
-            animation: whisker-twitch 6s infinite;
-            animation-delay: 3.5s;
-        }
-
-        .cat-gray .ear {
-            animation: ear-twitch 7s infinite;
-            animation-delay: 1.2s;
-        }
-
-        .cat-gray .cat-head {
-            animation: head-nod 3.6s infinite ease-in-out, gentle-breathing 2.8s infinite ease-in-out;
-            animation-delay: 1.1s, 0.5s;
-        }
-
-        .cat-gray .cat-tail {
-            animation: tail-wag 2.8s infinite ease-in-out;
-            animation-delay: 0.7s;
-            transform-origin: right bottom;
-        }
-        .cat-gray .cat-paw {
-            animation: paw-tap 1.3s infinite ease-in-out;
-            animation-delay: 0.4s;
-        }
-        .cat-gray .cat-eye {
-            animation: blink 5.3s infinite;
-            animation-delay: 1.8s;
-        }
-
-        /* Анимации для белого кота */
-        .cat-white .whisker {
-            animation: whisker-twitch 9s infinite;
-            animation-delay: 1s;
-        }
-
-        .cat-white .ear {
-            animation: ear-twitch 5s infinite;
-            animation-delay: 2.5s;
-        }
-
-        .cat-white .cat-head {
-            animation: head-nod 4.4s infinite ease-in-out, gentle-breathing 3.2s infinite ease-in-out;
-            animation-delay: 0.8s, 1.8s;
-        }
-
-        .cat-white .cat-tail {
-            animation: tail-wag 2.2s infinite ease-in-out;
-            animation-delay: 1.4s;
-            transform-origin: right bottom;
-        }
-        .cat-white .cat-paw {
-            animation: paw-tap 1.7s infinite ease-in-out;
-            animation-delay: 0.9s;
-        }
-        .cat-white .cat-eye {
-            animation: blink 3.8s infinite;
-            animation-delay: 2.1s;
-        }
-
-        /* Анимации для маленького серого кота */
-        .cat-small .whisker {
-            animation: whisker-twitch 5s infinite;
-            animation-delay: 4s;
-        }
-
-        .cat-small .ear {
-            animation: ear-twitch 6s infinite;
-            animation-delay: 0.8s;
-        }
-
-        .cat-small .cat-head {
-            animation: head-nod 3.9s infinite ease-in-out, gentle-breathing 2.5s infinite ease-in-out;
-            animation-delay: 1.6s, 0.2s;
-        }
-
-        .cat-small .cat-tail {
-            animation: tail-wag 2.6s infinite ease-in-out;
-            animation-delay: 0.2s;
-            transform-origin: right bottom;
-        }
-        .cat-small .cat-paw {
-            animation: paw-tap 1.6s infinite ease-in-out;
-            animation-delay: 1.2s;
-        }
-        .cat-small .cat-eye {
-            animation: blink 4.7s infinite;
-            animation-delay: 0.9s;
-        }
-
-        /* Стили для кия */
-        #cue {
-            transition: transform 0.1s ease-out;
-            pointer-events: none; /* Кий не должен мешать кликам */
-            z-index: 99999; /* Поверх всех элементов сайта */
-        }
-
-        /* Эмодзи над котами при забитии шара */
-        @keyframes emoji-fade-up {
-            0% { opacity: 0; transform: translate(-50%, -10px) scale(0.9); }
-            20% { opacity: 1; transform: translate(-50%, -16px) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -28px) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -40px) scale(0.95); }
-        }
-
-        .cat-emoji {
-            position: absolute;
-            pointer-events: none;
-            z-index: 99998;
-            font-size: 20px;
-            line-height: 1;
-            animation: emoji-fade-up 1.2s ease-out forwards;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
-        }
-
-        @media (max-width: 640px) {
-            .cat-emoji { font-size: 14px; }
-        }
-
-        /* Динамическое масштабирование элементов */
-        .dynamic-scaling .cat-container {
-            transition: transform 0.3s ease-out;
-        }
-        
-        .dynamic-scaling .billiard-ball {
-            transition: width 0.3s ease-out, height 0.3s ease-out;
-        }
-        
-        .dynamic-scaling [data-pocket] {
-            transition: width 0.3s ease-out, height 0.3s ease-out;
-        }
-        
-        .dynamic-scaling #cue {
-            transition: transform 0.1s ease-out, height 0.3s ease-out, width 0.3s ease-out;
-        }
-        
-        .dynamic-scaling button {
-            transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out, min-height 0.3s ease-out;
-        }
-        
-        .dynamic-scaling .landscape-mobile-controls button {
-            transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out, min-height 0.3s ease-out;
-        }
-        
-        .dynamic-scaling #score-display,
-        .dynamic-scaling #score-display-landscape {
-            transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out;
-        }
-
-        /* Индикатор силы удара */
-        #power-indicator {
-            position: absolute;
-            width: 100px;
-            height: 6px;
-            background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
-            border-radius: 3px;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            z-index: 10;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        #power-indicator.visible {
-            opacity: 0.9;
-        }
-
-        #power-fill {
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.1s ease-out;
-        }
-
-        /* Линия прицеливания */
-        #aim-line {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            z-index: 5;
-            border-radius: 1px;
-            pointer-events: none;
-        }
-
-        #aim-line.visible {
-            opacity: 0.7;
-        }
-
-        /* Улучшенные стили для сенсорного управления */
-        @media (max-width: 640px) {
-            #power-indicator {
-                width: 80px;
-                height: 8px;
-            }
-            
-            #aim-line {
-                height: 3px;
-            }
-            
-            /* Увеличиваем область касания для битка */
-            #cue-ball {
-                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
-            }
-        }
-
-        /* Модальное окно */
-        .modal-overlay {
-            backdrop-filter: blur(5px);
-        }
-
-        /* Улучшения для модального окна помощи */
-        #help-modal {
-            touch-action: auto; /* Более совместимый вариант */
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
-            overflow: hidden; /* Предотвращаем скролл фона */
-        }
-
-        #help-modal .bg-white {
-            max-height: 90vh;
-            overflow: hidden; /* Скрываем переполнение контейнера */
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Стили для скроллируемого контента */
-        #help-modal .overflow-y-auto {
-            -webkit-overflow-scrolling: touch; /* Плавный скроллинг на iOS */
-            scrollbar-width: thin; /* Тонкий скроллбар на Firefox */
-            scrollbar-color: #cbd5e1 #f1f5f9;
-            touch-action: pan-y; /* Разрешаем только вертикальный скролл */
-            overscroll-behavior: contain; /* Предотвращаем скролл родительских элементов */
-            flex: 1; /* Занимаем доступное пространство */
-            min-height: 0; /* Позволяем flex-элементу уменьшаться */
-        }
-
-        /* Дополнительные стили для iOS */
-        @supports (-webkit-overflow-scrolling: touch) {
-            #help-modal .overflow-y-auto {
-                -webkit-overflow-scrolling: touch;
-                transform: translateZ(0); /* Форсируем аппаратное ускорение */
-            }
-        }
-
-        /* Стили скроллбара для Webkit браузеров */
-        #help-modal .overflow-y-auto::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #help-modal .overflow-y-auto::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        #help-modal .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        #help-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Дополнительные отступы для контента */
-        #help-modal .space-y-2 > * + * {
-            margin-top: 0.5rem;
-        }
-
-        #help-modal .space-y-3 > * + * {
-            margin-top: 0.75rem;
-        }
-
-        /* Стили для цветных блоков информации */
-        #help-modal .bg-blue-50 {
-            background-color: #eff6ff;
-        }
-
-        #help-modal .border-blue-400 {
-            border-color: #60a5fa;
-        }
-
-        #help-modal .bg-green-50 {
-            background-color: #f0fdf4;
-        }
-
-        #help-modal .border-green-400 {
-            border-color: #4ade80;
-        }
-
-        #help-modal .bg-yellow-50 {
-            background-color: #fefce8;
-        }
-
-        #help-modal .border-yellow-400 {
-            border-color: #facc15;
-        }
-
-        #help-modal .bg-purple-50 {
-            background-color: #faf5ff;
-        }
-
-        #help-modal .border-purple-400 {
-            border-color: #c084fc;
-        }
-
-        #help-modal .text-blue-600 {
-            color: #2563eb;
-        }
-
-        /* Анимации для UI элементов */
-        .button-hover {
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .button-hover:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Пульсирующая анимация для важных элементов */
-        @keyframes pulse-glow {
-            0%, 100% { 
-                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
-            }
-            50% { 
-                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4);
-            }
-        }
-
-        .help-button-glow {
-            animation: pulse-glow 2s infinite;
-        }
-
-        /* Улучшенные тени */
-        .enhanced-shadow {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Градиентные фоны для кнопок */
-        .gradient-yellow {
-            background: linear-gradient(135deg, #fbbf24, #d97706);
-        }
-        
-        .gradient-blue {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        }
-        
-        .gradient-green {
-            background: linear-gradient(135deg, #10b981, #047857);
-        }
-
-        /* Адаптивные улучшения для мобильных устройств */
-        @media (max-width: 640px) {
-            /* Уменьшаем анимации на мобильных для производительности */
-            .cat-container * {
-                animation-duration: 0.8s !important;
-            }
-            
-            /* Значительно уменьшаем размер кошек на мобильных */
-            .cat-container {
-                transform: scale(0.3);
-            }
-            
-            /* Отключаем некоторые анимации для лучшей производительности */
-            .cat-tail, .cat-paw {
-                animation: none !important;
-            }
-            
-            /* Оставляем только основные анимации */
-            .cat-head {
-                animation: gentle-breathing 4s infinite ease-in-out !important;
-            }
-            
-            .cat-eye {
-                animation: blink 5s infinite !important;
-            }
-            
-            /* Улучшаем читаемость текста */
-            .text-sm {
-                font-size: 0.875rem;
-                line-height: 1.25rem;
-            }
-            
-            /* Оптимизируем тени для мобильных */
-            .shadow-lg {
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            }
-            
-            /* Дополнительные оптимизации для мобильных */
-            .billiard-ball {
-                width: 10px !important;
-                height: 10px !important;
-            }
-            
-            /* Уменьшаем размер кия на мобильных */
-            #cue {
-                height: 1px !important;
-                width: 25% !important;
-            }
-            
-            /* Увеличиваем размер луз для мобильных */
-            [data-pocket] {
-                width: 16px !important;
-                height: 16px !important;
-            }
-            
-            /* Очень маленькие кнопки для ландшафтного режима */
-            .landscape-mobile-controls button {
-                padding: 0.25rem 0.5rem !important;
-                font-size: 0.5rem !important;
-                min-width: 16px !important;
-                min-height: 16px !important;
-            }
-            
-            .landscape-mobile-controls #score-display-landscape {
-                font-size: 0.5rem !important;
-                padding: 0.25rem 0.5rem !important;
-            }
-        }
-
-        /* Улучшения для планшетов */
-        @media (min-width: 640px) and (max-width: 1024px) {
-            /* Средние размеры элементов */
-            .cat-container {
-                transform: scale(1.1);
-            }
-        }
-
-        /* Улучшения для больших экранов */
-        @media (min-width: 1024px) {
-            /* Полные размеры и эффекты */
-            .cat-container {
-                transform: scale(1);
-            }
-            
-            /* Улучшенные тени */
-            .enhanced-shadow {
-                box-shadow: 0 10px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1);
-            }
-        }
-
-        /* Поддержка ландшафтной ориентации на мобильных */
-        @media (max-width: 640px) and (orientation: landscape) {
-            body {
-                padding: 0.25rem;
-            }
-            
-            #game-area {
-                height: 100% !important;
-                width: 100% !important;
-                max-height: none !important;
-            }
-            
-            /* Ещё больше уменьшаем коты в ландшафтном режиме */
-            .cat-container {
-                transform: scale(0.25) !important;
-            }
-            
-            /* Уменьшаем размер шаров в ландшафтном режиме */
-            .billiard-ball {
-                width: 8px !important;
-                height: 8px !important;
-            }
-            
-            /* Уменьшаем размер кия в ландшафтном режиме */
-            #cue {
-                height: 1px !important;
-                width: 20% !important;
-            }
-            
-            /* Увеличиваем лузы в ландшафтном режиме */
-            [data-pocket] {
-                width: 14px !important;
-                height: 14px !important;
-            }
-            
-            /* Скрываем панель управления сверху в ландшафте */
-            .flex.justify-center.items-center.gap-1.mb-1.sm\\:hidden {
-                display: none !important;
-            }
-            
-            /* Скрываем счет сверху в ландшафте */
-            .mb-1.sm\\:hidden:has(#score-display-mobile) {
-                display: none !important;
-            }
-        }
-
-        /* Дополнительные стили для мобильных в портретной ориентации */
-        @media (max-width: 640px) and (orientation: portrait) {
-            #rotation-notice {
-                display: flex !important;
-            }
-            
-            /* Скрываем ландшафтные элементы управления */
-            .landscape-mobile-controls {
-                display: none !important;
-            }
-            
-            /* Оптимизация для портретной ориентации */
-            body {
-                overflow: hidden;
-            }
-            
-            #game-area {
-                height: 100% !important;
-                width: 100% !important;
-            }
-        }
-
-        /* Стили для ландшафтных элементов управления */
-        @media (max-width: 640px) and (orientation: landscape) {
-            .landscape-mobile-controls {
-                display: block !important;
-            }
-        }
-
-        /* Стили для уведомления о повороте телефона */
-        #rotation-notice {
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        @keyframes rotate-phone {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg); }
-            50% { transform: rotate(0deg); }
-            75% { transform: rotate(-90deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        .animate-pulse-custom {
-            animation: pulse 2s infinite;
-        }
-
-        .animate-rotate-phone {
-            animation: rotate-phone 3s infinite ease-in-out;
-        }
-
-        /* Скрытие уведомления при ландшафтной ориентации */
-        @media (max-width: 640px) and (orientation: landscape) {
-            #rotation-notice {
-                display: none !important;
-            }
-        }
-
-        /* Универсальные правила для всех размеров экрана */
-        #game-area {
-            max-width: 100vw;
-            max-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        /* Адаптивные размеры для очень маленьких экранов */
-        @media (max-width: 360px) {
-            .billiard-ball {
-                width: 8px;
-                height: 8px;
-            }
-            
-            .cat-container {
-                transform: scale(0.2);
-            }
-        }
-
-        /* Специальные стили для iPhone SE (375px) */
-        @media (max-width: 375px) {
-            .billiard-ball {
-                width: 6px !important;
-                height: 6px !important;
-            }
-            
-            .cat-container {
-                transform: scale(0.2) !important;
-            }
-            
-            /* Уменьшаем размер счета на маленьких экранах */
-            #score-display {
-                font-size: 0.625rem !important;
-                padding: 0.125rem 0.25rem !important;
-                max-width: 60px !important;
-            }
-            
-            /* Уменьшаем размер кнопок */
-            button {
-                padding: 0.125rem 0.25rem !important;
-                font-size: 0.5rem !important;
-                min-width: 16px !important;
-                min-height: 16px !important;
-            }
-            
-            /* Уменьшаем размер ландшафтных кнопок управления */
-            .landscape-mobile-controls button {
-                padding: 0.1rem 0.15rem !important;
-                font-size: 0.35rem !important;
-                min-width: 14px !important;
-                min-height: 14px !important;
-            }
-            
-            /* Уменьшаем счет для ландшафтного режима */
-            #score-display-landscape {
-                font-size: 0.4rem !important;
-                padding: 0.1rem 0.15rem !important;
-            }
-            
-            /* Увеличиваем размер луз для маленьких экранов */
-            [data-pocket] {
-                width: 14px !important;
-                height: 14px !important;
-            }
-            
-            /* Уменьшаем размер кия на мобильных */
-            #cue {
-                height: 1px !important;
-                width: 20% !important;
-            }
-        }
-
-        /* Адаптивные размеры для очень больших экранов */
-        @media (min-width: 1920px) {
-            .billiard-ball {
-                width: 28px;
-                height: 28px;
-            }
-            
-            .cat-container {
-                transform: scale(1.2);
-            }
-        }
-
-        /* Дополнительные улучшения для очень маленьких смартфонов */
-        @media (max-width: 320px) {
-            .cat-container {
-                transform: scale(0.15) !important;
-            }
-            
-            .billiard-ball {
-                width: 5px !important;
-                height: 5px !important;
-            }
-            
-            button {
-                padding: 0.05rem 0.1rem !important;
-                font-size: 0.35rem !important;
-                min-width: 12px !important;
-                min-height: 12px !important;
-            }
-            
-            .landscape-mobile-controls button {
-                padding: 0.05rem 0.1rem !important;
-                font-size: 0.3rem !important;
-                min-width: 10px !important;
-                min-height: 10px !important;
-            }
-            
-            /* Увеличиваем лузы для очень маленьких экранов */
-            [data-pocket] {
-                width: 12px !important;
-                height: 12px !important;
-            }
-            
-            /* Ещё более короткий кий */
-            #cue {
-                height: 1px !important;
-                width: 15% !important;
-            }
-        }
-
-        /* Улучшения для очень узких экранов */
-        @media (max-width: 280px) {
-            .cat-container {
-                transform: scale(0.1) !important;
-            }
-            
-            .billiard-ball {
-                width: 4px !important;
-                height: 4px !important;
-            }
-            
-            /* Увеличиваем лузы для самых маленьких экранов */
-            [data-pocket] {
-                width: 10px !important;
-                height: 10px !important;
-            }
-            
-            /* Минимальный размер кия */
-            #cue {
-                height: 1px !important;
-                width: 10% !important;
-            }
-        }
+body {
+    font-family: 'Comfortaa', cursive, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background-color: #3a2d27;
+    /* Fallback */
+    background-image: url('./img/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    /* Полностью убираем прокрутку */
+    touch-action: none;
+    /* Отключаем действия по умолчанию для касаний */
+    user-select: none;
+    /* Запрещаем выделение текста */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE/Edge */
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    /* Ускорение анимаций */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+}
+
+/* Гарантируем, что все помещается в экран */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* Предотвращаем зум на iOS */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* iOS Safari оптимизации */
+.ios-device {
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Android оптимизации */
+.android-device {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Samsung Internet оптимизации */
+.samsung-browser {
+    will-change: transform;
+}
+
+/* Оптимизации для старых Android браузеров */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+    .billiard-ball {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
+
+/* Firefox mobile оптимизации */
+@-moz-document url-prefix() {
+    .billiard-ball {
+        -moz-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
+
+/* Оптимизации для экранов с высокой плотностью пикселей */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .billiard-ball {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Улучшенные анимации для устройств с поддержкой аппаратного ускорения */
+@media (prefers-reduced-motion: no-preference) {
+    .cat-container * {
+        will-change: transform;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+}
+
+/* Снижение анимаций для пользователей, предпочитающих меньше движения */
+@media (prefers-reduced-motion: reduce) {
+    .cat-container * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* PWA стили */
+#pwa-install-button {
+    animation: pwa-bounce 2s infinite;
+}
+
+@keyframes pwa-bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@-webkit-keyframes pwa-bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        -webkit-transform: translateY(0);
+    }
+
+    40% {
+        -webkit-transform: translateY(-10px);
+    }
+
+    60% {
+        -webkit-transform: translateY(-5px);
+    }
+}
+
+/* PWA режим - скрываем некоторые элементы браузера */
+.pwa-mode {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* Стили для уведомлений */
+.notification {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Улучшенные стили для мобильных устройств в PWA режиме */
+@media (display-mode: standalone) {
+    body {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Скрываем полосы прокрутки в PWA */
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    html {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+}
+
+/* Анимация для поворота телефона */
+@keyframes rotate-phone {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(90deg);
+    }
+
+    50% {
+        transform: rotate(90deg);
+    }
+
+    75% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.animate-rotate-phone {
+    animation: rotate-phone 2s infinite ease-in-out;
+}
+
+/* Адаптивные размеры шаров */
+.billiard-ball {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    transition: transform 0.1s ease-out;
+    -webkit-transition: -webkit-transform 0.1s ease-out;
+    -moz-transition: -moz-transform 0.1s ease-out;
+    -o-transition: -o-transform 0.1s ease-out;
+    /* Аппаратное ускорение */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Увеличенные размеры для больших экранов */
+@media (min-width: 640px) {
+    .billiard-ball {
+        width: 18px;
+        height: 18px;
+        box-shadow: 1.5px 1.5px 3px rgba(0, 0, 0, 0.4);
+    }
+}
+
+@media (min-width: 768px) {
+    .billiard-ball {
+        width: 20px;
+        height: 20px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    }
+}
+
+@media (min-width: 1024px) {
+    .billiard-ball {
+        width: 22px;
+        height: 22px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    }
+}
+
+@media (min-width: 1280px) {
+    .billiard-ball {
+        width: 24px;
+        height: 24px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Анимация для хвоста кошки */
+@keyframes tail-wag {
+
+    0%,
+    100% {
+        transform: rotate(5deg);
+    }
+
+    50% {
+        transform: rotate(-15deg);
+    }
+}
+
+@-webkit-keyframes tail-wag {
+
+    0%,
+    100% {
+        -webkit-transform: rotate(5deg);
+    }
+
+    50% {
+        -webkit-transform: rotate(-15deg);
+    }
+}
+
+@-moz-keyframes tail-wag {
+
+    0%,
+    100% {
+        -moz-transform: rotate(5deg);
+    }
+
+    50% {
+        -moz-transform: rotate(-15deg);
+    }
+}
+
+/* Анимация для головы кошки (кивок) */
+@keyframes head-nod {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@-webkit-keyframes head-nod {
+
+    0%,
+    100% {
+        -webkit-transform: translateY(0);
+    }
+
+    50% {
+        -webkit-transform: translateY(-5px);
+    }
+}
+
+@-moz-keyframes head-nod {
+
+    0%,
+    100% {
+        -moz-transform: translateY(0);
+    }
+
+    50% {
+        -moz-transform: translateY(-5px);
+    }
+}
+
+/* Анимация для лапки */
+@keyframes paw-tap {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(5deg);
+    }
+
+    50% {
+        transform: translateY(-3px) rotate(-5deg);
+    }
+}
+
+@-webkit-keyframes paw-tap {
+
+    0%,
+    100% {
+        -webkit-transform: translateY(0) rotate(5deg);
+    }
+
+    50% {
+        -webkit-transform: translateY(-3px) rotate(-5deg);
+    }
+}
+
+@-moz-keyframes paw-tap {
+
+    0%,
+    100% {
+        -moz-transform: translateY(0) rotate(5deg);
+    }
+
+    50% {
+        -moz-transform: translateY(-3px) rotate(-5deg);
+    }
+}
+
+/* Анимация для моргания */
+@keyframes blink {
+
+    0%,
+    90%,
+    100% {
+        transform: scaleY(1);
+    }
+
+    95% {
+        transform: scaleY(0.1);
+    }
+}
+
+@-webkit-keyframes blink {
+
+    0%,
+    90%,
+    100% {
+        -webkit-transform: scaleY(1);
+    }
+
+    95% {
+        -webkit-transform: scaleY(0.1);
+    }
+}
+
+@-moz-keyframes blink {
+
+    0%,
+    90%,
+    100% {
+        -moz-transform: scaleY(1);
+    }
+
+    95% {
+        -moz-transform: scaleY(0.1);
+    }
+}
+
+/* Анимация для удара лапой */
+@keyframes paw-swat {
+    0% {
+        transform: scale(1) rotate(5deg);
+    }
+
+    50% {
+        transform: scale(1.4) rotate(-40deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(5deg);
+    }
+}
+
+/* Усиленная анимация для всего маленького кота */
+@keyframes small-cat-swat {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+    50% {
+        transform: scale(1.2) rotate(-8deg);
+    }
+
+    75% {
+        transform: scale(1.1) rotate(-3deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* Анимация испуга кота */
+@keyframes cat-scared {
+    0% {
+        transform: scale(1) translateY(0);
+    }
+
+    25% {
+        transform: scale(1.1) translateY(-5px);
+    }
+
+    50% {
+        transform: scale(1.05) translateY(-3px);
+    }
+
+    75% {
+        transform: scale(1.08) translateY(-4px);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+.swat-animation {
+    animation: paw-swat 0.3s ease-out;
+}
+
+/* Специальная анимация для всего маленького кота */
+.cat-small.swat-animation {
+    animation: small-cat-swat 0.5s ease-out;
+}
+
+.cat-scared {
+    animation: cat-scared 0.5s ease-out;
+}
+
+/* Дополнительные анимации для элементов котов */
+@keyframes whisker-twitch {
+
+    0%,
+    95%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    2%,
+    5% {
+        transform: rotate(5deg);
+    }
+}
+
+@keyframes ear-twitch {
+
+    0%,
+    90%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    5%,
+    15% {
+        transform: rotate(8deg);
+    }
+}
+
+@keyframes gentle-breathing {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+/* Анимации усов, ушей и дыхания для каждого кота */
+.cat-container:nth-child(1) .whisker {
+    animation: whisker-twitch 8s infinite;
+    animation-delay: 2s;
+}
+
+/* Анимации для оранжевого кота */
+.cat-orange .whisker {
+    animation: whisker-twitch 8s infinite;
+    animation-delay: 2s;
+}
+
+.cat-orange .cat-head {
+    animation: head-nod 4s infinite ease-in-out, gentle-breathing 3s infinite ease-in-out;
+    animation-delay: 0.3s, 1s;
+}
+
+.cat-orange .cat-tail {
+    animation: tail-wag 2.5s infinite ease-in-out;
+    animation-delay: 0s;
+    transform-origin: right bottom;
+}
+
+.cat-orange .cat-paw {
+    animation: paw-tap 1.5s infinite ease-in-out;
+    animation-delay: 0.1s;
+}
+
+.cat-orange .cat-eye {
+    animation: blink 4.2s infinite;
+    animation-delay: 0.5s;
+}
+
+/* Анимации для серого кота */
+.cat-gray .whisker {
+    animation: whisker-twitch 6s infinite;
+    animation-delay: 3.5s;
+}
+
+.cat-gray .ear {
+    animation: ear-twitch 7s infinite;
+    animation-delay: 1.2s;
+}
+
+.cat-gray .cat-head {
+    animation: head-nod 3.6s infinite ease-in-out, gentle-breathing 2.8s infinite ease-in-out;
+    animation-delay: 1.1s, 0.5s;
+}
+
+.cat-gray .cat-tail {
+    animation: tail-wag 2.8s infinite ease-in-out;
+    animation-delay: 0.7s;
+    transform-origin: right bottom;
+}
+
+.cat-gray .cat-paw {
+    animation: paw-tap 1.3s infinite ease-in-out;
+    animation-delay: 0.4s;
+}
+
+.cat-gray .cat-eye {
+    animation: blink 5.3s infinite;
+    animation-delay: 1.8s;
+}
+
+/* Анимации для белого кота */
+.cat-white .whisker {
+    animation: whisker-twitch 9s infinite;
+    animation-delay: 1s;
+}
+
+.cat-white .ear {
+    animation: ear-twitch 5s infinite;
+    animation-delay: 2.5s;
+}
+
+.cat-white .cat-head {
+    animation: head-nod 4.4s infinite ease-in-out, gentle-breathing 3.2s infinite ease-in-out;
+    animation-delay: 0.8s, 1.8s;
+}
+
+.cat-white .cat-tail {
+    animation: tail-wag 2.2s infinite ease-in-out;
+    animation-delay: 1.4s;
+    transform-origin: right bottom;
+}
+
+.cat-white .cat-paw {
+    animation: paw-tap 1.7s infinite ease-in-out;
+    animation-delay: 0.9s;
+}
+
+.cat-white .cat-eye {
+    animation: blink 3.8s infinite;
+    animation-delay: 2.1s;
+}
+
+/* Анимации для маленького серого кота */
+.cat-small .whisker {
+    animation: whisker-twitch 5s infinite;
+    animation-delay: 4s;
+}
+
+.cat-small .ear {
+    animation: ear-twitch 6s infinite;
+    animation-delay: 0.8s;
+}
+
+.cat-small .cat-head {
+    animation: head-nod 3.9s infinite ease-in-out, gentle-breathing 2.5s infinite ease-in-out;
+    animation-delay: 1.6s, 0.2s;
+}
+
+.cat-small .cat-tail {
+    animation: tail-wag 2.6s infinite ease-in-out;
+    animation-delay: 0.2s;
+    transform-origin: right bottom;
+}
+
+.cat-small .cat-paw {
+    animation: paw-tap 1.6s infinite ease-in-out;
+    animation-delay: 1.2s;
+}
+
+.cat-small .cat-eye {
+    animation: blink 4.7s infinite;
+    animation-delay: 0.9s;
+}
+
+/* Стили для кия */
+#cue {
+    transition: transform 0.1s ease-out;
+    pointer-events: none;
+    /* Кий не должен мешать кликам */
+    z-index: 99999;
+    /* Поверх всех элементов сайта */
+}
+
+/* Эмодзи над котами при забитии шара */
+@keyframes emoji-fade-up {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -10px) scale(0.9);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -16px) scale(1);
+    }
+
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -28px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -40px) scale(0.95);
+    }
+}
+
+.cat-emoji {
+    position: absolute;
+    pointer-events: none;
+    z-index: 99998;
+    font-size: 20px;
+    line-height: 1;
+    animation: emoji-fade-up 1.2s ease-out forwards;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+@media (max-width: 640px) {
+    .cat-emoji {
+        font-size: 14px;
+    }
+}
+
+/* Динамическое масштабирование элементов */
+.dynamic-scaling .cat-container {
+    transition: transform 0.3s ease-out;
+}
+
+.dynamic-scaling .billiard-ball {
+    transition: width 0.3s ease-out, height 0.3s ease-out;
+}
+
+.dynamic-scaling [data-pocket] {
+    transition: width 0.3s ease-out, height 0.3s ease-out;
+}
+
+.dynamic-scaling #cue {
+    transition: transform 0.1s ease-out, height 0.3s ease-out, width 0.3s ease-out;
+}
+
+.dynamic-scaling button {
+    transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out, min-height 0.3s ease-out;
+}
+
+.dynamic-scaling .landscape-mobile-controls button {
+    transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out, min-height 0.3s ease-out;
+}
+
+.dynamic-scaling #score-display,
+.dynamic-scaling #score-display-landscape {
+    transition: font-size 0.3s ease-out, padding 0.3s ease-out, min-width 0.3s ease-out;
+}
+
+/* Индикатор силы удара */
+#power-indicator {
+    position: absolute;
+    width: 100px;
+    height: 6px;
+    background: white;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 10;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#power-indicator.visible {
+    opacity: 0.9;
+}
+
+#power-fill {
+    height: 100%;
+    background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s ease-out;
+}
+
+/* Линия прицеливания */
+#aim-line {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 5;
+    border-radius: 1px;
+    pointer-events: none;
+}
+
+#aim-line.visible {
+    opacity: 0.7;
+}
+
+/* Улучшенные стили для сенсорного управления */
+@media (max-width: 640px) {
+    #power-indicator {
+        width: 50px;
+        height: 5px;
+    }
+
+    #aim-line {
+        height: 3px;
+    }
+
+    /* Увеличиваем область касания для битка */
+    #cue-ball {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Модальное окно */
+.modal-overlay {
+    backdrop-filter: blur(5px);
+}
+
+/* Улучшения для модального окна помощи */
+#help-modal {
+    touch-action: auto;
+    /* Более совместимый вариант */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    overflow: hidden;
+    /* Предотвращаем скролл фона */
+}
+
+#help-modal .bg-white {
+    max-height: 90vh;
+    overflow: hidden;
+    /* Скрываем переполнение контейнера */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Стили для скроллируемого контента */
+#help-modal .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    /* Плавный скроллинг на iOS */
+    scrollbar-width: thin;
+    /* Тонкий скроллбар на Firefox */
+    scrollbar-color: #cbd5e1 #f1f5f9;
+    touch-action: pan-y;
+    /* Разрешаем только вертикальный скролл */
+    overscroll-behavior: contain;
+    /* Предотвращаем скролл родительских элементов */
+    flex: 1;
+    /* Занимаем доступное пространство */
+    min-height: 0;
+    /* Позволяем flex-элементу уменьшаться */
+}
+
+/* Дополнительные стили для iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+    #help-modal .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+        transform: translateZ(0);
+        /* Форсируем аппаратное ускорение */
+    }
+}
+
+/* Стили скроллбара для Webkit браузеров */
+#help-modal .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+#help-modal .overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+#help-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#help-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Дополнительные отступы для контента */
+#help-modal .space-y-2>*+* {
+    margin-top: 0.5rem;
+}
+
+#help-modal .space-y-3>*+* {
+    margin-top: 0.75rem;
+}
+
+/* Стили для цветных блоков информации */
+#help-modal .bg-blue-50 {
+    background-color: #eff6ff;
+}
+
+#help-modal .border-blue-400 {
+    border-color: #60a5fa;
+}
+
+#help-modal .bg-green-50 {
+    background-color: #f0fdf4;
+}
+
+#help-modal .border-green-400 {
+    border-color: #4ade80;
+}
+
+#help-modal .bg-yellow-50 {
+    background-color: #fefce8;
+}
+
+#help-modal .border-yellow-400 {
+    border-color: #facc15;
+}
+
+#help-modal .bg-purple-50 {
+    background-color: #faf5ff;
+}
+
+#help-modal .border-purple-400 {
+    border-color: #c084fc;
+}
+
+#help-modal .text-blue-600 {
+    color: #2563eb;
+}
+
+/* Анимации для UI элементов */
+.button-hover {
+    transition: all 0.2s ease-in-out;
+}
+
+.button-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Пульсирующая анимация для важных элементов */
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4);
+    }
+}
+
+.help-button-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Улучшенные тени */
+.enhanced-shadow {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Градиентные фоны для кнопок */
+.gradient-yellow {
+    background: linear-gradient(135deg, #fbbf24, #d97706);
+}
+
+.gradient-blue {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.gradient-green {
+    background: linear-gradient(135deg, #10b981, #047857);
+}
+
+/* Адаптивные улучшения для мобильных устройств */
+@media (max-width: 640px) {
+
+    /* Уменьшаем анимации на мобильных для производительности */
+    .cat-container * {
+        animation-duration: 0.8s !important;
+    }
+
+    /* Значительно уменьшаем размер кошек на мобильных */
+    .cat-container {
+        transform: scale(0.3);
+    }
+
+    /* Отключаем некоторые анимации для лучшей производительности */
+    .cat-tail,
+    .cat-paw {
+        animation: none !important;
+    }
+
+    /* Оставляем только основные анимации */
+    .cat-head {
+        animation: gentle-breathing 4s infinite ease-in-out !important;
+    }
+
+    .cat-eye {
+        animation: blink 5s infinite !important;
+    }
+
+    /* Улучшаем читаемость текста */
+    .text-sm {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    /* Оптимизируем тени для мобильных */
+    .shadow-lg {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Дополнительные оптимизации для мобильных */
+    .billiard-ball {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    /* Уменьшаем размер кия на мобильных */
+    #cue {
+        height: 1px !important;
+        width: 25% !important;
+    }
+
+    /* Увеличиваем размер луз для мобильных */
+    [data-pocket] {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* Очень маленькие кнопки для ландшафтного режима */
+    .landscape-mobile-controls button {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.5rem !important;
+        min-width: 16px !important;
+        min-height: 16px !important;
+    }
+
+    .landscape-mobile-controls #score-display-landscape {
+        font-size: 0.5rem !important;
+        padding: 0.25rem 0.5rem !important;
+    }
+}
+
+/* Улучшения для планшетов */
+@media (min-width: 640px) and (max-width: 1024px) {
+
+    /* Средние размеры элементов */
+    .cat-container {
+        transform: scale(1.1);
+    }
+}
+
+/* Улучшения для больших экранов */
+@media (min-width: 1024px) {
+
+    /* Полные размеры и эффекты */
+    .cat-container {
+        transform: scale(1);
+    }
+
+    /* Улучшенные тени */
+    .enhanced-shadow {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Поддержка ландшафтной ориентации на мобильных */
+@media (max-width: 640px) and (orientation: landscape) {
+    body {
+        padding: 0.25rem;
+    }
+
+    #game-area {
+        height: 100% !important;
+        width: 100% !important;
+        max-height: none !important;
+    }
+
+    /* Ещё больше уменьшаем коты в ландшафтном режиме */
+    .cat-container {
+        transform: scale(0.25) !important;
+    }
+
+    /* Уменьшаем размер шаров в ландшафтном режиме */
+    .billiard-ball {
+        width: 8px !important;
+        height: 8px !important;
+    }
+
+    /* Уменьшаем размер кия в ландшафтном режиме */
+    #cue {
+        height: 1px !important;
+        width: 20% !important;
+    }
+
+    /* Увеличиваем лузы в ландшафтном режиме */
+    [data-pocket] {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /* Скрываем панель управления сверху в ландшафте */
+    .flex.justify-center.items-center.gap-1.mb-1.sm\\:hidden {
+        display: none !important;
+    }
+
+    /* Скрываем счет сверху в ландшафте */
+    .mb-1.sm\\:hidden:has(#score-display-mobile) {
+        display: none !important;
+    }
+}
+
+/* Дополнительные стили для мобильных в портретной ориентации */
+@media (max-width: 640px) and (orientation: portrait) {
+    #rotation-notice {
+        display: flex !important;
+    }
+
+    /* Скрываем ландшафтные элементы управления */
+    .landscape-mobile-controls {
+        display: none !important;
+    }
+
+    /* Оптимизация для портретной ориентации */
+    body {
+        overflow: hidden;
+    }
+
+    #game-area {
+        height: 100% !important;
+        width: 100% !important;
+    }
+}
+
+/* Стили для ландшафтных элементов управления */
+@media (max-width: 640px) and (orientation: landscape) {
+    .landscape-mobile-controls {
+        display: block !important;
+    }
+}
+
+/* Стили для уведомления о повороте телефона */
+#rotation-notice {
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes rotate-phone {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(90deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    75% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.animate-pulse-custom {
+    animation: pulse 2s infinite;
+}
+
+.animate-rotate-phone {
+    animation: rotate-phone 3s infinite ease-in-out;
+}
+
+/* Скрытие уведомления при ландшафтной ориентации */
+@media (max-width: 640px) and (orientation: landscape) {
+    #rotation-notice {
+        display: none !important;
+    }
+}
+
+/* Универсальные правила для всех размеров экрана */
+#game-area {
+    max-width: 100vw;
+    max-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Адаптивные размеры для очень маленьких экранов */
+@media (max-width: 360px) {
+    .billiard-ball {
+        width: 8px;
+        height: 8px;
+    }
+
+    .cat-container {
+        transform: scale(0.2);
+    }
+}
+
+/* Специальные стили для iPhone SE (375px) */
+@media (max-width: 375px) {
+    .billiard-ball {
+        width: 6px !important;
+        height: 6px !important;
+    }
+
+    .cat-container {
+        transform: scale(0.2) !important;
+    }
+
+    /* Уменьшаем размер счета на маленьких экранах */
+    #score-display {
+        font-size: 0.625rem !important;
+        padding: 0.125rem 0.25rem !important;
+        max-width: 60px !important;
+    }
+
+    /* Уменьшаем размер кнопок */
+    button {
+        padding: 0.125rem 0.25rem !important;
+        font-size: 0.5rem !important;
+        min-width: 16px !important;
+        min-height: 16px !important;
+    }
+
+    /* Уменьшаем размер ландшафтных кнопок управления */
+    .landscape-mobile-controls button {
+        padding: 0.1rem 0.15rem !important;
+        font-size: 0.35rem !important;
+        min-width: 14px !important;
+        min-height: 14px !important;
+    }
+
+    /* Уменьшаем счет для ландшафтного режима */
+    #score-display-landscape {
+        font-size: 0.4rem !important;
+        padding: 0.1rem 0.15rem !important;
+    }
+
+    /* Увеличиваем размер луз для маленьких экранов */
+    [data-pocket] {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /* Уменьшаем размер кия на мобильных */
+    #cue {
+        height: 1px !important;
+        width: 20% !important;
+    }
+}
+
+/* Адаптивные размеры для очень больших экранов */
+@media (min-width: 1920px) {
+    .billiard-ball {
+        width: 28px;
+        height: 28px;
+    }
+
+    .cat-container {
+        transform: scale(1.2);
+    }
+}
+
+/* Дополнительные улучшения для очень маленьких смартфонов */
+@media (max-width: 320px) {
+    .cat-container {
+        transform: scale(0.15) !important;
+    }
+
+    .billiard-ball {
+        width: 5px !important;
+        height: 5px !important;
+    }
+
+    button {
+        padding: 0.05rem 0.1rem !important;
+        font-size: 0.35rem !important;
+        min-width: 12px !important;
+        min-height: 12px !important;
+    }
+
+    .landscape-mobile-controls button {
+        padding: 0.05rem 0.1rem !important;
+        font-size: 0.3rem !important;
+        min-width: 10px !important;
+        min-height: 10px !important;
+    }
+
+    /* Увеличиваем лузы для очень маленьких экранов */
+    [data-pocket] {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* Ещё более короткий кий */
+    #cue {
+        height: 1px !important;
+        width: 15% !important;
+    }
+}
+
+/* Улучшения для очень узких экранов */
+@media (max-width: 280px) {
+    .cat-container {
+        transform: scale(0.1) !important;
+    }
+
+    .billiard-ball {
+        width: 4px !important;
+        height: 4px !important;
+    }
+
+    /* Увеличиваем лузы для самых маленьких экранов */
+    [data-pocket] {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    /* Минимальный размер кия */
+    #cue {
+        height: 1px !important;
+        width: 10% !important;
+    }
+}
+
+/* Окно завершения игры */
+#game-over {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+    color: #f3e5ab;
+    z-index: 100000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.stats-card {
+    background: #3d2b1f;
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid #8b5e3c;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 90%;
+}
+
+.restart-btn {
+    margin-top: 20px;
+    background: #1a4d2e;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s;
+}
+
+.restart-btn:hover {
+    background: #2a7d4b;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Custom styles for power indicator */
+/* Custom styles for power indicator */
+#power-indicator {
+    position: absolute;
+    /* bottom/left/transform removed to allow JS positioning over ball */
+    background-color: #ffffff !important;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    height: 15px;
+    width: 200px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#power-indicator.visible {
+    opacity: 1;
+}
+
+#power-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #eab308, #ef4444) !important;
+    border-radius: 8px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+    #power-indicator {
+        width: 50px;
+        height: 5px;
+        border-radius: 3px;
+        border-width: 1px;
+    }
+
+    #power-fill {
+        border-radius: 2px;
+    }
+}
+
+/* Виртуальный джойстик */
+.joystick-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+.joystick-base {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 2px 8px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.joystick-stick {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    border: 2px solid rgba(100, 100, 100, 0.5);
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+    will-change: transform;
+}
+
+.joystick-stick:active {
+    cursor: grabbing;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5), inset 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.joystick-paw {
+    font-size: 24px;
+    line-height: 1;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Адаптивные размеры для разных экранов */
+@media (max-width: 480px) {
+    .joystick-container {
+        bottom: 15px;
+        left: 15px;
+    }
+
+    .joystick-base {
+        width: 90px;
+        height: 90px;
+        border-width: 2px;
+    }
+
+    .joystick-stick {
+        width: 38px;
+        height: 38px;
+    }
+
+    .joystick-paw {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 375px) {
+    .joystick-container {
+        bottom: 10px;
+        left: 10px;
+    }
+
+    .joystick-base {
+        width: 80px;
+        height: 80px;
+    }
+
+    .joystick-stick {
+        width: 34px;
+        height: 34px;
+    }
+
+    .joystick-paw {
+        font-size: 16px;
+    }
+}
+
+/* Размеры джойстика для больших экранов */
+@media (min-width: 641px) and (max-width: 1920px) {
+    .joystick-container {
+        bottom: 30px;
+        left: 30px;
+    }
+
+    .joystick-base {
+        width: 140px;
+        height: 140px;
+        border-width: 3px;
+    }
+
+    .joystick-stick {
+        width: 60px;
+        height: 60px;
+    }
+
+    .joystick-paw {
+        font-size: 28px;
+    }
+}
+
+/* Размеры джойстика для очень больших экранов (1080p+) */
+@media (min-width: 1921px) {
+    .joystick-container {
+        bottom: 40px;
+        left: 40px;
+    }
+
+    .joystick-base {
+        width: 160px;
+        height: 160px;
+        border-width: 4px;
+    }
+
+    .joystick-stick {
+        width: 70px;
+        height: 70px;
+    }
+
+    .joystick-paw {
+        font-size: 32px;
+    }
+}
+
+/* Анимация появления джойстика */
+@keyframes joystick-fade-in {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.joystick-container {
+    animation: joystick-fade-in 0.3s ease-out;
+}

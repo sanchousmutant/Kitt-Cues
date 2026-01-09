@@ -34,12 +34,23 @@ export class CatManager {
         x: catCenterX,
         y: catCenterY,
         radius: radius,
-        cooldown: 0
+        cooldown: 0,
+        initialPosition: {
+          left: (el as HTMLElement).style.left,
+          top: (el as HTMLElement).style.top,
+          transform: (el as HTMLElement).style.transform
+        }
       };
 
       this.cats.push(cat);
     });
 
+    return this.cats;
+  }
+
+
+
+  getCats(): CatObject[] {
     return this.cats;
   }
 
@@ -383,10 +394,28 @@ export class CatManager {
 
       if (stillVisible) {
         requestAnimationFrame(animate);
+      } else {
+        // Animation finished
+        setTimeout(() => {
+          document.dispatchEvent(new CustomEvent('catnado-finished'));
+        }, 500);
       }
     };
 
     requestAnimationFrame(animate);
+  }
+
+  // Сброс позиций котов после игры
+  resetCats(): void {
+    this.cats.forEach(cat => {
+      // Восстанавливаем исходные стили
+      if (cat.initialPosition) {
+        cat.el.style.left = cat.initialPosition.left;
+        cat.el.style.top = cat.initialPosition.top;
+        cat.el.style.transform = cat.initialPosition.transform;
+      }
+      cat.el.classList.remove('swat-animation');
+    });
   }
 }
 
