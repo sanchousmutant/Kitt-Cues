@@ -471,28 +471,26 @@ export class UIManager {
     }
   }
 
-  private positionRightElements(_gameAreaRect: DOMRect, _tableRect: DOMRect, _margin: number): void {
-    // ДЕАКТИВИРОВАНО: Позиционирование управляется через CSS классы
-
-    // Правые кнопки (Reset) - если нужно, можно оставить логику для них или тоже перевести на CSS
+  private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
     const resetButton = this.buttons.resetButton;
-    if (resetButton?.parentElement) {
-      // Оставляем reset button управляемым CSS, или скрываем его на очень узких экранах если он мешает
-      // Но пока просто сбросим стили
-      resetButton.parentElement.style.left = '';
-      resetButton.parentElement.style.right = '';
-      resetButton.parentElement.style.display = 'block';
-    }
+    if (!resetButton?.parentElement) return;
 
-    // Счет
-    const scoreDisplay = this.scoreElements.scoreDisplay;
-    if (scoreDisplay?.parentElement) {
-      scoreDisplay.parentElement.style.display = 'block';
-      scoreDisplay.parentElement.style.top = '';
-      scoreDisplay.parentElement.style.left = '';
-      scoreDisplay.parentElement.style.right = '';
-      scoreDisplay.parentElement.style.bottom = '';
-    }
+    const buttonsContainer = resetButton.parentElement;
+    
+    // Position the button container to the right of the table
+    const newLeft = tableRect.right - gameAreaRect.left + margin;
+    
+    // Ensure it doesn't go off-screen
+    const finalLeft = Math.min(
+      newLeft,
+      gameAreaRect.width - buttonsContainer.offsetWidth - margin
+    );
+
+    buttonsContainer.style.position = 'absolute';
+    buttonsContainer.style.left = `${finalLeft}px`;
+    // Vertically center it relative to the table
+    buttonsContainer.style.top = `${tableRect.top + (tableRect.height / 2) - (buttonsContainer.offsetHeight / 2)}px`;
+    buttonsContainer.style.right = 'auto'; // Remove fixed 'right' positioning
   }
 
   private positionMobileElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
