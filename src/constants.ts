@@ -74,7 +74,7 @@ export const DOM_SELECTORS = {
 
 // Константы для кошек
 export const CAT_CONFIG = {
-  MOBILE_RADIUS_MULTIPLIER: 0.05,
+  MOBILE_RADIUS_MULTIPLIER: 0.5,
   MOBILE_COOLDOWN_MULTIPLIER: 2,
   MOBILE_SPEED_THRESHOLD: 3, // минимальная скорость для реакции кота на мобильных
   MOBILE_PAW_POWER_MULTIPLIER: 0.25,
@@ -86,7 +86,7 @@ export const CAT_CONFIG = {
 // Константы лунок
 export const POCKET_CONFIG = {
   VISUAL_RADIUS_MULTIPLIER: 0.95,
-  MOBILE_VISUAL_RADIUS_MULTIPLIER: 0.5,
+  MOBILE_VISUAL_RADIUS_MULTIPLIER: 0.8,
   MIN_RADIUS: 6,
   MIN_MOBILE_RADIUS: 4,
 } as const;
@@ -103,18 +103,18 @@ export const SCALING_CONFIG = {
     XL: 1024,
   },
   CAT_SCALES: {
-    XS: 0.1,
-    SM: 0.15,
-    MD: 0.2,
-    LG: 0.3,
+    XS: 0.25,
+    SM: 0.3,
+    MD: 0.4,
+    LG: 0.5,
     XL: 1.1,
   },
   BALL_SIZES: {
     BASE: 16,
-    XS: 16,
-    SM: 16,
-    MD: 16,
-    LG: 16,
+    XS: 26,
+    SM: 28,
+    MD: 30,
+    LG: 32,
   } as const,
 } as const;
 

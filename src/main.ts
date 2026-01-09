@@ -576,7 +576,7 @@ class Game {
     const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
     if (!cueBallObj) return;
 
-    soundManager.playHitSound();
+    soundManager.playHitSound(power);
     this.physicsEngine.applyForce(cueBallObj, this.gameState.cueAngle, power);
 
     // Анимация удара кием

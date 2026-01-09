@@ -1,10 +1,12 @@
 import { BackgroundMusic } from '../types';
-import { AUDIO_CONFIG, MUSIC_NOTES, STORAGE_KEYS } from '../constants';
+import { AUDIO_CONFIG, STORAGE_KEYS } from '../constants';
 import { vibrate } from '../utils/device';
 
 export class SoundManager {
   private audioContext: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
   private backgroundMusic: BackgroundMusic | null = null;
+  private ambientOscillator: OscillatorNode | null = null;
   private soundEnabled: boolean = true;
   private musicEnabled: boolean = true;
   private isMusicPlaying: boolean = false;
@@ -19,25 +21,31 @@ export class SoundManager {
 
     try {
       // Поддержка всех вариантов AudioContext
-      const AudioContextClass = window.AudioContext || 
-                               (window as any).webkitAudioContext || 
-                               (window as any).mozAudioContext || 
-                               (window as any).msAudioContext;
-      
+      const AudioContextClass = window.AudioContext ||
+        (window as any).webkitAudioContext ||
+        (window as any).mozAudioContext ||
+        (window as any).msAudioContext;
+
       if (AudioContextClass) {
         this.audioContext = new AudioContextClass();
-        
+        this.masterGain = this.audioContext.createGain();
+        this.masterGain.connect(this.audioContext.destination);
+        this.masterGain.gain.value = 0.5;
+
         // Для iOS Safari требуется пользовательское взаимодействие
         if (this.audioContext.state === 'suspended') {
           const resumeAudio = () => {
             this.audioContext?.resume().then(() => {
               console.log('Audio context resumed');
+              this.startAmbient(); // Запускаем эмбиент после разблокировки
               document.removeEventListener('touchstart', resumeAudio);
               document.removeEventListener('click', resumeAudio);
             });
           };
           document.addEventListener('touchstart', resumeAudio, { once: true });
           document.addEventListener('click', resumeAudio, { once: true });
+        } else {
+          this.startAmbient();
         }
       } else {
         console.warn('Web Audio API не поддерживается в этом браузере');
@@ -48,176 +56,219 @@ export class SoundManager {
     }
   }
 
-  createBackgroundMusic(): void {
-    if (!this.audioContext || !this.musicEnabled) return;
+  // Фоновое мурчание (низкий рокот)
+  startAmbient(): void {
+    if (!this.audioContext || !this.soundEnabled || !this.masterGain || this.ambientOscillator) return;
 
-    const oscillator1 = this.audioContext.createOscillator();
-    const oscillator2 = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
-    const filter = this.audioContext.createBiquadFilter();
+    try {
+      const osc = this.audioContext.createOscillator();
+      const g = this.audioContext.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 40; // Очень низко
 
-    // Настройки для озорного и ритмичного звучания
-    oscillator1.type = 'square';
-    oscillator2.type = 'sawtooth';
+      // Модуляция для эффекта дыхания/мурчания
+      const lfo = this.audioContext.createOscillator();
+      lfo.frequency.value = 0.5;
+      const lfoGain = this.audioContext.createGain();
+      lfoGain.gain.value = 5;
 
-    // Устанавливаем текущую громкость
-    gainNode.gain.setValueAtTime(this.musicVolume, this.audioContext.currentTime);
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
 
-    // Фильтр для более яркого звука
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1200, this.audioContext.currentTime);
-    filter.Q.setValueAtTime(1.5, this.audioContext.currentTime);
+      g.gain.value = 0.05;
+      osc.connect(g);
+      g.connect(this.masterGain);
 
-    // Веселая и озорная мелодия в стиле арпеджио
-    const notes = [
-      MUSIC_NOTES.C4, MUSIC_NOTES.E4, MUSIC_NOTES.G4, MUSIC_NOTES.C5,
-      MUSIC_NOTES.G4, MUSIC_NOTES.B4, MUSIC_NOTES.D5, MUSIC_NOTES.G5,
-    ];
+      osc.start();
+      lfo.start();
 
-    let noteIndex = 0;
-    const playNote = () => {
-      if (!this.musicEnabled || !this.isMusicPlaying || !this.audioContext) return;
+      this.ambientOscillator = osc;
+    } catch (e) {
+      console.error("Error starting ambient sound:", e);
+    }
+  }
 
-      const note = notes[noteIndex];
-      const duration = 0.15;
-      const currentTime = this.audioContext.currentTime;
+  stopAmbient(): void {
+    if (this.ambientOscillator) {
+      try {
+        this.ambientOscillator.stop();
+        this.ambientOscillator.disconnect();
+      } catch (e) { }
+      this.ambientOscillator = null;
+    }
+  }
 
-      oscillator1.frequency.setValueAtTime(note, currentTime);
-      oscillator2.frequency.setValueAtTime(note * 0.75, currentTime);
+  private musicTimeout: number | null = null;
+  // Гамма До мажор (C Major) для приятного звучания
+  private scale: number[] = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
 
-      gainNode.gain.cancelScheduledValues(currentTime);
-      gainNode.gain.setValueAtTime(this.musicVolume, currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(
-        Math.max(0.0005, this.musicVolume * 0.007), 
-        currentTime + duration
-      );
+  startMusicLoop(): void {
+    const playNextNote = () => {
+      if (!this.musicEnabled || !this.audioContext || !this.masterGain) return;
 
-      noteIndex = (noteIndex + 1) % notes.length;
+      const now = this.audioContext.currentTime;
+      const freq = this.scale[Math.floor(Math.random() * this.scale.length)];
+
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      // Мягкое появление и затухание (как у пианино)
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.05 * this.musicVolume, now + 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 3);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(now);
+      osc.stop(now + 3.1);
+
+      // Рекурсивный вызов с небольшим разбросом во времени для естественности
+      const nextTime = 1500 + Math.random() * 2000;
+      this.musicTimeout = window.setTimeout(playNextNote, nextTime);
     };
-
-    const musicInterval: number = window.setInterval(playNote, 250);
-
-    oscillator1.connect(filter);
-    oscillator2.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
-
-    oscillator1.start();
-    oscillator2.start();
-
-    this.backgroundMusic = {
-      oscillator1,
-      oscillator2,
-      gainNode,
-      interval: musicInterval
-    };
-
-    playNote();
+    playNextNote();
   }
 
   startBackgroundMusic(): void {
     if (!this.musicEnabled || this.isMusicPlaying || !this.audioContext) return;
-    
+
     this.isMusicPlaying = true;
-    this.createBackgroundMusic();
+    this.startMusicLoop();
   }
 
   stopBackgroundMusic(): void {
-    if (!this.backgroundMusic) return;
-    
     this.isMusicPlaying = false;
-    
-    // Плавно уменьшаем громкость
-    if (this.backgroundMusic.gainNode && this.audioContext) {
-      this.backgroundMusic.gainNode.gain.exponentialRampToValueAtTime(
-        0.001, 
-        this.audioContext.currentTime + 0.5
-      );
+
+    if (this.musicTimeout !== null) {
+      clearTimeout(this.musicTimeout);
+      this.musicTimeout = null;
     }
-    
-    // Останавливаем осцилляторы через полсекунды
-    setTimeout(() => {
-      if (this.backgroundMusic) {
-        this.backgroundMusic.oscillator1.stop();
-        this.backgroundMusic.oscillator2.stop();
-        clearInterval(this.backgroundMusic.interval);
-        this.backgroundMusic = null;
-      }
-    }, 500);
   }
 
-  playHitSound(): void {
-    if (!this.audioContext || !this.soundEnabled) return;
-    
+  // Звук столкновения "Клак" (мягкий)
+  playHitSound(velocity: number = 10): void {
+    if (!this.audioContext || !this.soundEnabled || !this.masterGain) return;
+
     try {
-      const oscillator = this.audioContext.createOscillator();
-      const gainNode = this.audioContext.createGain();
-      
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, this.audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.1);
-      
-      gainNode.gain.setValueAtTime(AUDIO_CONFIG.SOUND_EFFECT_VOLUME, this.audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
-      oscillator.start();
-      oscillator.stop(this.audioContext.currentTime + 0.1);
-      
+      const volume = Math.min(Math.max(velocity, 0.1) / 10, 1.0);
+
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      const filter = this.audioContext.createBiquadFilter();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(150 + Math.random() * 50, this.audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, this.audioContext.currentTime + 0.1);
+
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+
+      gain.gain.setValueAtTime(volume * AUDIO_CONFIG.SOUND_EFFECT_VOLUME, this.audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.15);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start();
+      osc.stop(this.audioContext.currentTime + 0.2);
+
       vibrate(AUDIO_CONFIG.VIBRATION_DURATION.HIT);
     } catch (error) {
       console.log('Error playing hit sound:', error);
     }
   }
 
-  playWallHitSound(): void {
-    if (!this.audioContext || !this.soundEnabled) return;
-    
+  // Звук удара о борт "Туд" (глухой)
+  playWallHitSound(velocity: number = 10): void {
+    if (!this.audioContext || !this.soundEnabled || !this.masterGain) return;
+
     try {
-      const oscillator = this.audioContext.createOscillator();
-      const gainNode = this.audioContext.createGain();
-      
-      oscillator.type = 'triangle';
-      oscillator.frequency.setValueAtTime(150, this.audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(80, this.audioContext.currentTime + 0.15);
-      
-      gainNode.gain.setValueAtTime(AUDIO_CONFIG.SOUND_EFFECT_VOLUME, this.audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.15);
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
-      oscillator.start();
-      oscillator.stop(this.audioContext.currentTime + 0.15);
-      
+      const volume = Math.min(Math.max(velocity, 0.1) / 15, 0.6);
+
+      const noise = this.audioContext.createBufferSource();
+      const bufferSize = this.audioContext.sampleRate * 0.1;
+      const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      noise.buffer = buffer;
+      const filter = this.audioContext.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 150;
+
+      const gain = this.audioContext.createGain();
+      gain.gain.setValueAtTime(volume * AUDIO_CONFIG.SOUND_EFFECT_VOLUME, this.audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      noise.start();
+
       vibrate(AUDIO_CONFIG.VIBRATION_DURATION.WALL_HIT);
     } catch (error) {
       console.log('Error playing wall hit sound:', error);
     }
   }
 
+  // Звук попадания в лузу (Магический дзинь)
+  playPocketSound(): void {
+    if (!this.audioContext || !this.soundEnabled || !this.masterGain) return;
+
+    try {
+      const now = this.audioContext.currentTime;
+
+      [440, 554, 659, 880].forEach((freq, i) => {
+        if (!this.audioContext || !this.masterGain) return;
+        const osc = this.audioContext.createOscillator();
+        const g = this.audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(0, now + i * 0.05);
+        g.gain.linearRampToValueAtTime(0.2 * AUDIO_CONFIG.SOUND_EFFECT_VOLUME, now + i * 0.05 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.05 + 0.5);
+
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.6);
+      });
+      vibrate([50, 50, 50]);
+    } catch (e) {
+      console.log('Error playing pocket sound:', e);
+    }
+  }
+
   playMeowSound(): void {
     console.log('playMeowSound called - soundEnabled:', this.soundEnabled, 'audioContext:', !!this.audioContext);
-    
-    if (!this.audioContext || !this.soundEnabled) return;
-    
+
+    if (!this.audioContext || !this.soundEnabled || !this.masterGain) return;
+
     try {
       const oscillator = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
-      
+
       oscillator.type = 'square';
       oscillator.frequency.setValueAtTime(300, this.audioContext.currentTime);
       oscillator.frequency.linearRampToValueAtTime(800, this.audioContext.currentTime + 0.1);
       oscillator.frequency.linearRampToValueAtTime(400, this.audioContext.currentTime + 0.3);
-      
-      gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+
+      gainNode.gain.setValueAtTime(0.1 * AUDIO_CONFIG.SOUND_EFFECT_VOLUME, this.audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
-      
+
       oscillator.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
+      gainNode.connect(this.masterGain);
       oscillator.start();
       oscillator.stop(this.audioContext.currentTime + 0.3);
-      
+
       vibrate([...AUDIO_CONFIG.VIBRATION_DURATION.MEOW]);
     } catch (error) {
       console.log('Error playing meow sound:', error);
@@ -227,32 +278,39 @@ export class SoundManager {
   toggleSound(): void {
     this.soundEnabled = !this.soundEnabled;
     console.log('Sound toggled - soundEnabled is now:', this.soundEnabled);
+
+    if (this.soundEnabled) {
+      this.startAmbient();
+    } else {
+      this.stopAmbient();
+    }
+
     this.saveSettings();
   }
 
   toggleMusic(): void {
     this.musicEnabled = !this.musicEnabled;
-    
+
     if (this.musicEnabled) {
       this.startBackgroundMusic();
     } else {
       this.stopBackgroundMusic();
     }
-    
+
     this.saveSettings();
   }
 
   setMusicVolume(volume: number): void {
     this.musicVolume = Math.max(0, Math.min(1, volume));
-    
+
     if (this.backgroundMusic?.gainNode && this.audioContext) {
       this.backgroundMusic.gainNode.gain.setTargetAtTime(
-        this.musicVolume, 
-        this.audioContext.currentTime, 
+        this.musicVolume,
+        this.audioContext.currentTime,
         0.05
       );
     }
-    
+
     this.saveSettings();
   }
 
@@ -261,12 +319,12 @@ export class SoundManager {
     if (savedSound !== null) {
       this.soundEnabled = savedSound === 'true';
     }
-    
+
     const savedMusic = localStorage.getItem(STORAGE_KEYS.MUSIC_ENABLED);
     if (savedMusic !== null) {
       this.musicEnabled = savedMusic === 'true';
     }
-    
+
     const savedVolume = localStorage.getItem(STORAGE_KEYS.MUSIC_VOLUME);
     if (savedVolume !== null && !Number.isNaN(Number(savedVolume))) {
       this.musicVolume = Math.max(0, Math.min(100, Number(savedVolume))) / 100;
@@ -302,6 +360,7 @@ export const soundManager = {
   get initAudio() { return getSoundManager().initAudio.bind(getSoundManager()); },
   get playHitSound() { return getSoundManager().playHitSound.bind(getSoundManager()); },
   get playWallHitSound() { return getSoundManager().playWallHitSound.bind(getSoundManager()); },
+  get playPocketSound() { return getSoundManager().playPocketSound.bind(getSoundManager()); },
   get playMeowSound() { return getSoundManager().playMeowSound.bind(getSoundManager()); },
   get toggleSound() { return getSoundManager().toggleSound.bind(getSoundManager()); },
   get toggleMusic() { return getSoundManager().toggleMusic.bind(getSoundManager()); },
@@ -315,6 +374,7 @@ export const soundManager = {
 };
 
 // Экспортируем функции для обратной совместимости
-export const playHitSound = () => getSoundManager().playHitSound();
-export const playWallHitSound = () => getSoundManager().playWallHitSound();
+export const playHitSound = (velocity?: number) => getSoundManager().playHitSound(velocity);
+export const playWallHitSound = (velocity?: number) => getSoundManager().playWallHitSound(velocity);
+export const playPocketSound = () => getSoundManager().playPocketSound();
 export const playMeowSound = () => getSoundManager().playMeowSound();

@@ -1,6 +1,6 @@
 import { BallObject, CatObject, PocketObject, PhysicsSettings } from '../types';
 import { PHYSICS_CONFIG, CAT_CONFIG } from '../constants';
-import { playHitSound, playWallHitSound, playMeowSound } from './sound';
+import { playHitSound, playWallHitSound, playMeowSound, playPocketSound } from './sound';
 import { vibrate } from '../utils/device';
 
 export class PhysicsEngine {
@@ -37,7 +37,7 @@ export class PhysicsEngine {
     // Применяем трение и останавливаем шар при низкой скорости
     if (Math.abs(ball.vx) < this.settings.minVelocity) ball.vx = 0;
     if (Math.abs(ball.vy) < this.settings.minVelocity) ball.vy = 0;
-    
+
     if (ball.vx === 0 && ball.vy === 0) return false;
 
     ball.vx *= this.settings.friction;
@@ -47,7 +47,7 @@ export class PhysicsEngine {
 
     // Проверяем попадание в лузы
     this.checkPocketCollisions(ball, pockets);
-    
+
     if (ball.sunk) return true;
 
     // Столкновения со стенами
@@ -64,14 +64,14 @@ export class PhysicsEngine {
       const dx = ball.x - pocket.x;
       const dy = ball.y - pocket.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       // Засчитываем, только если весь шар внутри радиуса лузы
       if ((distance + ball.radius) < pocket.radius && !ball.sunk) {
         ball.sunk = true;
         ball.vx = 0;
         ball.vy = 0;
         ball.el.style.display = 'none';
-        playHitSound();
+        playPocketSound();
         return;
       }
     }
@@ -80,14 +80,14 @@ export class PhysicsEngine {
   checkWallCollisions(ball: BallObject, tableWidth: number, tableHeight: number): void {
     if ((ball.x - ball.radius < 0 && ball.vx < 0) || (ball.x + ball.radius > tableWidth && ball.vx > 0)) {
       ball.vx *= -1;
-      playWallHitSound();
+      playWallHitSound(Math.abs(ball.vx));
       if (ball.x - ball.radius < 0) ball.x = ball.radius;
       if (ball.x + ball.radius > tableWidth) ball.x = tableWidth - ball.radius;
     }
-    
+
     if ((ball.y - ball.radius < 0 && ball.vy < 0) || (ball.y + ball.radius > tableHeight && ball.vy > 0)) {
       ball.vy *= -1;
-      playWallHitSound();
+      playWallHitSound(Math.abs(ball.vy));
       if (ball.y - ball.radius < 0) ball.y = ball.radius;
       if (ball.y + ball.radius > tableHeight) ball.y = tableHeight - ball.radius;
     }
@@ -96,7 +96,7 @@ export class PhysicsEngine {
   checkCatCollisions(ball: BallObject, cats: CatObject[]): void {
     for (const cat of cats) {
       if (cat.cooldown > 0 || ball.sunk) continue;
-      
+
       const dx = ball.x - cat.x;
       const dy = ball.y - cat.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
@@ -115,19 +115,19 @@ export class PhysicsEngine {
 
   private handleCatHit(ball: BallObject, cat: CatObject, dx: number, dy: number, distance: number): void {
     playMeowSound();
-    cat.cooldown = this.isMobile ? 
-      PHYSICS_CONFIG.CAT_COOLDOWN * CAT_CONFIG.MOBILE_COOLDOWN_MULTIPLIER : 
+    cat.cooldown = this.isMobile ?
+      PHYSICS_CONFIG.CAT_COOLDOWN * CAT_CONFIG.MOBILE_COOLDOWN_MULTIPLIER :
       PHYSICS_CONFIG.CAT_COOLDOWN;
-    
+
     // Анимация лапки/кота
     this.animateCatSwat(cat);
 
     // Отталкиваем шар
     const angle = Math.atan2(dy, dx);
-    const effectivePawPower = this.isMobile ? 
-      Math.max(1, PHYSICS_CONFIG.PAW_HIT_POWER * CAT_CONFIG.MOBILE_PAW_POWER_MULTIPLIER) : 
+    const effectivePawPower = this.isMobile ?
+      Math.max(1, PHYSICS_CONFIG.PAW_HIT_POWER * CAT_CONFIG.MOBILE_PAW_POWER_MULTIPLIER) :
       PHYSICS_CONFIG.PAW_HIT_POWER;
-    
+
     ball.vx = Math.cos(angle) * effectivePawPower;
     ball.vy = Math.sin(angle) * effectivePawPower;
 
@@ -155,10 +155,10 @@ export class PhysicsEngine {
   checkBallCollisions(balls: BallObject[]): void {
     for (let i = 0; i < balls.length; i++) {
       if (balls[i].sunk) continue;
-      
+
       for (let j = i + 1; j < balls.length; j++) {
         if (balls[j].sunk) continue;
-        
+
         this.handleBallCollision(balls[i], balls[j]);
       }
     }
@@ -200,7 +200,9 @@ export class PhysicsEngine {
       ball2.x += moveX;
       ball2.y += moveY;
 
-      playHitSound();
+      // Вычисляем силу столкновения для звука
+      const impactForce = Math.hypot(vx1 - vx2, vy1 - vy2);
+      playHitSound(impactForce);
     }
   }
 
@@ -214,7 +216,7 @@ export class PhysicsEngine {
     // Удар направляем противоположно углу прицеливания
     ball.vx = -Math.cos(angle) * power;
     ball.vy = -Math.sin(angle) * power;
-    
+
     // Добавляем вибрацию на мобильных
     if (this.isMobile) {
       const vibrationIntensity = Math.min(power * 2, 30);

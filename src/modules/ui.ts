@@ -284,7 +284,7 @@ export class UIManager {
   private scaleBalls(scaleFactor: number): void {
     const balls = document.querySelectorAll('.billiard-ball');
     balls.forEach(ball => {
-      let baseSize = SCALING_CONFIG.BALL_SIZES.BASE;
+      let baseSize: number = SCALING_CONFIG.BALL_SIZES.BASE;
 
       if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
         baseSize = SCALING_CONFIG.BALL_SIZES.XS;
@@ -296,7 +296,8 @@ export class UIManager {
         baseSize = SCALING_CONFIG.BALL_SIZES.LG;
       }
 
-      const finalSize = Math.max(3, baseSize * scaleFactor);
+      const ballScaleFactor = Math.max(0.8, scaleFactor);
+      const finalSize = Math.max(3, baseSize * ballScaleFactor);
       (ball as HTMLElement).style.width = `${finalSize}px`;
       (ball as HTMLElement).style.height = `${finalSize}px`;
     });
@@ -405,38 +406,39 @@ export class UIManager {
       if (!element) return;
 
       let baseFontSize = 18;
-      let basePaddingX = 32;
-      let basePaddingY = 16;
 
-      if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
-        baseFontSize = 8;
-        basePaddingX = 8;
-        basePaddingY = 4;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
-        baseFontSize = 10;
-        basePaddingX = 12;
-        basePaddingY = 6;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
-        baseFontSize = 14;
-        basePaddingX = 16;
-        basePaddingY = 8;
-      } else if (isLandscape) {
-        baseFontSize = 12;
-        basePaddingX = 12;
-        basePaddingY = 4;
-      }
+      // Для мобильной версии в ландшафте сохраняем логику
+      if (isLandscape) {
+        let basePaddingX = 12;
+        let basePaddingY = 4;
 
-      const finalFontSize = Math.max(8, baseFontSize * scaleFactor);
-      const finalPaddingX = Math.max(4, basePaddingX * scaleFactor);
-      const finalPaddingY = Math.max(2, basePaddingY * scaleFactor);
+        if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
+          baseFontSize = 12;
+        }
 
-      element.style.fontSize = `${finalFontSize}px`;
-      element.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
+        const finalFontSize = Math.max(8, baseFontSize * scaleFactor);
+        const finalPaddingX = Math.max(4, basePaddingX * scaleFactor);
+        const finalPaddingY = Math.max(2, basePaddingY * scaleFactor);
 
-      if (!isLandscape) {
-        const baseMinWidth = 80;
-        const finalMinWidth = Math.max(40, baseMinWidth * scaleFactor);
-        element.style.minWidth = `${finalMinWidth}px`;
+        element.style.fontSize = `${finalFontSize}px`;
+        element.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
+      } else {
+        // Для десктопной версии (текстовый лейбл)
+        // Только масштабируем шрифт, убираем отступы и фон
+        if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
+          baseFontSize = 14;
+        } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
+          baseFontSize = 20;
+        } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
+          baseFontSize = 24;
+        } else {
+          baseFontSize = 32;
+        }
+
+        const finalFontSize = Math.max(16, baseFontSize * scaleFactor);
+        element.style.fontSize = `${finalFontSize}px`;
+        element.style.padding = '0';
+        element.style.minWidth = 'auto'; // Убираем минимальную ширину
       }
     });
   }
@@ -456,55 +458,37 @@ export class UIManager {
   }
 
   private positionLeftButtons(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
+    // ДЕАКТИВИРОВАНО: Позиционирование управляется через CSS классы для предотвращения скрытия
+    // Мы теперь используем фиксированные позиции в углах экрана
     const soundToggle = this.buttons.soundToggle;
     if (soundToggle?.parentElement) {
-      const leftButtons = soundToggle.parentElement;
-      const leftX = tableRect.left - gameAreaRect.left - leftButtons.offsetWidth - margin;
-
-      // Если недостаточно места слева, скрываем или переносим
-      if (leftX < 10) {
-        leftButtons.style.display = 'none'; // Скрываем на очень узких экранах
-      } else {
-        leftButtons.style.display = 'flex';
-        leftButtons.style.left = `${leftX}px`;
-      }
-      leftButtons.style.right = 'auto';
+      soundToggle.parentElement.style.display = 'flex';
+      soundToggle.parentElement.style.left = ''; // Сбрасываем инлайн стили
+      soundToggle.parentElement.style.right = '';
     }
   }
 
   private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
-    const tableRightEdge = (gameAreaRect.width - this.elements.tableContainer!.offsetWidth) / 2 +
-      this.elements.tableContainer!.offsetWidth;
-    const commonLeftOffset = tableRightEdge + margin;
-    const availableWidth = gameAreaRect.width - commonLeftOffset;
+    // ДЕАКТИВИРОВАНО: Позиционирование управляется через CSS классы
 
-    // Правые кнопки
+    // Правые кнопки (Reset) - если нужно, можно оставить логику для них или тоже перевести на CSS
     const resetButton = this.buttons.resetButton;
     if (resetButton?.parentElement) {
-      if (availableWidth < 40) {
-        resetButton.parentElement.style.display = 'none';
-      } else {
-        resetButton.parentElement.style.display = 'block';
-        resetButton.parentElement.style.left = `${commonLeftOffset}px`;
-        resetButton.parentElement.style.right = 'auto';
-      }
+      // Оставляем reset button управляемым CSS, или скрываем его на очень узких экранах если он мешает
+      // Но пока просто сбросим стили
+      resetButton.parentElement.style.left = '';
+      resetButton.parentElement.style.right = '';
+      resetButton.parentElement.style.display = 'block';
     }
 
-    // Счет в правом верхнем углу
+    // Счет
     const scoreDisplay = this.scoreElements.scoreDisplay;
     if (scoreDisplay?.parentElement) {
-      const topRightScore = scoreDisplay.parentElement;
-      const topY = tableRect.top - gameAreaRect.top - topRightScore.offsetHeight - margin;
-
-      if (availableWidth < 80) {
-        topRightScore.style.display = 'none';
-      } else {
-        topRightScore.style.display = 'block';
-        topRightScore.style.top = `${Math.max(10, topY)}px`;
-        topRightScore.style.left = `${commonLeftOffset}px`;
-        topRightScore.style.right = 'auto';
-        topRightScore.style.bottom = 'auto';
-      }
+      scoreDisplay.parentElement.style.display = 'block';
+      scoreDisplay.parentElement.style.top = '';
+      scoreDisplay.parentElement.style.left = '';
+      scoreDisplay.parentElement.style.right = '';
+      scoreDisplay.parentElement.style.bottom = '';
     }
   }
 
