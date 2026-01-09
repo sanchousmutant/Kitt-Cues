@@ -94,29 +94,47 @@ export const POCKET_CONFIG = {
 
 // Настройки масштабирования
 export const SCALING_CONFIG = {
-  BASE_TABLE_WIDTH: 600,
-  BASE_TABLE_HEIGHT: 400,
+  BASE_TABLE_WIDTH: 800,
+  BASE_TABLE_HEIGHT: 533,
   BREAKPOINTS: {
-    XS: 280,
-    SM: 320,
-    MD: 375,
-    LG: 640,
-    XL: 1024,
+    SM: 480,
+    MD: 768,
+    LG: 1024,
   },
   CAT_SCALES: {
-    XS: 0.25,
-    SM: 0.3,
-    MD: 0.4,
-    LG: 0.5,
-    XL: 1.1,
+    BASE: 1.0,
+    LG: 1.0,
+    MD: 0.9,
+    SM: 0.7,
   },
   BALL_SIZES: {
-    BASE: 16,
-    XS: 26,
-    SM: 28,
-    MD: 30,
-    LG: 32,
-  } as const,
+    BASE: 24,
+    LG: 28,
+    MD: 32,
+    SM: 36,
+  },
+  POCKET_SIZES: {
+    BASE: 36,
+    LG: 42,
+    MD: 48,
+    SM: 54,
+  },
+  CUE_SIZES: {
+    HEIGHT: { BASE: 6, LG: 7, MD: 8, SM: 9 },
+    WIDTH_PERCENT: { BASE: 30, LG: 35, MD: 40, SM: 45 },
+  },
+  BUTTON_SIZES: {
+    FONT: { BASE: 16, LG: 14, MD: 12, SM: 10 },
+    PADDING_X: { BASE: 16, LG: 12, MD: 8, SM: 6 },
+    PADDING_Y: { BASE: 8, LG: 6, MD: 4, SM: 3 },
+  },
+  SCORE_SIZES: {
+    FONT: { BASE: 32, LG: 28, MD: 24, SM: 20 },
+  },
+  POWER_INDICATOR_SIZES: {
+    WIDTH: { BASE: 200, LG: 150, MD: 100, SM: 80 },
+    HEIGHT: { BASE: 15, LG: 12, MD: 10, SM: 8 },
+  },
 } as const;
 
 // Константы для настроек
