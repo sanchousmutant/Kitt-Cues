@@ -5,13 +5,13 @@ import { join } from 'path';
 export default defineConfig(({ mode }) => ({
     // Базовый путь для GitHub Pages
     base: '/Kitt-Cues/',
-    
+
     define: {
         __APP_VERSION__: JSON.stringify(process.env.npm_package_version || 'dev'),
         __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
         __GIT_COMMIT__: JSON.stringify(process.env.GITHUB_SHA || 'local'),
     },
-    
+
     build: {
         outDir: 'dist',
         emptyOutDir: true,
@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
             include: [/node_modules/],
             transformMixedEsModules: true
         },
-        
+
         rollupOptions: {
             input: {
                 main: 'index.html'
@@ -42,27 +42,27 @@ export default defineConfig(({ mode }) => ({
                 assetFileNames: 'assets/[name]-[hash].[ext]'
             }
         },
-        
+
         // Настройки для GitHub Pages
         assetsDir: 'assets',
-        
+
         // Оптимизация размера бандла
         chunkSizeWarningLimit: 1000,
-        
+
         // Настройки для PWA
         manifest: true,
-        
+
         // Копируем иконки после сборки
         copyPublicDir: true,
-        
+
         // Оптимизация для мобильных устройств
         target: ['es2020', 'chrome80', 'safari13'],
-        
+
         // CSS настройки
         cssCodeSplit: true,
         cssMinify: mode === 'production'
     },
-    
+
     resolve: {
         alias: {
             '@': new URL('./src', import.meta.url).pathname,
@@ -70,37 +70,41 @@ export default defineConfig(({ mode }) => ({
             '@utils': new URL('./src/utils', import.meta.url).pathname
         }
     },
-    
+
     // Настройки dev сервера
     server: {
         port: 3000,
         open: true,
         cors: true,
         host: '0.0.0.0', // Позволяет доступ с мобильных устройств в локальной сети
-        
-        // Настройки для тестирования PWA
+
+        // Настройки для тестирования PWA и отключения кэширования
         headers: {
-            'Service-Worker-Allowed': '/'
+            'Service-Worker-Allowed': '/',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Surrogate-Control': 'no-store'
         }
     },
-    
+
     // Настройки превью
     preview: {
         port: 4173,
         host: '0.0.0.0'
     },
-    
+
     // Оптимизация зависимостей
     optimizeDeps: {
         include: [],
         exclude: []
     },
-    
+
     // Настройки для TypeScript
     esbuild: {
         target: 'es2020',
         keepNames: true,
-        
+
         // Оптимизация для production
         ...(mode === 'production' && {
             drop: ['console', 'debugger'],
@@ -109,24 +113,24 @@ export default defineConfig(({ mode }) => ({
             minifyWhitespace: true
         })
     },
-    
+
     // Настройки CSS
     css: {
         devSourcemap: mode === 'development',
-        
+
         // PostCSS настройки для Tailwind
         postcss: {
             plugins: []
         }
     },
-    
+
     // Настройки для тестирования
     test: {
         environment: 'jsdom',
         globals: true,
         setupFiles: ['./src/test/setup.ts']
     },
-    
+
     // Плагин для копирования иконок
     plugins: [
         {
@@ -136,7 +140,7 @@ export default defineConfig(({ mode }) => ({
                 if (!existsSync(iconsDir)) {
                     mkdirSync(iconsDir, { recursive: true });
                 }
-                
+
                 // Копируем существующие иконки
                 const icons = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png', 'icon-192x192.svg'];
                 icons.forEach(icon => {
@@ -152,7 +156,7 @@ export default defineConfig(({ mode }) => ({
                         }
                     }
                 });
-                
+
                 // Создаем .nojekyll файл для отключения обработки Jekyll на GitHub Pages
                 // Это предотвращает проблемы с MIME типами для JS файлов
                 const nojekyllPath = join(process.cwd(), 'dist', '.nojekyll');
