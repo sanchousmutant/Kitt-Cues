@@ -204,8 +204,7 @@ class Game {
 
       // Рисуем траекторию
       if (state.power > JOYSTICK_CONFIG.MIN_POWER_THRESHOLD) {
-        const distance = state.power * 100; // Преобразуем в расстояние для траектории
-        this.drawTrajectory(cueBallObj, distance);
+        this.drawTrajectory(cueBallObj);
       }
 
       // Показываем визуальные помощники
@@ -519,11 +518,7 @@ class Game {
 
     // Рисование траектории
     if (this.gameState.isDragging) {
-      const dragDistance = distance(
-        this.gameState.dragStartX, this.gameState.dragStartY,
-        mouseX, mouseY
-      );
-      this.drawTrajectory(cueBallObj, dragDistance);
+      this.drawTrajectory(cueBallObj);
     }
 
     this.updateCuePosition(cueBallObj);
@@ -693,7 +688,7 @@ class Game {
     this.hitBall(power);
   }
 
-  private drawTrajectory(cueBall: BallObject, dragDistance: number): void {
+  private drawTrajectory(cueBall: BallObject): void {
     if (!this.trajectoryCtx || !this.uiManager.trajectoryCanvas) return;
 
     const ctx = this.trajectoryCtx;
