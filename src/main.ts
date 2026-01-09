@@ -857,12 +857,6 @@ class Game {
       }
     }
 
-    // Проверяем коллизии для каждого шара
-    this.gameState.balls.forEach(ball => {
-      this.physicsEngine.checkPocketCollisions(ball, this.gameState.pockets);
-      // this.physicsEngine.checkCatCollisions(ball, catManager.getCats()); // Removed as per new logic
-    });
-
     // Проверка на падение белого шара (штраф)
     const cueBall = this.gameState.balls.find(b => b.el.id === 'cue-ball');
     if (cueBall && cueBall.sunk && !this.gameState.isFoulPending) {
@@ -872,7 +866,6 @@ class Game {
       // Не прерываем игру, ждем остановки всех шаров
     }
 
-    this.physicsEngine.checkCatCollisions(this.gameState.balls, catManager.getCats());
     this.physicsEngine.checkBallCollisions(this.gameState.balls);
   }
 

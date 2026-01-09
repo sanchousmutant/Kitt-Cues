@@ -237,7 +237,9 @@ export class SoundManager {
         g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.05 + 0.5);
 
         osc.connect(g);
-        g.connect(this.masterGain);
+        if (this.masterGain) {
+          g.connect(this.masterGain);
+        }
         osc.start(now + i * 0.05);
         osc.stop(now + i * 0.05 + 0.6);
       });
@@ -390,7 +392,7 @@ export class SoundManager {
   get getMusicVolume(): number { return this.musicVolume; }
   get getIsMusicPlaying(): boolean { return this.isMusicPlaying; }
   playCueFall(): void {
-    if (!this.soundEnabled || !this.audioContext) return;
+    if (!this.soundEnabled || !this.audioContext || !this.masterGain) return;
 
     try {
       const now = this.audioContext.currentTime;
@@ -434,7 +436,9 @@ export class SoundManager {
       gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
       osc.connect(gainNode);
-      gainNode.connect(this.masterGain);
+      if (this.masterGain) {
+        gainNode.connect(this.masterGain);
+      }
 
       osc.start();
       osc.stop(now + 0.15);

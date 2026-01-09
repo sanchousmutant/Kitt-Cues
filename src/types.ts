@@ -119,6 +119,8 @@ export interface GameElements {
   helpModal: HTMLElement;
   rotationNotice: HTMLElement;
   trajectoryCanvas: HTMLCanvasElement;
+  gameOverModal: HTMLElement | null;
+  finalScore: HTMLElement | null;
 }
 
 // Кнопки управления
@@ -132,6 +134,7 @@ export interface ControlButtons {
   musicToggleLandscape: HTMLButtonElement | null;
   helpButtonLandscape: HTMLButtonElement | null;
   resetButtonLandscape: HTMLButtonElement | null;
+  restartButtonModal: HTMLButtonElement | null;
 }
 
 // Элементы отображения счета

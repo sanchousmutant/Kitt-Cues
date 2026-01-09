@@ -34,6 +34,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.8.1",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.12"
   },
@@ -42,10 +43,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/Kitt-Cues.git"
+    "url": "https://github.com/sanchousmutant/Kitt-Cues.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/Kitt-Cues/issues"
+    "url": "https://github.com/sanchousmutant/Kitt-Cues/issues"
   },
-  "homepage": "https://github.com/your-username/Kitt-Cues#readme"
+  "homepage": "https://sanchousmutant.github.io/Kitt-Cues/"
 }

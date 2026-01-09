@@ -503,7 +503,7 @@ export class UIManager {
     this.positionMobileElements(gameAreaRect, tableRect, margin);
   }
 
-  private positionLeftButtons(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
+  private positionLeftButtons(_gameAreaRect: DOMRect, _tableRect: DOMRect, _margin: number): void {
     // ДЕАКТИВИРОВАНО: Позиционирование управляется через CSS классы для предотвращения скрытия
     // Мы теперь используем фиксированные позиции в углах экрана
     const soundToggle = this.buttons.soundToggle;
@@ -514,7 +514,7 @@ export class UIManager {
     }
   }
 
-  private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
+  private positionRightElements(_gameAreaRect: DOMRect, _tableRect: DOMRect, _margin: number): void {
     // ДЕАКТИВИРОВАНО: Позиционирование управляется через CSS классы
 
     // Правые кнопки (Reset) - если нужно, можно оставить логику для них или тоже перевести на CSS
