@@ -339,7 +339,7 @@ export class CatManager {
       };
     });
 
-    let animationFrame: number;
+    //let animationFrame: number;
 
     const animate = () => {
       let stillVisible = false;
