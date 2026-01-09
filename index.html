@@ -49,11 +49,11 @@
             document.documentElement.style.opacity = '1';
         });
     </script>
-  <script type="module" crossorigin src="/Kitt-Cues/assets/main-CV7Y9Ujq.js"></script>
+  <script type="module" crossorigin src="/Kitt-Cues/assets/main-C08w-Y83.js"></script>
   <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/utils-mddd3nEY.js">
   <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/sound-D3iNkBN9.js">
   <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/physics-CneykC2A.js">
-  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/ui-BXPGp1kY.js">
+  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/ui-DEJ4X08k.js">
   <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/cats-L49h1Iw0.js">
   <link rel="stylesheet" crossorigin href="/Kitt-Cues/assets/main-CN38HSZm.css">
 </head>
@@ -80,7 +80,7 @@
 
     <div class="relative flex-1 w-full max-w-full sm:pl-24 sm:pt-20 sm:pr-8" id="game-area">
         <!-- Кнопки управления справа (только для больших экранов) -->
-        <div class="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 flex-col gap-4 z-10">
+        <div id="main-right-buttons-container" class="hidden sm:flex flex-col gap-4 z-10">
             <button id="sound-toggle" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Звуковые эффекты">🔊</button>
@@ -96,7 +96,7 @@
         </div>
 
         <!-- Счет в правом верхнем углу (только для больших экранов) -->
-        <div class="hidden sm:block absolute top-6 right-24 z-10 pointer-events-none">
+        <div id="main-score-container" class="hidden sm:block z-10 pointer-events-none">
             <div id="score-display"
                 class="text-[#facc15] font-bold text-2xl sm:text-3xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-comfortaa">
                 Счет: 0</div>
