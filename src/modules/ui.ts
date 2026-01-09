@@ -280,43 +280,40 @@ export class UIManager {
 
   private scaleCats(scaleFactor: number): void {
     const cats = document.querySelectorAll('.cat-container');
+    const { BREAKPOINTS, CAT_SCALES } = SCALING_CONFIG;
+    let baseScale = CAT_SCALES.BASE;
+
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= BREAKPOINTS.SM) {
+      baseScale = CAT_SCALES.SM;
+    } else if (screenWidth <= BREAKPOINTS.MD) {
+      baseScale = CAT_SCALES.MD;
+    } else if (screenWidth <= BREAKPOINTS.LG) {
+      baseScale = CAT_SCALES.LG;
+    }
+
     cats.forEach(cat => {
-      let baseScale = 1.0;
-
-      if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
-        baseScale = SCALING_CONFIG.CAT_SCALES.XS;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
-        baseScale = SCALING_CONFIG.CAT_SCALES.SM;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
-        baseScale = SCALING_CONFIG.CAT_SCALES.MD;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
-        baseScale = SCALING_CONFIG.CAT_SCALES.LG;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XL) {
-        baseScale = SCALING_CONFIG.CAT_SCALES.XL;
-      }
-
-      const finalScale = baseScale * scaleFactor;
-      (cat as HTMLElement).style.transform = `scale(${Math.max(0.05, finalScale)})`;
+      const finalScale = baseScale * Math.max(0.8, scaleFactor);
+      (cat as HTMLElement).style.transform = `scale(${Math.max(0.1, finalScale)})`;
     });
   }
 
   private scaleBalls(scaleFactor: number): void {
     const balls = document.querySelectorAll('.billiard-ball');
+    const { BREAKPOINTS, BALL_SIZES } = SCALING_CONFIG;
+    let baseSize = BALL_SIZES.BASE;
+
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= BREAKPOINTS.SM) {
+      baseSize = BALL_SIZES.SM;
+    } else if (screenWidth <= BREAKPOINTS.MD) {
+      baseSize = BALL_SIZES.MD;
+    } else if (screenWidth <= BREAKPOINTS.LG) {
+      baseSize = BALL_SIZES.LG;
+    }
+
     balls.forEach(ball => {
-      let baseSize: number = SCALING_CONFIG.BALL_SIZES.BASE;
-
-      if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
-        baseSize = SCALING_CONFIG.BALL_SIZES.XS;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
-        baseSize = SCALING_CONFIG.BALL_SIZES.SM;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
-        baseSize = SCALING_CONFIG.BALL_SIZES.MD;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
-        baseSize = SCALING_CONFIG.BALL_SIZES.LG;
-      }
-
-      const ballScaleFactor = Math.max(0.8, scaleFactor);
-      const finalSize = Math.max(3, baseSize * ballScaleFactor);
+      const finalSize = Math.max(8, baseSize * scaleFactor);
       (ball as HTMLElement).style.width = `${finalSize}px`;
       (ball as HTMLElement).style.height = `${finalSize}px`;
     });
@@ -324,21 +321,20 @@ export class UIManager {
 
   private scalePockets(scaleFactor: number): void {
     const pockets = document.querySelectorAll('[data-pocket]');
+    const { BREAKPOINTS, POCKET_SIZES } = SCALING_CONFIG;
+    let baseSize = POCKET_SIZES.BASE;
+
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= BREAKPOINTS.SM) {
+      baseSize = POCKET_SIZES.SM;
+    } else if (screenWidth <= BREAKPOINTS.MD) {
+      baseSize = POCKET_SIZES.MD;
+    } else if (screenWidth <= BREAKPOINTS.LG) {
+      baseSize = POCKET_SIZES.LG;
+    }
+    
     pockets.forEach(pocket => {
-      let baseSize = 32;
-
-      if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
-        baseSize = 12;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
-        baseSize = 14;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
-        baseSize = 16;
-      } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
-        baseSize = 20;
-      }
-
-      const pocketScaleFactor = Math.max(0.8, scaleFactor);
-      const finalSize = Math.max(8, baseSize * pocketScaleFactor);
+      const finalSize = Math.max(12, baseSize * scaleFactor);
       (pocket as HTMLElement).style.width = `${finalSize}px`;
       (pocket as HTMLElement).style.height = `${finalSize}px`;
     });
@@ -346,29 +342,26 @@ export class UIManager {
 
   private scaleCue(scaleFactor: number): void {
     if (!this.elements.cue) return;
+    
+    const { BREAKPOINTS, CUE_SIZES } = SCALING_CONFIG;
+    let baseHeight = CUE_SIZES.HEIGHT.BASE;
+    let baseWidth = CUE_SIZES.WIDTH_PERCENT.BASE;
 
-    let baseHeight = 8;
-    let baseWidth = 40;
-
-    if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.XS) {
-      baseHeight = 3;
-      baseWidth = 10;
-    } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.SM) {
-      baseHeight = 4;
-      baseWidth = 15;
-    } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.MD) {
-      baseHeight = 5;
-      baseWidth = 20;
-    } else if (window.innerWidth <= SCALING_CONFIG.BREAKPOINTS.LG) {
-      baseHeight = 6;
-      baseWidth = 25;
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= BREAKPOINTS.SM) {
+      baseHeight = CUE_SIZES.HEIGHT.SM;
+      baseWidth = CUE_SIZES.WIDTH_PERCENT.SM;
+    } else if (screenWidth <= BREAKPOINTS.MD) {
+      baseHeight = CUE_SIZES.HEIGHT.MD;
+      baseWidth = CUE_SIZES.WIDTH_PERCENT.MD;
+    } else if (screenWidth <= BREAKPOINTS.LG) {
+      baseHeight = CUE_SIZES.HEIGHT.LG;
+      baseWidth = CUE_SIZES.WIDTH_PERCENT.LG;
     }
 
-    const finalHeight = Math.max(1, baseHeight * scaleFactor);
-    const finalWidth = Math.max(5, baseWidth);
-
+    const finalHeight = Math.max(2, baseHeight * scaleFactor);
     this.elements.cue.style.height = `${finalHeight}px`;
-    this.elements.cue.style.width = `${finalWidth}%`;
+    this.elements.cue.style.width = `${baseWidth}%`;
   }
 
   private scaleButtons(scaleFactor: number): void {
