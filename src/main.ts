@@ -387,16 +387,17 @@ class Game {
       vibrate([100, 50, 100]);
     });
 
-    // Service Worker
+    // Service Worker - ОТКЛЮЧЕН и УДАЛЕН для предотвращения проблем с кэшированием при разработке
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then((registration) => {
-            console.log('✅ Service Worker registered successfully:', registration.scope);
-          })
-          .catch((registrationError) => {
-            console.log('❌ Service Worker registration failed:', registrationError);
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister().then(function (boolean) {
+            console.log('🧹 Service Worker unregistered:', boolean);
           });
+        }
+        if (registrations.length > 0) {
+          console.log('⚠️ Old Service Workers cleared. Please reload the page if changes are not visible.');
+        }
       });
     }
   }
