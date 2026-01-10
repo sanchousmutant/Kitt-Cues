@@ -74,7 +74,7 @@
 
     <div class="relative flex-1 w-full max-w-full sm:pl-24 sm:pt-20 sm:pr-8" id="game-area">
         <!-- Кнопки управления справа (только для больших экранов) -->
-        <div id="main-right-buttons-container" class="hidden sm:flex flex-col gap-4 z-10">
+        <div id="main-right-buttons-container" class="hidden xl:flex flex-col gap-4 z-10">
             <button id="sound-toggle" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Звуковые эффекты">🔊</button>
@@ -90,14 +90,14 @@
         </div>
 
         <!-- Счет в правом верхнем углу (только для больших экранов) -->
-        <div id="main-score-container" class="hidden sm:block z-10 pointer-events-none">
+        <div id="main-score-container" class="hidden xl:block z-10 pointer-events-none">
             <div id="score-display"
                 class="text-[#facc15] font-bold text-2xl sm:text-3xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-comfortaa">
                 Счет: 0</div>
         </div>
 
         <!-- Дополнительные кнопки для мобильных в ландшафтной ориентации: горизонтально в верхнем правом углу -->
-        <div class="absolute top-2 right-2 flex flex-row gap-2 sm:hidden landscape-mobile-controls z-20">
+        <div class="absolute top-2 right-2 flex flex-row gap-2 xl:hidden landscape-mobile-controls z-20">
             <button id="sound-toggle-landscape" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-8 h-8 rounded-full shadow-md text-xs flex items-center justify-center opacity-80 hover:opacity-100"
                 title="Звуковые эффекты">🔊</button>
@@ -114,7 +114,7 @@
 
         <!-- Счет для мобильных в ландшафтной ориентации: текст по центру сверху -->
         <div
-            class="absolute top-2 left-1/2 -translate-x-1/2 sm:hidden landscape-mobile-controls z-20 pointer-events-none">
+            class="absolute top-2 left-1/2 -translate-x-1/2 xl:hidden landscape-mobile-controls z-20 pointer-events-none">
             <div id="score-display-landscape"
                 class="text-[#facc15] font-bold text-xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-comfortaa">Счет: 0
             </div>
