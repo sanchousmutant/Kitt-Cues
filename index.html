@@ -52,8 +52,7 @@
     </script>
 </head>
 
-<body
-    class="flex flex-col items-center justify-center min-h-screen max-h-screen overflow-hidden px-4 py-8 md:px-8 md:py-12 xl:p-32">
+<body class="flex flex-col items-center justify-center min-h-screen max-h-screen overflow-hidden p-8 md:p-20 xl:p-32">
     <!-- Уведомление о повороте телефона -->
     <div id="rotation-notice"
         class="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col items-center justify-center text-white p-4 sm:hidden">
@@ -74,30 +73,31 @@
 
     <div class="relative flex-1 w-full max-w-full xl:pl-24 xl:pt-20 xl:pr-8" id="game-area">
         <!-- Кнопки управления справа (только для больших экранов) -->
-        <div id="main-right-buttons-container" class="hidden xl:flex flex-col gap-4 z-10">
+        <div id="main-right-buttons-container"
+            class="hidden md:flex flex-col gap-4 z-50 fixed right-2 top-1/2 -translate-y-1/2">
             <button id="sound-toggle" aria-label="Переключить звуковые эффекты"
-                class="bg-blue-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Звуковые эффекты">🔊</button>
             <button id="music-toggle" aria-label="Переключить фоновую музыку"
-                class="bg-purple-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-purple-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-purple-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-purple-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Фоновая музыка">🎵</button>
             <button id="help-button" aria-label="Открыть справку"
-                class="bg-green-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-green-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-green-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-green-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Справка">❓</button>
             <button id="reset-button" aria-label="Сбросить игру"
-                class="bg-yellow-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-yellow-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-yellow-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-yellow-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Сброс">🔄</button>
         </div>
 
         <!-- Счет в правом верхнем углу (только для больших экранов) -->
-        <div id="main-score-container" class="hidden xl:block z-10 pointer-events-none">
+        <div id="main-score-container" class="hidden md:block z-50 pointer-events-none fixed top-4 right-8">
             <div id="score-display"
                 class="text-[#facc15] font-bold text-2xl sm:text-3xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-comfortaa">
                 Счет: 0</div>
         </div>
 
         <!-- Дополнительные кнопки для мобильных в ландшафтной ориентации: горизонтально в верхнем правом углу -->
-        <div class="absolute top-4 right-4 flex flex-row gap-2 xl:hidden landscape-mobile-controls z-20">
+        <div class="absolute top-4 right-4 flex flex-row gap-2 md:hidden landscape-mobile-controls z-20">
             <button id="sound-toggle-landscape" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-8 h-8 rounded-full shadow-md text-xs flex items-center justify-center opacity-80 hover:opacity-100"
                 title="Звуковые эффекты">🔊</button>
@@ -114,7 +114,7 @@
 
         <!-- Счет для мобильных в ландшафтной ориентации: текст по центру сверху -->
         <div
-            class="absolute top-4 left-1/2 -translate-x-1/2 xl:hidden landscape-mobile-controls z-20 pointer-events-none">
+            class="absolute top-4 left-1/2 -translate-x-1/2 md:hidden landscape-mobile-controls z-20 pointer-events-none">
             <div id="score-display-landscape"
                 class="text-[#facc15] font-bold text-xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-comfortaa">Счет: 0
             </div>

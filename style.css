@@ -1600,12 +1600,3 @@ body {
 .joystick-container {
     animation: joystick-fade-in 0.3s ease-out;
 }
-
-/* Принудительное скрытие десктопных элементов на планшетах и мобильных */
-@media (max-width: 1279px) {
-
-    #main-right-buttons-container,
-    #main-score-container {
-        display: none !important;
-    }
-}

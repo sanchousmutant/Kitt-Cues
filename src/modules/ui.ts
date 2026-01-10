@@ -467,15 +467,18 @@ export class UIManager {
   private positionLeftButtons(_gameAreaRect: DOMRect, _tableRect: DOMRect, _margin: number): void {
     // ДЕАКТИВИРОВАНО: Позиционирование управляется через CSS классы для предотвращения скрытия
     // Мы теперь используем фиксированные позиции в углах экрана
+    /*
     const soundToggle = this.buttons.soundToggle;
     if (soundToggle?.parentElement) {
       soundToggle.parentElement.style.display = 'flex';
       soundToggle.parentElement.style.left = ''; // Сбрасываем инлайн стили
       soundToggle.parentElement.style.right = '';
     }
+    */
   }
 
   private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
+    /*
     const { mainRightButtonsContainer, mainScoreContainer } = this.elements;
 
     if (mainRightButtonsContainer) {
@@ -508,6 +511,7 @@ export class UIManager {
       mainScoreContainer.style.top = `${tableRect.top - gameAreaRect.top + margin}px`;
       mainScoreContainer.style.right = 'auto'; // Сброс, если был
     }
+    */
   }
 
   private positionMobileElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
