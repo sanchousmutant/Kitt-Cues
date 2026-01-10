@@ -336,7 +336,7 @@ export class UIManager {
     } else if (screenWidth <= BREAKPOINTS.LG) {
       baseSize = POCKET_SIZES.LG;
     }
-    
+
     pockets.forEach(pocket => {
       const finalSize = Math.max(12, baseSize * scaleFactor);
       (pocket as HTMLElement).style.width = `${finalSize}px`;
@@ -346,7 +346,7 @@ export class UIManager {
 
   private scaleCue(scaleFactor: number): void {
     if (!this.elements.cue) return;
-    
+
     const { BREAKPOINTS, CUE_SIZES } = SCALING_CONFIG;
     let baseHeight: number = CUE_SIZES.HEIGHT.BASE;
     let baseWidth: number = CUE_SIZES.WIDTH_PERCENT.BASE;
@@ -371,7 +371,7 @@ export class UIManager {
   private scaleButtons(scaleFactor: number): void {
     const buttons = document.querySelectorAll('button');
     const { BREAKPOINTS, BUTTON_SIZES } = SCALING_CONFIG;
-    
+
     let baseFontSize: number = BUTTON_SIZES.FONT.BASE;
     let basePaddingX: number = BUTTON_SIZES.PADDING_X.BASE;
     let basePaddingY: number = BUTTON_SIZES.PADDING_Y.BASE;
@@ -407,7 +407,7 @@ export class UIManager {
     const scoreElements = [this.scoreElements.scoreDisplay, this.scoreElements.scoreDisplayLandscape];
     const { BREAKPOINTS, SCORE_SIZES } = SCALING_CONFIG;
     let baseFontSize: number = SCORE_SIZES.FONT.BASE;
-    
+
     const screenWidth = window.innerWidth;
     if (screenWidth <= BREAKPOINTS.SM) {
       baseFontSize = SCORE_SIZES.FONT.SM;
@@ -486,10 +486,10 @@ export class UIManager {
       mainRightButtonsContainer.style.position = 'absolute'; // Ensure absolute positioning
       // Calculate desired left position: right edge of table + margin
       const desiredLeft = (tableRect.right - gameAreaRect.left) + margin;
-      
+
       // Ensure it doesn't go off the right edge of the gameArea
       const finalLeft = Math.min(desiredLeft, gameAreaRect.width - buttonsWidth - margin);
-      
+
       mainRightButtonsContainer.style.left = `${finalLeft}px`;
       mainRightButtonsContainer.style.top = `${tableRect.top - gameAreaRect.top + (tableRect.height / 2) - (buttonsHeight / 2)}px`;
       mainRightButtonsContainer.style.right = 'auto'; // Сброс, если был
@@ -499,7 +499,7 @@ export class UIManager {
       mainScoreContainer.style.position = 'absolute'; // Ensure absolute positioning
       // Calculate desired left position: right edge of table + margin
       const desiredLeft = (tableRect.right - gameAreaRect.left) + margin;
-      
+
       // Ensure it doesn't go off the right edge of the gameArea
       const scoreWidth = mainScoreContainer.offsetWidth;
       const finalLeft = Math.min(desiredLeft, gameAreaRect.width - scoreWidth - margin);
@@ -511,12 +511,15 @@ export class UIManager {
   }
 
   private positionMobileElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
-    // Мобильные кнопки в ландшафтной ориентации
+    // Мобильные кнопки и счет теперь позиционируются через CSS классы (Tailwind)
+    // в index.html (top-2 right-2 и т.д.)
+    // Динамическое позиционирование здесь отключено, чтобы не переопределять стили.
+
+    /*
     const soundToggleLandscape = this.buttons.soundToggleLandscape;
     if (soundToggleLandscape?.parentElement) {
       const mobileButtons = soundToggleLandscape.parentElement;
       const topY = tableRect.top - gameAreaRect.top - mobileButtons.offsetHeight - margin;
-      // Гарантируем, что кнопки не улетают вверх за экран
       mobileButtons.style.top = `${Math.max(5, topY)}px`;
       mobileButtons.style.bottom = 'auto';
     }
@@ -525,10 +528,10 @@ export class UIManager {
     if (scoreDisplayLandscape?.parentElement) {
       const mobileScore = scoreDisplayLandscape.parentElement;
       const topY = tableRect.top - gameAreaRect.top - mobileScore.offsetHeight - margin;
-      // Гарантируем, что счет не улетает вверх за экран
       mobileScore.style.top = `${Math.max(5, topY)}px`;
       mobileScore.style.bottom = 'auto';
     }
+    */
   }
 
   private applyDeviceOptimizations(): void {
