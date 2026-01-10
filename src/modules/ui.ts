@@ -483,23 +483,27 @@ export class UIManager {
       const buttonsWidth = mainRightButtonsContainer.offsetWidth;
       const buttonsHeight = mainRightButtonsContainer.offsetHeight;
 
-      const newLeft = tableRect.right - gameAreaRect.left + margin;
-      const finalLeft = Math.min(newLeft, gameAreaRect.width - buttonsWidth - margin);
-
-      mainRightButtonsContainer.style.position = 'absolute';
+      mainRightButtonsContainer.style.position = 'absolute'; // Ensure absolute positioning
+      // Calculate desired left position: right edge of table + margin
+      const desiredLeft = (tableRect.right - gameAreaRect.left) + margin;
+      
+      // Ensure it doesn't go off the right edge of the gameArea
+      const finalLeft = Math.min(desiredLeft, gameAreaRect.width - buttonsWidth - margin);
+      
       mainRightButtonsContainer.style.left = `${finalLeft}px`;
       mainRightButtonsContainer.style.top = `${tableRect.top - gameAreaRect.top + (tableRect.height / 2) - (buttonsHeight / 2)}px`;
       mainRightButtonsContainer.style.right = 'auto'; // Сброс, если был
     }
 
     if (mainScoreContainer) {
-      // Счет (справа сверху)
+      mainScoreContainer.style.position = 'absolute'; // Ensure absolute positioning
+      // Calculate desired left position: right edge of table + margin
+      const desiredLeft = (tableRect.right - gameAreaRect.left) + margin;
+      
+      // Ensure it doesn't go off the right edge of the gameArea
       const scoreWidth = mainScoreContainer.offsetWidth;
+      const finalLeft = Math.min(desiredLeft, gameAreaRect.width - scoreWidth - margin);
 
-      const newLeft = tableRect.right - gameAreaRect.left + margin;
-      const finalLeft = Math.min(newLeft, gameAreaRect.width - scoreWidth - margin);
-
-      mainScoreContainer.style.position = 'absolute';
       mainScoreContainer.style.left = `${finalLeft}px`;
       mainScoreContainer.style.top = `${tableRect.top - gameAreaRect.top + margin}px`;
       mainScoreContainer.style.right = 'auto'; // Сброс, если был

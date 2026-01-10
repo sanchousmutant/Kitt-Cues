@@ -572,7 +572,7 @@ class Game {
     const powerPercent = Math.min((power / GAME_CONFIG.MAX_POWER) * 100, 100);
     this.uiManager.powerFill.style.width = `${powerPercent}%`;
 
-    if (this.gameState.isDragging && power > 0) {
+    if (power > 0) {
       this.uiManager.powerIndicator.classList.add('visible');
       const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
 
