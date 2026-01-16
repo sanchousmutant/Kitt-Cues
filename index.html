@@ -49,17 +49,17 @@
             document.documentElement.style.opacity = '1';
         });
     </script>
-  <script type="module" crossorigin src="/Kitt-Cues/assets/main-BnnPygEa.js"></script>
+  <script type="module" crossorigin src="/Kitt-Cues/assets/main-C6sMMl02.js"></script>
   <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/utils-mddd3nEY.js">
-  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/sound-D3iNkBN9.js">
-  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/physics-CneykC2A.js">
-  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/ui-6feOGVQK.js">
-  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/cats-L49h1Iw0.js">
-  <link rel="stylesheet" crossorigin href="/Kitt-Cues/assets/main-CN38HSZm.css">
+  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/sound-Bv0E3ubS.js">
+  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/physics-Cwab0H-q.js">
+  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/ui-Vraw8pqI.js">
+  <link rel="modulepreload" crossorigin href="/Kitt-Cues/assets/cats-C2cVbtDP.js">
+  <link rel="stylesheet" crossorigin href="/Kitt-Cues/assets/main-CX8Fns7f.css">
 </head>
 
 <body
-    class="flex flex-col items-center justify-center min-h-screen max-h-screen overflow-hidden p-12 sm:p-16 md:p-20 lg:p-24 xl:p-32">
+    class="flex flex-col items-center justify-center min-h-screen max-h-screen overflow-hidden p-2 md:p-6 lg:p-20 xl:p-32">
     <!-- Уведомление о повороте телефона -->
     <div id="rotation-notice"
         class="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col items-center justify-center text-white p-4 sm:hidden">
@@ -78,33 +78,33 @@
     </div>
 
 
-    <div class="relative flex-1 w-full max-w-full sm:pl-24 sm:pt-20 sm:pr-8" id="game-area">
+    <div class="relative flex-1 w-full max-w-full xl:pl-24 xl:pt-20 xl:pr-8" id="game-area">
         <!-- Кнопки управления справа (только для больших экранов) -->
-        <div id="main-right-buttons-container" class="hidden sm:flex flex-col gap-4 z-10">
+        <div id="main-right-buttons-container"
+            class="hidden md:flex flex-col gap-4 z-50 fixed right-2 top-1/2 -translate-y-1/2">
             <button id="sound-toggle" aria-label="Переключить звуковые эффекты"
-                class="bg-blue-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-blue-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-blue-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Звуковые эффекты">🔊</button>
             <button id="music-toggle" aria-label="Переключить фоновую музыку"
-                class="bg-purple-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-purple-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-purple-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-purple-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Фоновая музыка">🎵</button>
             <button id="help-button" aria-label="Открыть справку"
-                class="bg-green-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-green-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-green-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-green-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Справка">❓</button>
             <button id="reset-button" aria-label="Сбросить игру"
-                class="bg-yellow-600 text-white w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full shadow-lg text-lg sm:text-xl md:text-2xl hover:bg-yellow-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                class="bg-yellow-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-yellow-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Сброс">🔄</button>
         </div>
 
         <!-- Счет в правом верхнем углу (только для больших экранов) -->
-        <div id="main-score-container" class="hidden sm:block z-10 pointer-events-none">
+        <div id="main-score-container" class="hidden md:block z-50 pointer-events-none fixed top-4 right-8">
             <div id="score-display"
                 class="text-[#facc15] font-bold text-2xl sm:text-3xl md:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-comfortaa">
                 Счет: 0</div>
         </div>
 
-        <!-- Дополнительные кнопки для мобильных в ландшафтной ориентации: вертикально по центру справа -->
-        <div
-            class="absolute top-1/2 -translate-y-1/2 right-2 flex flex-col gap-3 sm:hidden landscape-mobile-controls z-20">
+        <!-- Дополнительные кнопки для мобильных в ландшафтной ориентации: горизонтально в верхнем правом углу -->
+        <div class="absolute top-4 right-4 flex flex-row gap-2 md:hidden landscape-mobile-controls z-20">
             <button id="sound-toggle-landscape" aria-label="Переключить звуковые эффекты"
                 class="bg-blue-600 text-white w-8 h-8 rounded-full shadow-md text-xs flex items-center justify-center opacity-80 hover:opacity-100"
                 title="Звуковые эффекты">🔊</button>
@@ -119,8 +119,9 @@
                 title="Сброс">🔄</button>
         </div>
 
-        <!-- Счет для мобильных в ландшафтной ориентации: текст в правом верхнем углу -->
-        <div class="absolute top-4 right-12 sm:hidden landscape-mobile-controls z-20 pointer-events-none">
+        <!-- Счет для мобильных в ландшафтной ориентации: текст по центру сверху -->
+        <div
+            class="absolute top-4 left-1/2 -translate-x-1/2 md:hidden landscape-mobile-controls z-20 pointer-events-none">
             <div id="score-display-landscape"
                 class="text-[#facc15] font-bold text-xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-comfortaa">Счет: 0
             </div>
@@ -494,14 +495,14 @@
             class="fixed inset-0 bg-black bg-opacity-75 z-[100] hidden flex-col items-center justify-center text-yellow-100"
             style="display: none;">
             <div
-                class="stats-card bg-gray-800 p-6 rounded-xl border-2 border-yellow-600 text-center shadow-2xl max-w-sm mx-4 transform transition-all">
-                <h2 class="text-3xl font-bold mb-4 text-white">Игра окончена!</h2>
-                <div class="mb-6">
+                class="stats-card bg-gray-800 p-4 rounded-xl border-2 border-yellow-600 text-center shadow-2xl max-w-sm mx-4 transform transition-all">
+                <h2 class="text-2xl font-bold mb-2 text-white">Игра окончена!</h2>
+                <div class="mb-4">
                     <p class="text-gray-400 text-lg mb-1">Финальный счет</p>
-                    <p id="final-score" class="text-5xl font-bold text-yellow-400">0</p>
+                    <p id="final-score" class="text-4xl font-bold text-yellow-400">0</p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-3 mb-6 text-left bg-gray-900 p-4 rounded-lg">
+                <div class="grid grid-cols-1 gap-2 mb-4 text-left bg-gray-900 p-3 rounded-lg">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-400">Ударов по шару:</span>
                         <span id="stat-player-shots" class="text-xl font-bold text-blue-400">0</span>
@@ -518,7 +519,7 @@
 
                 <div class="flex justify-center space-x-4">
                     <button id="restart-button-modal"
-                        class="restart-btn bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg transition transform hover:scale-105 shadow-lg active:scale-95 duration-200">
+                        class="restart-btn bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full text-lg transition transform hover:scale-105 shadow-lg active:scale-95 duration-200">
                         Начать заново 🔄
                     </button>
                 </div>
