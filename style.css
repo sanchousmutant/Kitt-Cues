@@ -703,51 +703,6 @@ body {
     .cat-emoji {
         font-size: 14px;
     }
-
-    /* Фиксация позиций луз для экранов меньше 640px */
-    [data-pocket="0"] {
-        top: -12px !important;
-        left: -12px !important;
-        width: 48px !important;
-        height: 48px !important;
-    }
-
-    [data-pocket="1"] {
-        top: -12px !important;
-        right: -12px !important;
-        width: 48px !important;
-        height: 48px !important;
-    }
-
-    [data-pocket="2"] {
-        bottom: -12px !important;
-        left: -12px !important;
-        width: 48px !important;
-        height: 48px !important;
-    }
-
-    [data-pocket="3"] {
-        bottom: -12px !important;
-        right: -12px !important;
-        width: 48px !important;
-        height: 48px !important;
-    }
-
-    [data-pocket="4"] {
-        top: -12px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 48px !important;
-        height: 48px !important;
-    }
-
-    [data-pocket="5"] {
-        bottom: -12px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 48px !important;
-        height: 48px !important;
-    }
 }
 
 /* Динамическое масштабирование элементов */
@@ -821,22 +776,7 @@ body {
     opacity: 0.7;
 }
 
-/* Улучшенные стили для сенсорного управления */
-@media (max-width: 640px) {
-    #power-indicator {
-        width: 50px;
-        height: 5px;
-    }
 
-    #aim-line {
-        height: 3px;
-    }
-
-    /* Увеличиваем область касания для битка */
-    #cue-ball {
-        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
-    }
-}
 
 /* Модальное окно */
 .modal-overlay {
@@ -1002,75 +942,7 @@ body {
 }
 
 /* Адаптивные улучшения для мобильных устройств */
-@media (max-width: 640px) {
 
-    /* Уменьшаем анимации на мобильных для производительности */
-    .cat-container * {
-        animation-duration: 0.8s !important;
-    }
-
-    /* Значительно уменьшаем размер кошек на мобильных */
-    .cat-container {
-        transform: scale(0.3);
-    }
-
-    /* Отключаем некоторые анимации для лучшей производительности */
-    .cat-tail,
-    .cat-paw {
-        animation: none !important;
-    }
-
-    /* Оставляем только основные анимации */
-    .cat-head {
-        animation: gentle-breathing 4s infinite ease-in-out !important;
-    }
-
-    .cat-eye {
-        animation: blink 5s infinite !important;
-    }
-
-    /* Улучшаем читаемость текста */
-    .text-sm {
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-    }
-
-    /* Оптимизируем тени для мобильных */
-    .shadow-lg {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    /* Дополнительные оптимизации для мобильных */
-    .billiard-ball {
-        width: 10px !important;
-        height: 10px !important;
-    }
-
-    /* Уменьшаем размер кия на мобильных */
-    #cue {
-        height: 1px !important;
-        width: 25% !important;
-    }
-
-    /* Увеличиваем размер луз для мобильных */
-    [data-pocket] {
-        width: 16px !important;
-        height: 16px !important;
-    }
-
-    /* Очень маленькие кнопки для ландшафтного режима */
-    .landscape-mobile-controls button {
-        padding: 0.25rem 0.5rem !important;
-        font-size: 0.5rem !important;
-        min-width: 16px !important;
-        min-height: 16px !important;
-    }
-
-    .landscape-mobile-controls #score-display-landscape {
-        font-size: 0.5rem !important;
-        padding: 0.25rem 0.5rem !important;
-    }
-}
 
 /* Улучшения для планшетов */
 @media (min-width: 640px) and (max-width: 1024px) {
@@ -1254,58 +1126,7 @@ body {
     }
 }
 
-/* Специальные стили для iPhone SE (375px) */
-@media (max-width: 375px) {
-    .billiard-ball {
-        width: 6px !important;
-        height: 6px !important;
-    }
 
-    .cat-container {
-        transform: scale(0.2) !important;
-    }
-
-    /* Уменьшаем размер счета на маленьких экранах */
-    #score-display {
-        font-size: 0.625rem !important;
-        padding: 0.125rem 0.25rem !important;
-        max-width: 60px !important;
-    }
-
-    /* Уменьшаем размер кнопок */
-    button {
-        padding: 0.125rem 0.25rem !important;
-        font-size: 0.5rem !important;
-        min-width: 16px !important;
-        min-height: 16px !important;
-    }
-
-    /* Уменьшаем размер ландшафтных кнопок управления */
-    .landscape-mobile-controls button {
-        padding: 0.1rem 0.15rem !important;
-        font-size: 0.35rem !important;
-        min-width: 14px !important;
-        min-height: 14px !important;
-    }
-
-    /* Уменьшаем счет для ландшафтного режима */
-    #score-display-landscape {
-        font-size: 0.4rem !important;
-        padding: 0.1rem 0.15rem !important;
-    }
-
-    /* Увеличиваем размер луз для маленьких экранов */
-    [data-pocket] {
-        width: 14px !important;
-        height: 14px !important;
-    }
-
-    /* Уменьшаем размер кия на мобильных */
-    #cue {
-        height: 1px !important;
-        width: 20% !important;
-    }
-}
 
 /* Адаптивные размеры для очень больших экранов */
 @media (min-width: 1920px) {
@@ -1319,67 +1140,9 @@ body {
     }
 }
 
-/* Дополнительные улучшения для очень маленьких смартфонов */
-@media (max-width: 320px) {
-    .cat-container {
-        transform: scale(0.15) !important;
-    }
 
-    .billiard-ball {
-        width: 5px !important;
-        height: 5px !important;
-    }
 
-    button {
-        padding: 0.05rem 0.1rem !important;
-        font-size: 0.35rem !important;
-        min-width: 12px !important;
-        min-height: 12px !important;
-    }
 
-    .landscape-mobile-controls button {
-        padding: 0.05rem 0.1rem !important;
-        font-size: 0.3rem !important;
-        min-width: 10px !important;
-        min-height: 10px !important;
-    }
-
-    /* Увеличиваем лузы для очень маленьких экранов */
-    [data-pocket] {
-        width: 12px !important;
-        height: 12px !important;
-    }
-
-    /* Ещё более короткий кий */
-    #cue {
-        height: 1px !important;
-        width: 15% !important;
-    }
-}
-
-/* Улучшения для очень узких экранов */
-@media (max-width: 280px) {
-    .cat-container {
-        transform: scale(0.1) !important;
-    }
-
-    .billiard-ball {
-        width: 4px !important;
-        height: 4px !important;
-    }
-
-    /* Увеличиваем лузы для самых маленьких экранов */
-    [data-pocket] {
-        width: 10px !important;
-        height: 10px !important;
-    }
-
-    /* Минимальный размер кия */
-    #cue {
-        height: 1px !important;
-        width: 10% !important;
-    }
-}
 
 /* Окно завершения игры */
 #game-over {

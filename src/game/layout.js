@@ -14,87 +14,45 @@ export function createLayoutManager(ctx, physics) {
     const { document: doc, window: win, dom, state } = ctx;
 
     function applyDynamicScaling(tableWidth, tableHeight) {
-        const baseTableWidth = 600;
-        const baseTableHeight = 400;
-        const scaleFactorX = tableWidth / baseTableWidth;
-        const scaleFactorY = tableHeight / baseTableHeight;
-        const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+        const baseTableWidth = 800;
+        const scaleFactor = Math.min(tableWidth / baseTableWidth, tableHeight / (baseTableWidth / 1.5));
 
         const cats = doc.querySelectorAll('.cat-container');
         cats.forEach(cat => {
-            let baseScale = 1;
-            if (win.innerWidth <= 280) {
-                baseScale = 0.1;
-            } else if (win.innerWidth <= 320) {
-                baseScale = 0.15;
-            } else if (win.innerWidth <= 375) {
-                baseScale = 0.2;
-            } else if (win.innerWidth <= 640) {
-                baseScale = 0.3;
-            } else if (win.innerWidth <= 1024) {
-                baseScale = 1.1;
-            }
-
-            const finalScale = Math.max(0.05, baseScale * scaleFactor);
+            const baseScale = 0.8; 
+            const finalScale = Math.max(0.2, baseScale * scaleFactor);
             if (!cat.dataset.baseTransform) {
                 cat.dataset.baseTransform = cat.style.transform || '';
             }
-            const baseTransform = cat.dataset.baseTransform;
-            const transformParts = [];
-            if (baseTransform && baseTransform.trim().length > 0) {
-                transformParts.push(baseTransform.trim());
-            }
-            transformParts.push(`scale(${finalScale})`);
-            cat.style.transform = transformParts.join(' ');
+            cat.style.transform = `${cat.dataset.baseTransform} scale(${finalScale})`;
         });
 
         const balls = doc.querySelectorAll('.billiard-ball');
         balls.forEach(ball => {
-            let baseSize = 16;
-            if (win.innerWidth <= 280) {
-                baseSize = 4;
-            } else if (win.innerWidth <= 320) {
-                baseSize = 5;
-            } else if (win.innerWidth <= 375) {
-                baseSize = 6;
-            } else if (win.innerWidth <= 640) {
-                baseSize = 10;
-            }
-
-            const finalSize = Math.max(3, baseSize * scaleFactor);
+            const baseSize = 20; 
+            const finalSize = Math.max(5, baseSize * scaleFactor);
             ball.style.width = `${finalSize}px`;
             ball.style.height = `${finalSize}px`;
         });
 
         const pockets = doc.querySelectorAll('[data-pocket]');
         pockets.forEach(pocket => {
-            let baseSize = 32;
-            if (win.innerWidth <= 280) {
-                baseSize = 12;
-            } else if (win.innerWidth <= 320) {
-                baseSize = 14;
-            } else if (win.innerWidth <= 375) {
-                baseSize = 16;
-            } else if (win.innerWidth <= 640) {
-                baseSize = 20;
-            }
-
-            const pocketScaleFactor = Math.max(0.8, scaleFactor);
-            const finalSize = Math.max(8, baseSize * pocketScaleFactor);
+            const baseSize = 40; 
+            const finalSize = Math.max(10, baseSize * scaleFactor);
             pocket.style.width = `${finalSize}px`;
             pocket.style.height = `${finalSize}px`;
-
-            // Dynamic positioning correction
-            const offset = -(finalSize / 2);
+            
+            const tableComputedStyle = win.getComputedStyle(dom.table);
+            const tablePadding = parseFloat(tableComputedStyle.paddingTop) || 0;
+            const offset = -(finalSize * 0.5 + tablePadding);
             const index = parseInt(pocket.dataset.pocket);
 
-            // Reset potential conflicting inline styles first
             pocket.style.top = '';
             pocket.style.bottom = '';
             pocket.style.left = '';
             pocket.style.right = '';
+            pocket.style.transform = '';
 
-            // Apply new dynamic positions
             if (index === 0) { // Top-Left
                 pocket.style.top = `${offset}px`;
                 pocket.style.left = `${offset}px`;
@@ -109,150 +67,22 @@ export function createLayoutManager(ctx, physics) {
                 pocket.style.right = `${offset}px`;
             } else if (index === 4) { // Top-Middle
                 pocket.style.top = `${offset}px`;
-                // left is handled by CSS class w/ transform
+                pocket.style.left = '50%';
+                pocket.style.transform = 'translateX(-50%)';
             } else if (index === 5) { // Bottom-Middle
                 pocket.style.bottom = `${offset}px`;
-                // left is handled by CSS class w/ transform
+                pocket.style.left = '50%';
+                pocket.style.transform = 'translateX(-50%)';
             }
         });
 
         if (dom.cue) {
-            let baseHeight = 8;
-            let baseWidth = 40;
-            if (win.innerWidth <= 280) {
-                baseHeight = 1;
-                baseWidth = 10;
-            } else if (win.innerWidth <= 320) {
-                baseHeight = 1;
-                baseWidth = 15;
-            } else if (win.innerWidth <= 375) {
-                baseHeight = 1;
-                baseWidth = 20;
-            } else if (win.innerWidth <= 640) {
-                baseHeight = 1;
-                baseWidth = 25;
-            }
-
-            const finalHeight = Math.max(1, baseHeight * scaleFactor);
-            const finalWidth = Math.max(5, baseWidth);
-
+            const baseHeight = 6;
+            const finalHeight = Math.max(2, baseHeight * scaleFactor);
             dom.cue.style.height = `${finalHeight}px`;
-            dom.cue.style.width = `${finalWidth}%`;
+            const baseWidth = 40; 
+            dom.cue.style.width = `${baseWidth * Math.max(0.5, scaleFactor)}%`;
         }
-
-        const buttons = doc.querySelectorAll('button');
-        buttons.forEach(button => {
-            if (button.closest('.landscape-mobile-controls')) return;
-
-            let baseFontSize = 16;
-            let basePaddingX = 16;
-            let basePaddingY = 8;
-            let baseMinWidth = 40;
-            let baseMinHeight = 40;
-
-            if (win.innerWidth <= 320) {
-                baseFontSize = 8;
-                basePaddingX = 4;
-                basePaddingY = 2;
-                baseMinWidth = 12;
-                baseMinHeight = 12;
-            } else if (win.innerWidth <= 375) {
-                baseFontSize = 10;
-                basePaddingX = 6;
-                basePaddingY = 3;
-                baseMinWidth = 16;
-                baseMinHeight = 16;
-            } else if (win.innerWidth <= 640) {
-                baseFontSize = 12;
-                basePaddingX = 8;
-                basePaddingY = 4;
-                baseMinWidth = 20;
-                baseMinHeight = 20;
-            }
-
-            const finalFontSize = Math.max(6, baseFontSize * scaleFactor);
-            const finalPaddingX = Math.max(2, basePaddingX * scaleFactor);
-            const finalPaddingY = Math.max(1, basePaddingY * scaleFactor);
-            const finalMinWidth = Math.max(10, baseMinWidth * scaleFactor);
-            const finalMinHeight = Math.max(10, baseMinHeight * scaleFactor);
-
-            button.style.fontSize = `${finalFontSize}px`;
-            button.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
-            button.style.minWidth = `${finalMinWidth}px`;
-            button.style.minHeight = `${finalMinHeight}px`;
-        });
-
-        const landscapeButtons = doc.querySelectorAll('.landscape-mobile-controls button');
-        landscapeButtons.forEach(button => {
-            let baseFontSize = 10;
-            let basePaddingX = 4;
-            let basePaddingY = 2;
-            let baseMinWidth = 16;
-            let baseMinHeight = 16;
-
-            if (win.innerWidth <= 320) {
-                baseFontSize = 6;
-                basePaddingX = 2;
-                basePaddingY = 1;
-                baseMinWidth = 10;
-                baseMinHeight = 10;
-            }
-
-            const finalFontSize = Math.max(4, baseFontSize * scaleFactor);
-            const finalPaddingX = Math.max(1, basePaddingX * scaleFactor);
-            const finalPaddingY = Math.max(1, basePaddingY * scaleFactor);
-            const finalMinWidth = Math.max(8, baseMinWidth * scaleFactor);
-            const finalMinHeight = Math.max(8, baseMinHeight * scaleFactor);
-
-            button.style.fontSize = `${finalFontSize}px`;
-            button.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
-            button.style.minWidth = `${finalMinWidth}px`;
-            button.style.minHeight = `${finalMinHeight}px`;
-        });
-
-        const scoreElements = [
-            doc.getElementById('score-display'),
-            doc.getElementById('score-display-landscape')
-        ];
-
-        scoreElements.forEach(element => {
-            if (!element) return;
-
-            let baseFontSize = 18;
-            let basePaddingX = 32;
-            let basePaddingY = 16;
-
-            if (win.innerWidth <= 320) {
-                baseFontSize = 8;
-                basePaddingX = 8;
-                basePaddingY = 4;
-            } else if (win.innerWidth <= 375) {
-                baseFontSize = 10;
-                basePaddingX = 12;
-                basePaddingY = 6;
-            } else if (win.innerWidth <= 640) {
-                baseFontSize = 14;
-                basePaddingX = 16;
-                basePaddingY = 8;
-            } else if (element.id === 'score-display-landscape') {
-                baseFontSize = 12;
-                basePaddingX = 12;
-                basePaddingY = 4;
-            }
-
-            const finalFontSize = Math.max(8, baseFontSize * scaleFactor);
-            const finalPaddingX = Math.max(4, basePaddingX * scaleFactor);
-            const finalPaddingY = Math.max(2, basePaddingY * scaleFactor);
-
-            element.style.fontSize = `${finalFontSize}px`;
-            element.style.padding = `${finalPaddingY}px ${finalPaddingX}px`;
-
-            if (element.id === 'score-display') {
-                const baseMinWidth = 80;
-                const finalMinWidth = Math.max(40, baseMinWidth * scaleFactor);
-                element.style.minWidth = `${finalMinWidth}px`;
-            }
-        });
     }
 
     function positionUIElements() {
