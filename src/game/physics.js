@@ -70,7 +70,7 @@ export function createPhysicsEngine(ctx, audioManager) {
             const visualRadius = Math.max(el.offsetWidth, el.offsetHeight) / 2;
             let pocketRadius = Math.max(6, visualRadius * 0.95);
             if (state.isMobile) {
-                pocketRadius = Math.max(4, visualRadius * 0.5);
+                pocketRadius = Math.max(4, visualRadius * 0.75);
             }
 
             state.pockets.push({

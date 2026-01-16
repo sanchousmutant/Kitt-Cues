@@ -83,6 +83,37 @@ export function createLayoutManager(ctx, physics) {
             const finalSize = Math.max(8, baseSize * pocketScaleFactor);
             pocket.style.width = `${finalSize}px`;
             pocket.style.height = `${finalSize}px`;
+
+            // Dynamic positioning correction
+            const offset = -(finalSize * 0.25);
+            const index = parseInt(pocket.dataset.pocket);
+
+            // Reset potential conflicting inline styles first
+            pocket.style.top = '';
+            pocket.style.bottom = '';
+            pocket.style.left = '';
+            pocket.style.right = '';
+
+            // Apply new dynamic positions
+            if (index === 0) { // Top-Left
+                pocket.style.top = `${offset}px`;
+                pocket.style.left = `${offset}px`;
+            } else if (index === 1) { // Top-Right
+                pocket.style.top = `${offset}px`;
+                pocket.style.right = `${offset}px`;
+            } else if (index === 2) { // Bottom-Left
+                pocket.style.bottom = `${offset}px`;
+                pocket.style.left = `${offset}px`;
+            } else if (index === 3) { // Bottom-Right
+                pocket.style.bottom = `${offset}px`;
+                pocket.style.right = `${offset}px`;
+            } else if (index === 4) { // Top-Middle
+                pocket.style.top = `${offset}px`;
+                // left is handled by CSS class w/ transform
+            } else if (index === 5) { // Bottom-Middle
+                pocket.style.bottom = `${offset}px`;
+                // left is handled by CSS class w/ transform
+            }
         });
 
         if (dom.cue) {
