@@ -477,7 +477,7 @@ export class UIManager {
     */
   }
 
-  private positionRightElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
+  private positionRightElements(_gameAreaRect: DOMRect, _tableRect: DOMRect, _margin: number): void {
     /*
     const { mainRightButtonsContainer, mainScoreContainer } = this.elements;
 
@@ -514,7 +514,7 @@ export class UIManager {
     */
   }
 
-  private positionMobileElements(gameAreaRect: DOMRect, tableRect: DOMRect, margin: number): void {
+  private positionMobileElements(_gameAreaRect: DOMRect, _tableRect: DOMRect, _margin: number): void {
     // Мобильные кнопки и счет теперь позиционируются через CSS классы (Tailwind)
     // в index.html (top-2 right-2 и т.д.)
     // Динамическое позиционирование здесь отключено, чтобы не переопределять стили.

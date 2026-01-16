@@ -109,19 +109,19 @@ export const SCALING_CONFIG = {
   },
   BALL_SIZES: {
     BASE: 24,
-    LG: 28,
-    MD: 32,
-    SM: 36,
+    LG: 22,
+    MD: 20,
+    SM: 18,
   },
   POCKET_SIZES: {
     BASE: 36,
-    LG: 42,
-    MD: 48,
-    SM: 54,
+    LG: 32,
+    MD: 28,
+    SM: 24,
   },
   CUE_SIZES: {
-    HEIGHT: { BASE: 6, LG: 7, MD: 8, SM: 9 },
-    WIDTH_PERCENT: { BASE: 30, LG: 35, MD: 40, SM: 45 },
+    HEIGHT: { BASE: 6, LG: 5, MD: 4, SM: 3 },
+    WIDTH_PERCENT: { BASE: 30, LG: 28, MD: 25, SM: 22 },
   },
   BUTTON_SIZES: {
     FONT: { BASE: 16, LG: 14, MD: 12, SM: 10 },
