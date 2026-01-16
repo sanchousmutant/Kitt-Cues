@@ -703,6 +703,51 @@ body {
     .cat-emoji {
         font-size: 14px;
     }
+
+    /* Фиксация позиций луз для экранов меньше 640px */
+    [data-pocket="0"] {
+        top: -12px !important;
+        left: -12px !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    [data-pocket="1"] {
+        top: -12px !important;
+        right: -12px !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    [data-pocket="2"] {
+        bottom: -12px !important;
+        left: -12px !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    [data-pocket="3"] {
+        bottom: -12px !important;
+        right: -12px !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    [data-pocket="4"] {
+        top: -12px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    [data-pocket="5"] {
+        bottom: -12px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
 }
 
 /* Динамическое масштабирование элементов */

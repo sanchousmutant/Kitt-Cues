@@ -85,7 +85,7 @@ export function createLayoutManager(ctx, physics) {
             pocket.style.height = `${finalSize}px`;
 
             // Dynamic positioning correction
-            const offset = -(finalSize * 0.25);
+            const offset = -(finalSize / 2);
             const index = parseInt(pocket.dataset.pocket);
 
             // Reset potential conflicting inline styles first
