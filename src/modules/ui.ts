@@ -13,6 +13,11 @@ export class UIManager {
   private isMobile: boolean = false;
   private isPortrait: boolean = false;
 
+  // Вычисленные радиусы для использования в physics (масштабируются пропорционально столу)
+  public currentBallRadius: number = 12;
+  public currentPocketRadius: number = 24;
+  public currentScaleFactor: number = 1;
+
   constructor() {
     this.deviceInfo = getDeviceInfo();
     this.initializeElements();
@@ -273,6 +278,9 @@ export class UIManager {
     const scaleFactorY = tableHeight / SCALING_CONFIG.BASE_TABLE_HEIGHT;
     const scaleFactor = Math.min(scaleFactorX, scaleFactorY);
 
+    // Сохраняем scaleFactor для использования в main.ts
+    this.currentScaleFactor = scaleFactor;
+
     this.scaleCats(scaleFactor);
     this.scaleBalls(scaleFactor);
     this.scalePockets(scaleFactor);
@@ -304,20 +312,16 @@ export class UIManager {
 
   private scaleBalls(scaleFactor: number): void {
     const balls = document.querySelectorAll('.billiard-ball');
-    const { BREAKPOINTS, BALL_SIZES } = SCALING_CONFIG;
-    let baseSize: number = BALL_SIZES.BASE;
+    // Базовый размер шара при базовом размере стола (800x533)
+    // Размер должен масштабироваться ТОЛЬКО относительно стола, не viewport
+    const baseBallSize = 24; // при tableWidth = 800
 
-    const screenWidth = window.innerWidth;
-    if (screenWidth <= BREAKPOINTS.SM) {
-      baseSize = BALL_SIZES.SM;
-    } else if (screenWidth <= BREAKPOINTS.MD) {
-      baseSize = BALL_SIZES.MD;
-    } else if (screenWidth <= BREAKPOINTS.LG) {
-      baseSize = BALL_SIZES.LG;
-    }
+    const finalSize = Math.max(10, baseBallSize * scaleFactor);
+
+    // Сохраняем вычисленный радиус для использования в physics
+    this.currentBallRadius = finalSize / 2;
 
     balls.forEach(ball => {
-      const finalSize = Math.max(8, baseSize * scaleFactor);
       (ball as HTMLElement).style.width = `${finalSize}px`;
       (ball as HTMLElement).style.height = `${finalSize}px`;
     });
@@ -325,20 +329,16 @@ export class UIManager {
 
   private scalePockets(scaleFactor: number): void {
     const pockets = document.querySelectorAll('[data-pocket]');
-    const { BREAKPOINTS, POCKET_SIZES } = SCALING_CONFIG;
-    let baseSize: number = POCKET_SIZES.BASE;
+    // Базовый размер лузы при базовом размере стола (800x533)
+    // Размер должен масштабироваться ТОЛЬКО относительно стола, не viewport
+    const basePocketSize = 48; // при tableWidth = 800
 
-    const screenWidth = window.innerWidth;
-    if (screenWidth <= BREAKPOINTS.SM) {
-      baseSize = POCKET_SIZES.SM;
-    } else if (screenWidth <= BREAKPOINTS.MD) {
-      baseSize = POCKET_SIZES.MD;
-    } else if (screenWidth <= BREAKPOINTS.LG) {
-      baseSize = POCKET_SIZES.LG;
-    }
+    const finalSize = Math.max(20, basePocketSize * scaleFactor);
+
+    // Сохраняем вычисленный радиус для использования в physics
+    this.currentPocketRadius = finalSize / 2;
 
     pockets.forEach(pocket => {
-      const finalSize = Math.max(12, baseSize * scaleFactor);
       (pocket as HTMLElement).style.width = `${finalSize}px`;
       (pocket as HTMLElement).style.height = `${finalSize}px`;
     });

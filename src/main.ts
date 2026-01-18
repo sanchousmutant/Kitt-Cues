@@ -1,5 +1,5 @@
 import { BallObject, GameState } from './types';
-import { DOM_SELECTORS, GAME_CONFIG, POCKET_CONFIG, JOYSTICK_CONFIG } from './constants';
+import { DOM_SELECTORS, GAME_CONFIG, JOYSTICK_CONFIG } from './constants';
 import { PhysicsEngine } from './modules/physics';
 import { soundManager } from './modules/sound';
 import { UIManager } from './modules/ui';
@@ -332,8 +332,8 @@ class Game {
       ball.x *= scaleX;
       ball.y *= scaleY;
 
-      // Обновляем радиус (он меняется через CSS в uiManager.updateLayout -> applyDynamicScaling)
-      ball.radius = ball.el.offsetWidth / 2;
+      // Обновляем радиус из вычисленного значения в uiManager (масштабируется пропорционально столу)
+      ball.radius = this.uiManager.currentBallRadius || ball.radius;
 
       // Ограничиваем координаты границами (clamping)
       // Используем простой Math.max / Math.min, так как функция clamp может быть не импортирована
@@ -420,23 +420,18 @@ class Game {
     const pocketElements = document.querySelectorAll(DOM_SELECTORS.POCKETS);
     const tableRect = this.uiManager.table.getBoundingClientRect();
 
+    // Используем вычисленный радиус из uiManager (масштабируется пропорционально столу)
+    let pocketRadius = this.uiManager.currentPocketRadius || 24;
+
+    if (this.isMobile) {
+      // На мобильных немного уменьшаем радиус для более точных попаданий
+      pocketRadius = Math.max(10, pocketRadius * 0.85);
+    }
+
     pocketElements.forEach((el) => {
       const pocketRect = el.getBoundingClientRect();
       const pocketX = (pocketRect.left - tableRect.left) + pocketRect.width / 2;
       const pocketY = (pocketRect.top - tableRect.top) + pocketRect.height / 2;
-
-      const visualRadius = Math.max((el as HTMLElement).offsetWidth, (el as HTMLElement).offsetHeight) / 2;
-      let pocketRadius = Math.max(
-        POCKET_CONFIG.MIN_RADIUS,
-        visualRadius * POCKET_CONFIG.VISUAL_RADIUS_MULTIPLIER
-      );
-
-      if (this.isMobile) {
-        pocketRadius = Math.max(
-          POCKET_CONFIG.MIN_MOBILE_RADIUS,
-          visualRadius * POCKET_CONFIG.MOBILE_VISUAL_RADIUS_MULTIPLIER
-        );
-      }
 
       this.gameState.pockets.push({
         x: pocketX,
@@ -455,6 +450,9 @@ class Game {
     const ballElements = document.querySelectorAll(DOM_SELECTORS.BILLIARD_BALLS);
     const tableRect = this.uiManager.table.getBoundingClientRect();
 
+    // Используем вычисленный радиус из uiManager (масштабируется пропорционально столу)
+    const ballRadius = this.uiManager.currentBallRadius || 12;
+
     ballElements.forEach(el => {
       (el as HTMLElement).style.transform = '';
       (el as HTMLElement).style.display = 'block';
@@ -469,7 +467,7 @@ class Game {
         y: posY,
         vx: 0,
         vy: 0,
-        radius: (el as HTMLElement).offsetWidth / 2,
+        radius: ballRadius,
         sunk: false
       };
 

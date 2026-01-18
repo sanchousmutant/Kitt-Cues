@@ -63,14 +63,21 @@ export function createPhysicsEngine(ctx, audioManager) {
         const pocketElements = doc.querySelectorAll('[data-pocket]');
         const tableRect = table.getBoundingClientRect();
 
+        // Используем сохранённый pocketRadius из state (устанавливается в layout.js)
+        // Если state.pocketRadius не установлен, вычисляем fallback из CSS
+        const savedPocketRadius = state.pocketRadius || 24;
+
         pocketElements.forEach(el => {
             const pocketRect = el.getBoundingClientRect();
             const pocketX = (pocketRect.left - tableRect.left) + pocketRect.width / 2;
             const pocketY = (pocketRect.top - tableRect.top) + pocketRect.height / 2;
-            const visualRadius = Math.max(el.offsetWidth, el.offsetHeight) / 2;
-            let pocketRadius = Math.max(6, visualRadius * 0.95);
+
+            // Радиус для физики коллизий - используем сохранённое значение из layout.js
+            // Это гарантирует согласованность между визуалом и физикой
+            let pocketRadius = savedPocketRadius;
             if (state.isMobile) {
-                pocketRadius = Math.max(4, visualRadius * 0.75);
+                // На мобильных немного уменьшаем радиус для более точных попаданий
+                pocketRadius = Math.max(10, savedPocketRadius * 0.85);
             }
 
             state.pockets.push({
@@ -92,6 +99,10 @@ export function createPhysicsEngine(ctx, audioManager) {
             pyramidContainer.style.display = 'block';
         }
 
+        // Используем сохранённый ballRadius из state (устанавливается в layout.js)
+        // Это гарантирует, что физический радиус соответствует визуальному
+        const savedBallRadius = state.ballRadius || 12;
+
         ballElements.forEach(el => {
             el.style.transform = '';
             el.style.display = 'block';
@@ -105,7 +116,7 @@ export function createPhysicsEngine(ctx, audioManager) {
                 y: posY,
                 vx: 0,
                 vy: 0,
-                radius: el.offsetWidth / 2,
+                radius: savedBallRadius,
                 sunk: false
             });
             table.appendChild(el);

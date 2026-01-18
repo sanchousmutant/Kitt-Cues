@@ -15,36 +15,54 @@ export function createLayoutManager(ctx, physics) {
 
     function applyDynamicScaling(tableWidth, tableHeight) {
         const baseTableWidth = 800;
-        const scaleFactor = Math.min(tableWidth / baseTableWidth, tableHeight / (baseTableWidth / 1.5));
+        const baseTableHeight = baseTableWidth / 1.5; // ~533
 
+        // Вычисляем единый scaleFactor относительно базового размера стола
+        const scaleFactor = Math.min(tableWidth / baseTableWidth, tableHeight / baseTableHeight);
+
+        // Сохраняем scaleFactor в state для использования в physics.js
+        state.scaleFactor = scaleFactor;
+
+        // Базовые размеры элементов при baseTableWidth = 800
+        const baseBallSize = 24;    // размер шара при 800px ширине стола
+        const basePocketSize = 48;  // размер лузы при 800px ширине стола
+
+        // Вычисляем масштабированные размеры
+        const ballSize = Math.max(10, baseBallSize * scaleFactor);
+        const pocketSize = Math.max(20, basePocketSize * scaleFactor);
+
+        // Сохраняем вычисленные размеры в state для использования в physics.js
+        state.ballRadius = ballSize / 2;
+        state.pocketRadius = pocketSize / 2;
+        state.pocketVisualRadius = pocketSize / 2;
+
+        // Масштабируем котов
         const cats = doc.querySelectorAll('.cat-container');
         cats.forEach(cat => {
-            const baseScale = 0.8; 
-            const finalScale = Math.max(0.2, baseScale * scaleFactor);
+            const baseScale = 0.8;
+            const finalScale = Math.max(0.3, baseScale * scaleFactor);
             if (!cat.dataset.baseTransform) {
                 cat.dataset.baseTransform = cat.style.transform || '';
             }
             cat.style.transform = `${cat.dataset.baseTransform} scale(${finalScale})`;
         });
 
+        // Масштабируем шары
         const balls = doc.querySelectorAll('.billiard-ball');
         balls.forEach(ball => {
-            const baseSize = 20; 
-            const finalSize = Math.max(5, baseSize * scaleFactor);
-            ball.style.width = `${finalSize}px`;
-            ball.style.height = `${finalSize}px`;
+            ball.style.width = `${ballSize}px`;
+            ball.style.height = `${ballSize}px`;
         });
 
+        // Масштабируем лузы
         const pockets = doc.querySelectorAll('[data-pocket]');
         pockets.forEach(pocket => {
-            const baseSize = 40; 
-            const finalSize = Math.max(10, baseSize * scaleFactor);
-            pocket.style.width = `${finalSize}px`;
-            pocket.style.height = `${finalSize}px`;
-            
+            pocket.style.width = `${pocketSize}px`;
+            pocket.style.height = `${pocketSize}px`;
+
             const tableComputedStyle = win.getComputedStyle(dom.table);
             const tablePadding = parseFloat(tableComputedStyle.paddingTop) || 0;
-            const offset = -(finalSize * 0.5 + tablePadding);
+            const offset = -(pocketSize * 0.5 + tablePadding);
             const index = parseInt(pocket.dataset.pocket);
 
             pocket.style.top = '';
@@ -76,11 +94,12 @@ export function createLayoutManager(ctx, physics) {
             }
         });
 
+        // Масштабируем кий
         if (dom.cue) {
             const baseHeight = 6;
             const finalHeight = Math.max(2, baseHeight * scaleFactor);
             dom.cue.style.height = `${finalHeight}px`;
-            const baseWidth = 40; 
+            const baseWidth = 40;
             dom.cue.style.width = `${baseWidth * Math.max(0.5, scaleFactor)}%`;
         }
     }
