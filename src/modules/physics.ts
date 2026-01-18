@@ -76,6 +76,7 @@ export class PhysicsEngine {
         ball.vy = 0;
         ball.el.style.display = 'none';
         playPocketSound();
+        document.dispatchEvent(new CustomEvent('ball-sunk-in-pocket', { detail: { x: pocket.x, y: pocket.y } }));
         return;
       }
     }

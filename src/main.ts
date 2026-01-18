@@ -5,6 +5,7 @@ import { soundManager } from './modules/sound';
 import { UIManager } from './modules/ui';
 import { catManager } from './modules/cats';
 import { JoystickManager } from './modules/joystick';
+import { ParticleManager } from './modules/particles'; // Import ParticleManager
 import { debounce, smoothAngle, clamp, distance, angle } from './utils/helpers';
 import { isMobileDevice, isPortraitOrientation, vibrate, enterFullscreen, exitFullscreen, isFullscreenActive } from './utils/device';
 
@@ -12,6 +13,7 @@ class Game {
   private physicsEngine: PhysicsEngine;
   private uiManager: UIManager;
   private joystickManager: JoystickManager | null = null;
+  private particleManager: ParticleManager; // Declare ParticleManager
   private lastJoystickPower: number = 0;
   private gameState: GameState;
   private isMobile: boolean = false;
@@ -26,6 +28,10 @@ class Game {
     // Инициализация движков и менеджеров
     this.physicsEngine = new PhysicsEngine(this.isMobile);
     this.uiManager = new UIManager();
+    if (!this.uiManager.gameArea) {
+      throw new Error("Game area element not found. Cannot initialize ParticleManager.");
+    }
+    this.particleManager = new ParticleManager(this.uiManager.gameArea); // Initialize ParticleManager
 
     // Начальное состояние игры
     this.gameState = {
@@ -249,6 +255,23 @@ class Game {
     // Обработчик запроса на сброс игры из модального окна
     document.addEventListener('game-reset-requested', () => {
       this.resetGame();
+    });
+
+    // Event listener for ball sunk in pocket
+    document.addEventListener('ball-sunk-in-pocket', (e: Event) => {
+      const customEvent = e as CustomEvent<{ x: number; y: number }>;
+      const tableRect = this.uiManager.table?.getBoundingClientRect();
+      const gameAreaRect = this.uiManager.gameArea?.getBoundingClientRect();
+
+      if (tableRect && gameAreaRect) {
+        const offsetX = tableRect.left - gameAreaRect.left;
+        const offsetY = tableRect.top - gameAreaRect.top;
+        
+        this.particleManager.spawnStars(customEvent.detail.x + offsetX, customEvent.detail.y + offsetY);
+      } else {
+        // Fallback to original coordinates if rects are not available
+        this.particleManager.spawnStars(customEvent.detail.x, customEvent.detail.y);
+      }
     });
 
     // Экспортируем функцию сброса для HTML onclick
@@ -825,6 +848,7 @@ class Game {
 
   private gameLoop(): void {
     this.updatePhysics();
+    this.particleManager.updateParticles(); // Update particle positions and states
     this.render();
 
     const allStopped = this.physicsEngine.areAllBallsStopped(this.gameState.balls);
