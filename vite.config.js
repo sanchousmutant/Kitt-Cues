@@ -129,9 +129,7 @@ export default defineConfig(({ mode }) => ({
     plugins: [
         VitePWA({
             registerType: 'autoUpdate',
-            devOptions: {
-                enabled: true
-            },
+            includeAssets: ['/Kitt-Cues/icons/*.png', '/Kitt-Cues/icons/*.svg'],
             manifest: {
                 name: 'Kitt-Cues - Бильярд с котами',
                 short_name: 'Kitt-Cues',
@@ -139,6 +137,7 @@ export default defineConfig(({ mode }) => ({
                 theme_color: '#1f2937',
                 background_color: '#3a2d27',
                 display: 'standalone',
+                display_override: ['standalone'],
                 orientation: 'any',
                 scope: '/Kitt-Cues/',
                 start_url: '/Kitt-Cues/',
@@ -147,13 +146,60 @@ export default defineConfig(({ mode }) => ({
                         src: '/Kitt-Cues/icons/icon-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
-                        purpose: 'any maskable'
+                        purpose: 'any'
                     },
                     {
                         src: '/Kitt-Cues/icons/icon-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'any maskable'
+                        purpose: 'any'
+                    },
+                    {
+                        src: '/Kitt-Cues/icons/icon-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'maskable'
+                    },
+                    {
+                        src: '/Kitt-Cues/icons/icon-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable'
+                    }
+                ]
+            },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+                cleanupOutdatedCaches: true,
+                maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // Увеличиваем лимит до 10MB (10 * 1024 * 1024 Bytes)
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'google-fonts-cache',
+                            expiration: {
+                                maxEntries: 10,
+                                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'gstatic-fonts-cache',
+                            expiration: {
+                                maxEntries: 10,
+                                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
                     }
                 ]
             }
