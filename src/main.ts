@@ -6,7 +6,6 @@ import { UIManager } from './modules/ui';
 import { catManager } from './modules/cats';
 import { JoystickManager } from './modules/joystick';
 import { ParticleManager } from './modules/particles'; // Import ParticleManager
-import { registerSW } from './modules/pwa'; // Import PWA registration
 
 import { debounce, smoothAngle, clamp, distance, angle } from './utils/helpers';
 import { isMobileDevice, isPortraitOrientation, vibrate, enterFullscreen, exitFullscreen, isFullscreenActive } from './utils/device';
@@ -95,9 +94,6 @@ class Game {
       }
       this.trajectoryCtx = this.uiManager.trajectoryCanvas.getContext('2d');
     }
-
-    // Настройка PWA
-    this.setupPWA();
   }
 
   private setupEventListeners(): void {
@@ -399,23 +395,7 @@ class Game {
     }
   }
 
-  private setupPWA(): void {
-    // PWA Install Prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('Получено событие beforeinstallprompt');
-      e.preventDefault();
-      // Здесь можно показать кнопку установки PWA, если нужно
-      // deferredPrompt = e; 
-    });
 
-    window.addEventListener('appinstalled', () => {
-      console.log('PWA успешно установлено');
-      vibrate([100, 50, 100]);
-    });
-
-    // Регистрируем Service Worker для PWA
-    registerSW();
-  }
 
   private setupLayout(): void {
     if (this.uiManager.gameArea) {

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 import { copyFileSync, mkdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
@@ -49,9 +50,6 @@ export default defineConfig(({ mode }) => ({
         // Оптимизация размера бандла
         chunkSizeWarningLimit: 1000,
 
-        // Настройки для PWA
-        manifest: true,
-
         // Копируем иконки после сборки
         copyPublicDir: true,
 
@@ -77,14 +75,10 @@ export default defineConfig(({ mode }) => ({
         open: true,
         cors: true,
         host: '0.0.0.0', // Позволяет доступ с мобильных устройств в локальной сети
-
-        // Настройки для тестирования PWA и отключения кэширования
+        
+        // Для тестирования PWA важно разрешить service worker
         headers: {
             'Service-Worker-Allowed': '/',
-            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            'Surrogate-Control': 'no-store'
         }
     },
 
@@ -131,37 +125,68 @@ export default defineConfig(({ mode }) => ({
         setupFiles: ['./src/test/setup.ts']
     },
 
-    // Плагин для копирования иконок
+    // Плагины
     plugins: [
+        VitePWA({
+            registerType: 'autoUpdate',
+            devOptions: {
+                enabled: true
+            },
+            manifest: {
+                name: 'Kitt-Cues - Бильярд с котами',
+                short_name: 'Kitt-Cues',
+                description: 'Весёлая игра в бильярд с интерактивными котами',
+                theme_color: '#1f2937',
+                background_color: '#3a2d27',
+                display: 'standalone',
+                orientation: 'any',
+                scope: '/Kitt-Cues/',
+                start_url: '/Kitt-Cues/',
+                icons: [
+                    {
+                        src: '/Kitt-Cues/icons/icon-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'any maskable'
+                    },
+                    {
+                        src: '/Kitt-Cues/icons/icon-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any maskable'
+                    }
+                ]
+            }
+        }),
         {
-            name: 'copy-icons',
+            name: 'copy-files-for-dist',
             writeBundle() {
-                const iconsDir = join(process.cwd(), 'dist', 'icons');
+                const distDir = join(process.cwd(), 'dist');
+
+                // --- Копирование иконок ---
+                const iconsDir = join(distDir, 'icons');
                 if (!existsSync(iconsDir)) {
                     mkdirSync(iconsDir, { recursive: true });
                 }
-
-                // Копируем существующие иконки
-                const icons = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png', 'icon-192x192.svg'];
-                icons.forEach(icon => {
+                const iconsToCopy = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png', 'icon-192x192.svg'];
+                iconsToCopy.forEach(icon => {
                     const src = join(process.cwd(), 'icons', icon);
-                    const dest = join(iconsDir, icon);
                     if (existsSync(src)) {
-                        copyFileSync(src, dest);
-                    } else if (icon === 'icon-192x192.png' || icon === 'icon-512x512.png') {
-                        // Если отсутствует, копируем icon-72x72.png с новым именем
-                        const fallback = join(process.cwd(), 'icons', 'icon-72x72.png');
-                        if (existsSync(fallback)) {
-                            copyFileSync(fallback, dest);
-                        }
+                        copyFileSync(src, join(iconsDir, icon));
                     }
                 });
-
-                // Создаем .nojekyll файл для отключения обработки Jekyll на GitHub Pages
-                // Это предотвращает проблемы с MIME типами для JS файлов
-                const nojekyllPath = join(process.cwd(), 'dist', '.nojekyll');
+                
+                // --- Создание .nojekyll ---
+                const nojekyllPath = join(distDir, '.nojekyll');
                 writeFileSync(nojekyllPath, '', 'utf8');
-                console.log('✅ Created .nojekyll file to disable Jekyll processing');
+                console.log('✅ Created .nojekyll file');
+
+                // --- Копирование browserconfig.xml ---
+                const browserConfigSrc = join(process.cwd(), 'browserconfig.xml');
+                if (existsSync(browserConfigSrc)) {
+                    copyFileSync(browserConfigSrc, join(distDir, 'browserconfig.xml'));
+                    console.log('✅ Copied browserconfig.xml');
+                }
             }
         }
     ]
