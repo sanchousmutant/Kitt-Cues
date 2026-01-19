@@ -1,34 +1,37 @@
 {
-    "name": "Kitt-Cues - Бильярд с котами",
-    "short_name": "Kitt-Cues",
-    "description": "Весёлая игра в бильярд с интерактивными котами",
-    "start_url": "./",
-    "scope": "./",
-    "display": "standalone",
-    "orientation": "any",
-    "theme_color": "#1f2937",
-    "background_color": "#3a2d27",
-    "icons": [
-        {
-            "src": "icons/icon-72x72.png",
-            "sizes": "72x72",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "icons/icon-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "icons/icon-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ],
-    "categories": ["games", "entertainment"],
-    "lang": "ru",
-    "dir": "ltr"
+  "name": "Kitt-Cues - Бильярд с котами",
+  "short_name": "Kitt-Cues",
+  "description": "Весёлая игра в бильярд с интерактивными котами",
+  "start_url": "/Kitt-Cues/",
+  "scope": "/Kitt-Cues/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1f2937",
+  "background_color": "#3a2d27",
+  "icons": [
+    {
+      "src": "/Kitt-Cues/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Kitt-Cues/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Kitt-Cues/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "lang": "ru",
+  "dir": "ltr"
 }
