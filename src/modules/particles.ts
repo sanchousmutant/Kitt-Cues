@@ -16,7 +16,6 @@ interface StarParticle {
 export class ParticleManager {
   private gameArea: HTMLElement;
   private particleCount: number = 20; // Number of stars to spawn, matching reference
-  private spreadRadius: number = 30; // How far stars spread from the center
   private activeParticles: StarParticle[] = []; // Array to hold active particles
 
   constructor(gameArea: HTMLElement) {
@@ -50,7 +49,7 @@ export class ParticleManager {
     const vy = Math.sin(angle) * speed;
 
     const size = parseFloat(starEl.style.fontSize); // Use font size as effective size
-    
+
     const particle: StarParticle = {
       el: starEl,
       x: x,
