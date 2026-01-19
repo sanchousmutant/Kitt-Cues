@@ -143,28 +143,22 @@ export default defineConfig(({ mode }) => ({
                 start_url: '/Kitt-Cues/',
                 icons: [
                     {
-                        src: '/Kitt-Cues/icons/icon-192x192.png',
-                        sizes: '192x192',
+                        src: 'icons/icon-72x72.png',
+                        sizes: '72x72',
                         type: 'image/png',
                         purpose: 'any'
                     },
                     {
-                        src: '/Kitt-Cues/icons/icon-512x512.png',
-                        sizes: '512x512',
-                        type: 'image/png',
-                        purpose: 'any'
-                    },
-                    {
-                        src: '/Kitt-Cues/icons/icon-192x192.png',
+                        src: 'icons/icon-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
-                        purpose: 'maskable'
+                        purpose: 'any maskable'
                     },
                     {
-                        src: '/Kitt-Cues/icons/icon-512x512.png',
+                        src: 'icons/icon-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
-                        purpose: 'maskable'
+                        purpose: 'any maskable'
                     }
                 ]
             },
