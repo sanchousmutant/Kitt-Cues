@@ -6,7 +6,8 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "noEmit": true
+    "emitDeclarationOnly": true,
+    "outDir": "dist/nodes"
   },
   "include": [
     "vite.config.js"
