@@ -2,7 +2,7 @@
   "name": "Kitt-Cues - Бильярд с котами",
   "short_name": "Kitt-Cues",
   "description": "Весёлая игра в бильярд с интерактивными котами",
-  "start_url": "./index.html",
+  "start_url": ".",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",

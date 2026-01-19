@@ -67,15 +67,7 @@ self.addEventListener('fetch', event => {
                 .then(response => {
                     if (!response || response.status !== 200) {
                         return response;
-                    }
-
-                    const responseToCache = response.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
-
-                    return response;
-                })
+                    })
                 .catch(error => {
                     console.error('Fetch failed; returning offline page instead.', error);
                     // Fallback to cache for document requests (e.g., offline or network error)
@@ -84,6 +76,18 @@ self.addEventListener('fetch', event => {
                     }
                     throw error;
                 });
+        })
+    );
+});
+                })
+                .catch (error => {
+    console.error('Fetch failed; returning offline page instead.', error);
+    // Fallback to cache for document requests (e.g., offline or network error)
+    if (event.request.destination === 'document') {
+        return caches.match(`${BASE}index.html`);
+    }
+    throw error;
+});
         })
     );
 });
