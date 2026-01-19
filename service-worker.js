@@ -79,18 +79,6 @@ self.addEventListener('fetch', event => {
         })
     );
 });
-                })
-                .catch (error => {
-    console.error('Fetch failed; returning offline page instead.', error);
-    // Fallback to cache for document requests (e.g., offline or network error)
-    if (event.request.destination === 'document') {
-        return caches.match(`${BASE}index.html`);
-    }
-    throw error;
-});
-        })
-    );
-});
 
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
