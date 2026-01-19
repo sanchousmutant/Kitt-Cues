@@ -6,6 +6,8 @@ import { UIManager } from './modules/ui';
 import { catManager } from './modules/cats';
 import { JoystickManager } from './modules/joystick';
 import { ParticleManager } from './modules/particles'; // Import ParticleManager
+import { registerSW } from './modules/pwa'; // Import PWA registration
+
 import { debounce, smoothAngle, clamp, distance, angle } from './utils/helpers';
 import { isMobileDevice, isPortraitOrientation, vibrate, enterFullscreen, exitFullscreen, isFullscreenActive } from './utils/device';
 
@@ -266,7 +268,7 @@ class Game {
       if (tableRect && gameAreaRect) {
         const offsetX = tableRect.left - gameAreaRect.left;
         const offsetY = tableRect.top - gameAreaRect.top;
-        
+
         this.particleManager.spawnStars(customEvent.detail.x + offsetX, customEvent.detail.y + offsetY);
       } else {
         // Fallback to original coordinates if rects are not available
@@ -400,29 +402,19 @@ class Game {
   private setupPWA(): void {
     // PWA Install Prompt
     window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('beforeinstallprompt event received');
+      console.log('Получено событие beforeinstallprompt');
       e.preventDefault();
-      // Здесь можно показать кнопку установки PWA
+      // Здесь можно показать кнопку установки PWA, если нужно
+      // deferredPrompt = e; 
     });
 
     window.addEventListener('appinstalled', () => {
-      console.log('PWA successfully installed');
+      console.log('PWA успешно установлено');
       vibrate([100, 50, 100]);
     });
 
-    // Service Worker - ОТКЛЮЧЕН и УДАЛЕН для предотвращения проблем с кэшированием при разработке
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) {
-          registration.unregister().then(function (boolean) {
-            console.log('🧹 Service Worker unregistered:', boolean);
-          });
-        }
-        if (registrations.length > 0) {
-          console.log('⚠️ Old Service Workers cleared. Please reload the page if changes are not visible.');
-        }
-      });
-    }
+    // Регистрируем Service Worker для PWA
+    registerSW();
   }
 
   private setupLayout(): void {
