@@ -67,7 +67,9 @@ self.addEventListener('fetch', event => {
                 .then(response => {
                     if (!response || response.status !== 200) {
                         return response;
-                    })
+                    }
+                    return response;
+                })
                 .catch(error => {
                     console.error('Fetch failed; returning offline page instead.', error);
                     // Fallback to cache for document requests (e.g., offline or network error)
