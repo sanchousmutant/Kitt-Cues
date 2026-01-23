@@ -154,6 +154,6 @@ export const CAT_TYPES = {
 
 // Константы джойстика
 export const JOYSTICK_CONFIG = {
-  POWER_MULTIPLIER: 25, // множитель для преобразования силы джойстика в силу удара
+  POWER_MULTIPLIER: 40, // множитель для преобразования силы джойстика в силу удара
   MIN_POWER_THRESHOLD: 0.1, // минимальная сила для регистрации удара
 } as const;
