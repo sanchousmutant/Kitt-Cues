@@ -97,7 +97,7 @@ jobs:
       - name: 📋 Install dependencies
         run: |
           echo "Installing dependencies..."
-          # npm ci --prefer-offline --no-audit
+          npm ci --prefer-offline --no-audit
           echo "✅ Dependencies installed successfully"
           
       - name: 🏗️ Build TypeScript project
