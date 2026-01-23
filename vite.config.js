@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import tailwindcss from '@tailwindcss/vite';
 import { copyFileSync, mkdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
@@ -85,7 +86,9 @@ export default defineConfig(({ mode }) => ({
     // Настройки превью
     preview: {
         port: 4173,
-        host: '0.0.0.0'
+        host: '0.0.0.0',
+        // Для корректной работы с base path
+        strictPort: false
     },
 
     // Оптимизация зависимостей
@@ -111,11 +114,6 @@ export default defineConfig(({ mode }) => ({
     // Настройки CSS
     css: {
         devSourcemap: mode === 'development',
-
-        // PostCSS настройки для Tailwind
-        postcss: {
-            plugins: []
-        }
     },
 
     // Настройки для тестирования
@@ -127,6 +125,7 @@ export default defineConfig(({ mode }) => ({
 
     // Плагины
     plugins: [
+        tailwindcss(),
         VitePWA({
             registerType: 'autoUpdate',
             includeAssets: ['/Kitt-Cues/icons/*.png', '/Kitt-Cues/icons/*.svg'],
@@ -149,8 +148,38 @@ export default defineConfig(({ mode }) => ({
                         purpose: 'any'
                     },
                     {
+                        src: 'icons/icon-96x96.png',
+                        sizes: '96x96',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: 'icons/icon-128x128.png',
+                        sizes: '128x128',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: 'icons/icon-144x144.png',
+                        sizes: '144x144',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
+                        src: 'icons/icon-152x152.png',
+                        sizes: '152x152',
+                        type: 'image/png',
+                        purpose: 'any'
+                    },
+                    {
                         src: 'icons/icon-192x192.png',
                         sizes: '192x192',
+                        type: 'image/png',
+                        purpose: 'any maskable'
+                    },
+                    {
+                        src: 'icons/icon-384x384.png',
+                        sizes: '384x384',
                         type: 'image/png',
                         purpose: 'any maskable'
                     },
@@ -160,7 +189,8 @@ export default defineConfig(({ mode }) => ({
                         type: 'image/png',
                         purpose: 'any maskable'
                     }
-                ]
+                ],
+                prefer_related_applications: false
             },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
@@ -208,7 +238,7 @@ export default defineConfig(({ mode }) => ({
                 if (!existsSync(iconsDir)) {
                     mkdirSync(iconsDir, { recursive: true });
                 }
-                const iconsToCopy = ['icon-72x72.png', 'icon-192x192.png', 'icon-512x512.png', 'icon-192x192.svg'];
+                const iconsToCopy = ['icon-72x72.png', 'icon-96x96.png', 'icon-128x128.png', 'icon-144x144.png', 'icon-152x152.png', 'icon-192x192.png', 'icon-384x384.png', 'icon-512x512.png', 'icon-192x192.svg'];
                 iconsToCopy.forEach(icon => {
                     const src = join(process.cwd(), 'icons', icon);
                     if (existsSync(src)) {
@@ -226,6 +256,13 @@ export default defineConfig(({ mode }) => ({
                 if (existsSync(browserConfigSrc)) {
                     copyFileSync(browserConfigSrc, join(distDir, 'browserconfig.xml'));
                     console.log('✅ Copied browserconfig.xml');
+                }
+
+                // --- Копирование favicon.ico ---
+                const faviconSrc = join(process.cwd(), 'public', 'favicon.ico');
+                if (existsSync(faviconSrc)) {
+                    copyFileSync(faviconSrc, join(distDir, 'favicon.ico'));
+                    console.log('✅ Copied favicon.ico');
                 }
             }
         }

@@ -642,6 +642,11 @@ export class UIManager {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'auto';
 
+      // Ensure the help dialog opens above the game field by hiding the cue if visible
+      if (this.elements.cue) {
+        this.elements.cue.style.visibility = 'hidden';
+      }
+
       const scrollableContent = this.elements.helpModal.querySelector('.overflow-y-auto');
       if (scrollableContent) {
         (scrollableContent as HTMLElement).scrollTop = 0;
@@ -654,6 +659,11 @@ export class UIManager {
       this.elements.helpModal.classList.add('hidden');
       document.body.style.overflow = '';
       document.body.style.touchAction = 'none';
+
+      // Restore cue visibility after closing help
+      if (this.elements.cue) {
+        this.elements.cue.style.visibility = 'visible';
+      }
     }
   }
 
