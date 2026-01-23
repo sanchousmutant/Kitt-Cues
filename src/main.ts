@@ -738,12 +738,12 @@ class Game {
       ctx.moveTo(cueBall.x, cueBall.y);
       ctx.lineTo(collisionPoint.x, collisionPoint.y);
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 4; // LINE TO CHANGE
       ctx.stroke();
 
       // 2. Призрачный шар ("Ghost Ball")
       ctx.beginPath();
-      ctx.arc(collisionPoint.x, collisionPoint.y, cueBall.radius, 0, Math.PI * 2);
+      ctx.arc(collisionPoint.x, collisionPoint.y, cueBall.radius * 1.2, 0, Math.PI * 2); // RADIUS TO CHANGE
       ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
@@ -758,7 +758,7 @@ class Game {
         ctx.moveTo(hitTarget.x, hitTarget.y);
         ctx.lineTo(hitTarget.x + Math.cos(hitAngle) * 60, hitTarget.y + Math.sin(hitAngle) * 60);
         ctx.strokeStyle = 'rgba(243, 229, 171, 0.4)'; // Желтоватый
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 4; // LINE TO CHANGE
         ctx.stroke();
       }
 

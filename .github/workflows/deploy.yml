@@ -100,11 +100,7 @@ jobs:
           # npm ci --prefer-offline --no-audit
           echo "✅ Dependencies installed successfully"
           
-      - name: 🔍 Verify TypeScript setup
-        run: |
-          echo "Checking TypeScript configuration..."
-          npx tsc --version
-          echo "✅ TypeScript is ready"
+"
           
       - name: 🏗️ Build TypeScript project
         run: |

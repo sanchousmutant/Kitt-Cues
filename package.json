@@ -8,7 +8,9 @@
     "dev": "vite --host",
     "build": "vite build",
     "build-with-types": "tsc --noEmit && vite build",
+    "build-local": "vite build --base=/",
     "preview": "vite preview --host",
+    "preview-local": "vite preview --host --base=/",
     "type-check": "tsc --noEmit --skipLibCheck",
     "type-check:watch": "tsc --noEmit --skipLibCheck --watch",
     "clean": "rimraf dist node_modules/.vite",
@@ -49,5 +51,9 @@
   "bugs": {
     "url": "https://github.com/sanchousmutant/Kitt-Cues/issues"
   },
-  "homepage": "https://sanchousmutant.github.io/Kitt-Cues/"
+  "homepage": "https://sanchousmutant.github.io/Kitt-Cues/",
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
 }

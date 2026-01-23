@@ -34,10 +34,10 @@ export const UI_CONFIG = {
 
 // Константы игровой механики
 export const GAME_CONFIG = {
-  MAX_POWER: 25,
+  MAX_POWER: 40,
   MIN_POWER_FOR_CLICK: 10,
   POWER_SENSITIVITY: 6, // делитель для вычисления силы из расстояния
-  AIM_LINE_LENGTH: 150,
+  AIM_LINE_LENGTH: 250,
   TABLE_ASPECT_RATIO: 1.5, // соотношение сторон стола
   BORDER_WIDTH: 20,
 } as const;
