@@ -22,14 +22,18 @@ export class ParticleManager {
     this.gameArea = gameArea;
   }
 
-  spawnStars(x: number, y: number): void {
+  spawnStars(x: number, y: number, color?: string): void {
     for (let i = 0; i < this.particleCount; i++) {
-      const particle = this.createStarParticle(x, y);
+      const particle = this.createStarParticle(x, y, color);
       this.activeParticles.push(particle);
     }
   }
 
-  private createStarParticle(x: number, y: number): StarParticle {
+  hasActiveParticles(): boolean {
+    return this.activeParticles.length > 0;
+  }
+
+  private createStarParticle(x: number, y: number, color?: string): StarParticle {
     const starEl = document.createElement('div'); // Using div as a container
     starEl.classList.add('star-particle');
     starEl.textContent = '★'; // Star character
@@ -39,7 +43,7 @@ export class ParticleManager {
     starEl.style.position = 'absolute';
     starEl.style.pointerEvents = 'none';
     starEl.style.zIndex = '1000'; // Ensure it's on top
-    starEl.style.color = '#ffd700'; // Gold color for star
+    starEl.style.color = color || '#ffd700'; // Gold color for star by default
     starEl.style.fontSize = `${random(15, 30)}px`; // Increased random font size for stars
 
     // Initial physics properties

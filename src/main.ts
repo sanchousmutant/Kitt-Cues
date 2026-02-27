@@ -187,10 +187,8 @@ class Game {
       const cueBallObj = this.gameState.balls.find(b => b.el.id === 'cue-ball');
       if (!cueBallObj || !this.uiManager.table) return;
 
-      // Преобразуем угол джойстика в угол прицеливания
-      // Джойстик: угол от центра (0 = вправо, PI/2 = вниз)
-      // Механика рогатки: тянем назад - бьем вперед (направление уже инвертировано)
-      const aimAngle = state.angle;
+      // Плавно интерполируем угол кия к углу джойстика
+      const aimAngle = smoothAngle(this.gameState.cueAngle, state.angle, JOYSTICK_CONFIG.ANGLE_SMOOTHING);
 
       // Обновляем угол кия
       this.gameState.cueAngle = aimAngle;
@@ -201,8 +199,9 @@ class Game {
       // Обновляем линию прицеливания (симметрично кию, с противоположной стороны битка)
       this.updateAimLine(cueBallObj.x, cueBallObj.y, aimAngle + Math.PI);
 
-      // Сохраняем силу и обновляем индикатор
-      const power = state.power * JOYSTICK_CONFIG.POWER_MULTIPLIER;
+      // Плавно интерполируем силу
+      const rawPower = state.power * JOYSTICK_CONFIG.POWER_MULTIPLIER;
+      const power = this.lastJoystickPower + (rawPower - this.lastJoystickPower) * JOYSTICK_CONFIG.POWER_SMOOTHING;
       this.lastJoystickPower = power;
       this.updatePowerIndicator(power);
 
@@ -824,9 +823,20 @@ class Game {
     this.render();
 
     const allStopped = this.physicsEngine.areAllBallsStopped(this.gameState.balls);
-    if (allStopped) {
+    if (allStopped && !this.particleManager.hasActiveParticles()) {
       this.gameState.animationFrameId = null;
       this.onGameStopped();
+    } else if (allStopped) {
+      // Шары остановились, но частицы ещё живые — продолжаем только ради частиц
+      this.gameState.animationFrameId = requestAnimationFrame(() => {
+        this.particleManager.updateParticles();
+        if (!this.particleManager.hasActiveParticles()) {
+          this.gameState.animationFrameId = null;
+          this.onGameStopped();
+        } else {
+          this.gameState.animationFrameId = requestAnimationFrame(() => this.gameLoop());
+        }
+      });
     } else {
       this.gameState.animationFrameId = requestAnimationFrame(() => this.gameLoop());
     }

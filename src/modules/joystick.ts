@@ -158,7 +158,8 @@ export class JoystickManager {
             deltaY = Math.sin(angle) * this.maxDistance;
         }
 
-        // Обновляем позицию стика
+        // Обновляем позицию стика (без transition во время движения)
+        this.stick.style.transition = 'none';
         this.stick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
 
         // Обновляем состояние
@@ -176,6 +177,8 @@ export class JoystickManager {
     private resetStick(): void {
         if (!this.stick) return;
 
+        // Плавный возврат в центр
+        this.stick.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         this.stick.style.transform = 'translate(0px, 0px)';
         this.state.deltaX = 0;
         this.state.deltaY = 0;
