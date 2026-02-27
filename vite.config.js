@@ -76,7 +76,7 @@ export default defineConfig(({ mode }) => ({
         open: true,
         cors: true,
         host: '0.0.0.0', // Позволяет доступ с мобильных устройств в локальной сети
-        https: true, // Включаем HTTPS для безопасного контекста PWA
+        https: false, // HTTP для локальной разработки
         
         // Для тестирования PWA важно разрешить service worker
         headers: {

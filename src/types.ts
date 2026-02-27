@@ -137,6 +137,8 @@ export interface ControlButtons {
   helpButtonLandscape: HTMLButtonElement | null;
   resetButtonLandscape: HTMLButtonElement | null;
   restartButtonModal: HTMLButtonElement | null;
+  fullscreenToggle: HTMLButtonElement | null;
+  fullscreenToggleLandscape: HTMLButtonElement | null;
 }
 
 // Элементы отображения счета

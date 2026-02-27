@@ -50,6 +50,8 @@ export class UIManager {
     this.buttons.musicToggleLandscape = document.querySelector('#music-toggle-landscape') as HTMLButtonElement;
     this.buttons.helpButtonLandscape = document.querySelector('#help-button-landscape') as HTMLButtonElement;
     this.buttons.resetButtonLandscape = document.querySelector('#reset-button-landscape') as HTMLButtonElement;
+    this.buttons.fullscreenToggle = document.querySelector('#fullscreen-toggle') as HTMLButtonElement;
+    this.buttons.fullscreenToggleLandscape = document.querySelector('#fullscreen-toggle-landscape') as HTMLButtonElement;
 
     // Элементы отображения счета
     this.scoreElements.scoreDisplay = document.querySelector(DOM_SELECTORS.SCORE_DISPLAY) as HTMLElement;
@@ -87,6 +89,11 @@ export class UIManager {
     // Let's just expose the button or leave it for main.ts to find? 
     // No, good practice is to handle UI events here.
     // Let's dispatch a custom event 'request-reset' on window or document.
+    if (this.buttons.fullscreenToggle) this.addButtonListener(this.buttons.fullscreenToggle, () => this.toggleFullscreen());
+    if (this.buttons.fullscreenToggleLandscape) this.addButtonListener(this.buttons.fullscreenToggleLandscape, () => this.toggleFullscreen());
+
+    document.addEventListener('fullscreenchange', () => this.updateFullscreenButton());
+
     if (this.buttons.restartButtonModal) {
       this.addButtonListener(this.buttons.restartButtonModal, () => {
         document.dispatchEvent(new CustomEvent('game-reset-requested'));
@@ -570,6 +577,20 @@ export class UIManager {
   toggleSound(): void {
     soundManager.toggleSound();
     this.updateSoundButtons();
+  }
+
+  toggleFullscreen(): void {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  private updateFullscreenButton(): void {
+    const icon = document.fullscreenElement ? '✕' : '⛶';
+    if (this.buttons.fullscreenToggle) this.buttons.fullscreenToggle.textContent = icon;
+    if (this.buttons.fullscreenToggleLandscape) this.buttons.fullscreenToggleLandscape.textContent = icon;
   }
 
   toggleMusic(): void {

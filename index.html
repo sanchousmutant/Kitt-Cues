@@ -65,6 +65,9 @@
             <button id="reset-button" aria-label="Сбросить игру"
                 class="bg-yellow-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-yellow-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
                 title="Сброс">🔄</button>
+            <button id="fullscreen-toggle" aria-label="Полноэкранный режим"
+                class="bg-gray-600 text-white w-12 h-12 rounded-full shadow-lg text-lg hover:bg-gray-700 transition-colors flex items-center justify-center transform hover:scale-105 duration-200"
+                title="Полный экран">⛶</button>
         </div>
 
         <!-- Счет в правом верхнем углу (только для больших экранов) -->
@@ -88,6 +91,9 @@
             <button id="reset-button-landscape" aria-label="Сбросить игру"
                 class="bg-yellow-600 text-white w-8 h-8 rounded-full shadow-md text-xs flex items-center justify-center opacity-80 hover:opacity-100"
                 title="Сброс">🔄</button>
+            <button id="fullscreen-toggle-landscape" aria-label="Полноэкранный режим"
+                class="bg-gray-600 text-white w-8 h-8 rounded-full shadow-md text-xs flex items-center justify-center opacity-80 hover:opacity-100"
+                title="Полный экран">⛶</button>
         </div>
 
         <!-- Счет для мобильных в ландшафтной ориентации: текст по центру сверху -->
@@ -173,26 +179,27 @@
                         class="cat-head absolute w-10 h-8 sm:w-12 sm:h-10 md:w-14 md:h-12 bg-orange-500 rounded-full top-0 left-3 sm:left-4 md:left-5">
                         <!-- Ears -->
                         <div class="ear absolute w-3 h-4 sm:w-4 sm:h-5 md:w-4 md:h-6 bg-orange-500 top-[-6px] sm:top-[-7px] md:top-[-8px] left-1 rotate-[-25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0;">
+                            <div class="absolute bg-pink-300" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);"></div>
+                        </div>
                         <div class="ear absolute w-3 h-4 sm:w-4 sm:h-5 md:w-4 md:h-6 bg-orange-500 top-[-6px] sm:top-[-7px] md:top-[-8px] right-1 rotate-[25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0;">
+                            <div class="absolute bg-pink-300" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);"></div>
+                        </div>
                         <!-- Eyes -->
                         <div
-                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-white rounded-full top-3 sm:top-3.5 md:top-4 left-2 sm:left-2.5 md:left-3 cat-eye">
-                            <div
-                                class="absolute w-1 h-1 sm:w-1 sm:h-1 md:w-1.5 md:h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-amber-200 rounded-full top-3 sm:top-3.5 md:top-4 left-2 sm:left-2.5 md:left-3 cat-eye" style="box-shadow:inset 0 1px 2px rgba(0,0,0,0.2);">
+                            <div class="absolute bg-black rounded-full" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:20%;height:20%;top:20%;left:60%;"></div>
                         </div>
                         <div
-                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-white rounded-full top-3 sm:top-3.5 md:top-4 right-2 sm:right-2.5 md:right-3 cat-eye">
-                            <div
-                                class="absolute w-1 h-1 sm:w-1 sm:h-1 md:w-1.5 md:h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-amber-200 rounded-full top-3 sm:top-3.5 md:top-4 right-2 sm:right-2.5 md:right-3 cat-eye" style="box-shadow:inset 0 1px 2px rgba(0,0,0,0.2);">
+                            <div class="absolute bg-black rounded-full" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:20%;height:20%;top:20%;left:60%;"></div>
                         </div>
-                        <!-- Nose -->
-                        <div
-                            class="absolute w-2 h-1.5 sm:w-2.5 sm:h-1.5 md:w-3 md:h-2 bg-pink-300 rounded-full top-5 sm:top-6 md:top-7 left-1/2 -translate-x-1/2">
-                        </div>
+                        <!-- Nose + Mouth -->
+                        <div class="absolute top-5 sm:top-6 md:top-7 left-1/2 -translate-x-1/2" style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid #f9a8d4;"></div>
+                        <div class="absolute top-7 sm:top-8 md:top-9 left-1/2 -translate-x-1/2" style="width:8px;height:4px;border-bottom:1.5px solid rgba(0,0,0,0.4);border-left:1.5px solid rgba(0,0,0,0.4);border-right:1.5px solid rgba(0,0,0,0.4);border-radius:0 0 50% 50%;"></div>
                         <!-- Whiskers -->
                         <div
                             class="whisker absolute w-4 h-px sm:w-5 sm:h-px md:w-6 md:h-px bg-black top-6 sm:top-7 md:top-8 left-[-3px] sm:left-[-4px] md:left-[-5px] rotate-[10deg]">
@@ -217,14 +224,24 @@
                         class="absolute w-14 h-7 sm:w-16 sm:h-8 md:w-20 md:h-10 bg-orange-500 rounded-tl-full rounded-br-full top-7 sm:top-8 md:top-10 left-0">
                         <!-- Paws -->
                         <div
-                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-orange-400 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] left-1 sm:left-1.5 md:left-2">
+                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-orange-400 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] left-1 sm:left-1.5 md:left-2" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.15);">
+                            <div class="absolute" style="bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                                <div style="width:4px;height:4px;background:#fb923c;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#fb923c;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#fb923c;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            </div>
                         </div>
                         <div
-                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-orange-400 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] left-7 sm:left-8 md:left-10">
+                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-orange-400 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] left-7 sm:left-8 md:left-10" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.15);">
+                            <div class="absolute" style="bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                                <div style="width:4px;height:4px;background:#fb923c;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#fb923c;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#fb923c;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            </div>
                         </div>
                     </div>
                     <div
-                        class="cat-tail absolute w-8 h-3 sm:w-10 sm:h-3.5 md:w-12 md:h-4 bg-orange-400 rounded-full -left-6 sm:-left-7 md:-left-8 top-8 sm:top-10 md:top-12">
+                        class="cat-tail absolute w-8 h-3 sm:w-10 sm:h-3.5 md:w-12 md:h-4 bg-orange-400 rounded-full -left-6 sm:-left-7 md:-left-8 top-8 sm:top-10 md:top-12" style="border-radius:50% 0 0 50% / 50% 0 0 50%;box-shadow:inset 0 1px 2px rgba(0,0,0,0.1);">
                     </div>
                 </div>
                 <div class="cat-container cat-gray absolute w-16 h-20 sm:w-18 sm:h-22 md:w-20 md:h-24"
@@ -233,26 +250,27 @@
                         class="cat-head absolute w-10 h-12 sm:w-11 sm:h-13 md:w-12 md:h-14 bg-gray-800 rounded-full top-4 sm:top-4.5 md:top-5 left-3 sm:left-3.5 md:left-4">
                         <!-- Ears -->
                         <div class="ear absolute w-3 h-4 sm:w-3.5 sm:h-5 md:w-4 md:h-6 bg-gray-800 top-[-6px] sm:top-[-7px] md:top-[-8px] left-0 rotate-[-25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0;">
+                            <div class="absolute bg-pink-400" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);opacity:0.8;"></div>
+                        </div>
                         <div class="ear absolute w-3 h-4 sm:w-3.5 sm:h-5 md:w-4 md:h-6 bg-gray-800 top-[-6px] sm:top-[-7px] md:top-[-8px] right-0 rotate-[25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0;">
+                            <div class="absolute bg-pink-400" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);opacity:0.8;"></div>
+                        </div>
                         <!-- Eyes -->
                         <div
-                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-yellow-300 rounded-full top-3 sm:top-3.5 md:top-4 left-2 sm:left-2.5 md:left-3 cat-eye">
-                            <div
-                                class="absolute w-1 h-1 sm:w-1 sm:h-1 md:w-1.5 md:h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-yellow-300 rounded-full top-3 sm:top-3.5 md:top-4 left-2 sm:left-2.5 md:left-3 cat-eye" style="box-shadow:inset 0 1px 2px rgba(0,0,0,0.2);">
+                            <div class="absolute bg-black" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:20%;height:20%;top:20%;left:60%;"></div>
                         </div>
                         <div
-                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-yellow-300 rounded-full top-3 sm:top-3.5 md:top-4 right-2 sm:right-2.5 md:right-3 cat-eye">
-                            <div
-                                class="absolute w-1 h-1 sm:w-1 sm:h-1 md:w-1.5 md:h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-yellow-300 rounded-full top-3 sm:top-3.5 md:top-4 right-2 sm:right-2.5 md:right-3 cat-eye" style="box-shadow:inset 0 1px 2px rgba(0,0,0,0.2);">
+                            <div class="absolute bg-black" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:20%;height:20%;top:20%;left:60%;"></div>
                         </div>
-                        <!-- Nose -->
-                        <div
-                            class="absolute w-2 h-1.5 sm:w-2.5 sm:h-1.5 md:w-3 md:h-2 bg-pink-400 rounded-full top-6 sm:top-7 md:top-8 left-1/2 -translate-x-1/2">
-                        </div>
+                        <!-- Nose + Mouth -->
+                        <div class="absolute top-6 sm:top-7 md:top-8 left-1/2 -translate-x-1/2" style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid #f472b6;"></div>
+                        <div class="absolute top-8 sm:top-9 md:top-10 left-1/2 -translate-x-1/2" style="width:8px;height:4px;border-bottom:1.5px solid rgba(255,255,255,0.3);border-left:1.5px solid rgba(255,255,255,0.3);border-right:1.5px solid rgba(255,255,255,0.3);border-radius:0 0 50% 50%;"></div>
                         <!-- Whiskers -->
                         <div
                             class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-400 top-7 sm:top-8 md:top-9 left-[-1px] sm:left-[-1.5px] md:left-[-2px] rotate-[10deg]">
@@ -268,14 +286,24 @@
                         </div>
                     </div>
                     <div
-                        class="cat-tail absolute w-3 h-10 sm:w-3.5 sm:h-12 md:w-4 md:h-14 bg-gray-700 rounded-full right-0 -top-6 sm:-top-7 md:-top-8 rotate-45">
+                        class="cat-tail absolute w-3 h-10 sm:w-3.5 sm:h-12 md:w-4 md:h-14 bg-gray-700 rounded-full right-0 -top-6 sm:-top-7 md:-top-8 rotate-45" style="box-shadow:inset 1px 0 2px rgba(0,0,0,0.2);">
                     </div>
                     <!-- Paws -->
                     <div
-                        class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-4 md:w-6 md:h-5 bg-gray-700 rounded-b-full bottom-0 left-4 sm:left-4.5 md:left-5">
+                        class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-4 md:w-6 md:h-5 bg-gray-700 rounded-b-full bottom-0 left-4 sm:left-4.5 md:left-5" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.2);">
+                        <div class="absolute" style="bottom:0;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                            <div style="width:4px;height:4px;background:#4b5563;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#4b5563;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#4b5563;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                        </div>
                     </div>
                     <div
-                        class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-4 md:w-6 md:h-5 bg-gray-700 rounded-b-full bottom-0 right-4 sm:right-4.5 md:right-5">
+                        class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-4 md:w-6 md:h-5 bg-gray-700 rounded-b-full bottom-0 right-4 sm:right-4.5 md:right-5" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.2);">
+                        <div class="absolute" style="bottom:0;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                            <div style="width:4px;height:4px;background:#4b5563;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#4b5563;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#4b5563;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="cat-container cat-white absolute w-16 h-14 sm:w-20 sm:h-16 md:w-24 md:h-20"
@@ -284,36 +312,47 @@
                         class="absolute w-14 h-7 sm:w-16 sm:h-8 md:w-20 md:h-10 bg-white rounded-tl-full rounded-br-full top-7 sm:top-8 md:top-10 right-0 transform scale-x-[-1]">
                         <!-- Paws -->
                         <div
-                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-gray-200 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] right-1 sm:right-1.5 md:right-2">
+                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-gray-200 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] right-1 sm:right-1.5 md:right-2" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.1);">
+                            <div class="absolute" style="bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                                <div style="width:4px;height:4px;background:#e5e7eb;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#e5e7eb;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#e5e7eb;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            </div>
                         </div>
                         <div
-                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-gray-200 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] right-7 sm:right-8 md:right-10">
+                            class="cat-paw absolute w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-gray-200 rounded-full bottom-[-3px] sm:bottom-[-4px] md:bottom-[-5px] right-7 sm:right-8 md:right-10" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.1);">
+                            <div class="absolute" style="bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                                <div style="width:4px;height:4px;background:#e5e7eb;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#e5e7eb;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                                <div style="width:4px;height:4px;background:#e5e7eb;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            </div>
                         </div>
                     </div>
                     <div
                         class="cat-head absolute w-10 h-8 sm:w-12 sm:h-10 md:w-14 md:h-12 bg-white rounded-full top-0 right-3 sm:right-4 md:right-5">
                         <!-- Ears -->
                         <div class="ear absolute w-3 h-4 sm:w-4 sm:h-5 md:w-4 md:h-6 bg-white top-[-6px] sm:top-[-7px] md:top-[-8px] left-1 rotate-[-25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                            <div class="absolute bg-pink-200" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);"></div>
+                        </div>
                         <div class="ear absolute w-3 h-4 sm:w-4 sm:h-5 md:w-4 md:h-6 bg-white top-[-6px] sm:top-[-7px] md:top-[-8px] right-1 rotate-[25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                            <div class="absolute bg-pink-200" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);"></div>
+                        </div>
                         <!-- Eyes -->
                         <div
-                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-blue-300 rounded-full top-3 sm:top-3.5 md:top-4 left-2 sm:left-2.5 md:left-3 cat-eye">
-                            <div
-                                class="absolute w-1 h-1 sm:w-1 sm:h-1 md:w-1.5 md:h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-blue-300 rounded-full top-3 sm:top-3.5 md:top-4 left-2 sm:left-2.5 md:left-3 cat-eye" style="box-shadow:inset 0 1px 2px rgba(0,0,0,0.15);">
+                            <div class="absolute bg-black" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:20%;height:20%;top:20%;left:60%;"></div>
                         </div>
                         <div
-                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-blue-300 rounded-full top-3 sm:top-3.5 md:top-4 right-2 sm:right-2.5 md:right-3 cat-eye">
-                            <div
-                                class="absolute w-1 h-1 sm:w-1 sm:h-1 md:w-1.5 md:h-1.5 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 bg-blue-300 rounded-full top-3 sm:top-3.5 md:top-4 right-2 sm:right-2.5 md:right-3 cat-eye" style="box-shadow:inset 0 1px 2px rgba(0,0,0,0.15);">
+                            <div class="absolute bg-black" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:20%;height:20%;top:20%;left:60%;"></div>
                         </div>
-                        <!-- Nose -->
-                        <div
-                            class="absolute w-2 h-1.5 sm:w-2.5 sm:h-1.5 md:w-3 md:h-2 bg-pink-200 rounded-full top-5 sm:top-6 md:top-7 left-1/2 -translate-x-1/2">
-                        </div>
+                        <!-- Nose + Mouth -->
+                        <div class="absolute top-5 sm:top-6 md:top-7 left-1/2 -translate-x-1/2" style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:5px solid #fbcfe8;"></div>
+                        <div class="absolute top-7 sm:top-8 md:top-9 left-1/2 -translate-x-1/2" style="width:8px;height:4px;border-bottom:1.5px solid rgba(0,0,0,0.25);border-left:1.5px solid rgba(0,0,0,0.25);border-right:1.5px solid rgba(0,0,0,0.25);border-radius:0 0 50% 50%;"></div>
                         <!-- Whiskers -->
                         <div
                             class="whisker absolute w-4 h-px sm:w-5 sm:h-px md:w-6 md:h-px bg-gray-400 top-6 sm:top-7 md:top-8 left-[-3px] sm:left-[-4px] md:left-[-5px] rotate-[10deg]">
@@ -329,7 +368,7 @@
                         </div>
                     </div>
                     <div
-                        class="cat-tail absolute w-8 h-3 sm:w-10 sm:h-3.5 md:w-12 md:h-4 bg-gray-200 rounded-full -right-6 sm:-right-7 md:-right-8 top-8 sm:top-10 md:top-12">
+                        class="cat-tail absolute w-8 h-3 sm:w-10 sm:h-3.5 md:w-12 md:h-4 bg-gray-200 rounded-full -right-6 sm:-right-7 md:-right-8 top-8 sm:top-10 md:top-12" style="border-radius:0 50% 50% 0 / 0 50% 50% 0;box-shadow:inset 0 1px 2px rgba(0,0,0,0.08);">
                     </div>
                 </div>
                 <div class="cat-container cat-small absolute w-20 h-12 sm:w-24 sm:h-14 md:w-28 md:h-16"
@@ -341,38 +380,39 @@
                         class="cat-head absolute w-8 h-6 sm:w-10 sm:h-8 md:w-12 md:h-10 bg-gray-500 rounded-full top-0 left-5 sm:left-6 md:left-8">
                         <!-- Ears -->
                         <div class="ear absolute w-2 h-3 sm:w-2.5 sm:h-4 md:w-3 md:h-5 bg-gray-500 top-[-4px] sm:top-[-5px] md:top-[-6px] left-1 rotate-[-25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0;">
+                            <div class="absolute bg-pink-300" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);opacity:0.9;"></div>
+                        </div>
                         <div class="ear absolute w-2 h-3 sm:w-2.5 sm:h-4 md:w-3 md:h-5 bg-gray-500 top-[-4px] sm:top-[-5px] md:top-[-6px] right-1 rotate-[25deg]"
-                            style="border-radius: 50% 50% 0 0;"></div>
+                            style="border-radius: 50% 50% 0 0;">
+                            <div class="absolute bg-pink-300" style="width:45%;height:55%;border-radius:50% 50% 0 0;top:20%;left:50%;transform:translateX(-50%);opacity:0.9;"></div>
+                        </div>
                         <!-- Eyes -->
                         <div
-                            class="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2 md:h-2 bg-white rounded-full top-2 sm:top-2.5 md:top-3 left-2 sm:left-2.5 md:left-3 cat-eye">
-                            <div
-                                class="absolute w-0.5 h-0.5 sm:w-1 sm:h-1 md:w-1 md:h-1 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2 md:h-2 bg-amber-100 rounded-full top-2 sm:top-2.5 md:top-3 left-2 sm:left-2.5 md:left-3 cat-eye" style="box-shadow:inset 0 1px 1px rgba(0,0,0,0.15);">
+                            <div class="absolute bg-black" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:25%;height:25%;top:15%;left:55%;"></div>
                         </div>
                         <div
-                            class="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2 md:h-2 bg-white rounded-full top-2 sm:top-2.5 md:top-3 right-2 sm:right-2.5 md:right-3 cat-eye">
-                            <div
-                                class="absolute w-0.5 h-0.5 sm:w-1 sm:h-1 md:w-1 md:h-1 bg-black rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            </div>
+                            class="absolute w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-2 md:h-2 bg-amber-100 rounded-full top-2 sm:top-2.5 md:top-3 right-2 sm:right-2.5 md:right-3 cat-eye" style="box-shadow:inset 0 1px 1px rgba(0,0,0,0.15);">
+                            <div class="absolute bg-black" style="width:55%;height:70%;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:40%;"></div>
+                            <div class="absolute bg-white rounded-full" style="width:25%;height:25%;top:15%;left:55%;"></div>
                         </div>
-                        <!-- Nose -->
-                        <div
-                            class="absolute w-1.5 h-1 sm:w-2 sm:h-1.5 md:w-2 md:h-1.5 bg-pink-300 rounded-full top-3 sm:top-4 md:top-5 left-1/2 -translate-x-1/2">
-                        </div>
+                        <!-- Nose + Mouth -->
+                        <div class="absolute top-3 sm:top-4 md:top-5 left-1/2 -translate-x-1/2" style="width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-bottom:4px solid #f9a8d4;"></div>
+                        <div class="absolute top-5 sm:top-6 md:top-7 left-1/2 -translate-x-1/2" style="width:6px;height:3px;border-bottom:1px solid rgba(0,0,0,0.35);border-left:1px solid rgba(0,0,0,0.35);border-right:1px solid rgba(0,0,0,0.35);border-radius:0 0 50% 50%;"></div>
                         <!-- Whiskers -->
                         <div
-                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-4 sm:top-5 md:top-6 left-0.5 sm:left-1 rotate-[10deg]">
+                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-4 sm:top-5 md:top-6 left-[-4px] sm:left-[-5px] md:left-[-6px] rotate-[10deg]">
                         </div>
                         <div
-                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-5 sm:top-6 md:top-7 left-0.5 sm:left-1 rotate-[0deg]">
+                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-5 sm:top-6 md:top-7 left-[-4px] sm:left-[-5px] md:left-[-6px] rotate-[0deg]">
                         </div>
                         <div
-                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-4 sm:top-5 md:top-6 right-0.5 sm:right-1 rotate-[-10deg]">
+                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-4 sm:top-5 md:top-6 right-[-4px] sm:right-[-5px] md:right-[-6px] rotate-[-10deg]">
                         </div>
                         <div
-                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-5 sm:top-6 md:top-7 right-0.5 sm:right-1 rotate-[0deg]">
+                            class="whisker absolute w-3 h-px sm:w-4 sm:h-px md:w-5 md:h-px bg-gray-800 top-5 sm:top-6 md:top-7 right-[-4px] sm:right-[-5px] md:right-[-6px] rotate-[0deg]">
                         </div>
                     </div>
                     <!-- Добавляем хвост маленькому серому коту -->
@@ -381,10 +421,20 @@
                     </div>
                     <!-- Возвращаем обычный размер лапки -->
                     <div
-                        class="cat-paw hitting-paw absolute w-3 h-5 sm:w-4 sm:h-6 md:w-5 md:h-8 bg-gray-400 rounded-b-full top-7 sm:top-8 md:top-10 left-1 sm:left-1.5 md:left-2">
+                        class="cat-paw hitting-paw absolute w-4 h-3 sm:w-5 sm:h-4 md:w-6 md:h-4 bg-gray-400 rounded-full top-8 sm:top-9 md:top-11 left-1 sm:left-1.5 md:left-2" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.15);">
+                        <div class="absolute" style="bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                            <div style="width:4px;height:4px;background:#9ca3af;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#9ca3af;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#9ca3af;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                        </div>
                     </div>
-                    <div class="cat-paw absolute w-3 h-5 sm:w-4 sm:h-6 md:w-5 md:h-8 bg-gray-400 rounded-b-full top-7 sm:top-8 md:top-10 left-14 sm:left-16 md:left-20"
-                        style="animation-delay: 0.5s;"></div>
+                    <div class="cat-paw absolute w-4 h-3 sm:w-5 sm:h-4 md:w-6 md:h-4 bg-gray-400 rounded-full top-8 sm:top-9 md:top-11 left-14 sm:left-16 md:left-20" style="box-shadow:inset 0 -2px 3px rgba(0,0,0,0.15);animation-delay:0.5s;">
+                        <div class="absolute" style="bottom:-1px;left:50%;transform:translateX(-50%);display:flex;gap:1px;">
+                            <div style="width:4px;height:4px;background:#9ca3af;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#9ca3af;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                            <div style="width:4px;height:4px;background:#9ca3af;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
